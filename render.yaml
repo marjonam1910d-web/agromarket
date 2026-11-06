@@ -1,0 +1,50 @@
+# Render Blueprint — bitta servis: backend API + WebSocket + tayyor frontend (bitta domen).
+# Render → New → Blueprint → shu repozitoriyni tanlang. "sync: false" qiymatlarini Render o'zi so'raydi.
+services:
+  - type: web
+    name: agromarket
+    runtime: node
+    plan: free            # real biznes uchun: starter (uxlamaydi, Payme/Click callback'lari uchun shart)
+    region: frankfurt     # O'zbekistonga eng yaqin
+    branch: main
+    autoDeploy: true
+    buildCommand: >-
+      cd frontend && npm ci --include=dev && npm run build &&
+      cd ../backend && npm ci --include=dev && npx prisma generate && npm run build
+    startCommand: cd backend && npm run start:prod
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      # Supabase → Connect → "Session pooler" manzili (port 5432)
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: OTP_SECRET
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: FRONTEND_DIR
+        value: ../frontend/dist
+      # Fayllar bazada saqlanadi (Render diski vaqtinchalik). Katta hajm uchun: s3 + Supabase Storage
+      - key: STORAGE_DRIVER
+        value: db
+      # Birinchi ishga tushishda (baza bo'sh bo'lsa) demo ma'lumotlar
+      - key: SEED_DEMO
+        value: "true"
+      # Kurs ishi taqdimoti: sandbox to'lov + OTP ekranda. REAL BIZNESDA false!
+      - key: DEMO_MODE
+        value: "true"
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: UNPAID_ORDER_TTL_MIN
+        value: "30"
+      - key: RATE_LIMIT_PER_MIN
+        value: "600"

@@ -1,0 +1,52 @@
+# AgroMarket — to'liq stek: PostgreSQL + Redis + API + Web (Nginx)
+# Ishga tushirish:  cp .env.example .env  (qiymatlarni o'zgartiring)  →  docker compose up -d --build
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-agromarket}
+      POSTGRES_USER: ${POSTGRES_USER:-agromarket}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD kerak}
+      TZ: Asia/Tashkent
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-agromarket}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - redisdata:/data
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-agromarket}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-agromarket}?schema=public&connection_limit=20
+      REDIS_URL: redis://redis:6379
+      UPLOAD_DIR: /app/uploads
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_started }
+    volumes:
+      - uploads:/app/uploads
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on: [backend]
+    ports:
+      - "${WEB_PORT:-8080}:80"
+
+volumes:
+  pgdata:
+  redisdata:
+  uploads:

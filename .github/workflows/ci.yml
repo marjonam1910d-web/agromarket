@@ -1,0 +1,54 @@
+# Har push va pull request'da: tiplar, backend testlari (haqiqiy PostgreSQL bilan), frontend testlari va build
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: agromarket
+          POSTGRES_PASSWORD: agromarket
+          POSTGRES_DB: agromarket_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U agromarket" --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://agromarket:agromarket@localhost:5432/agromarket_test
+      DATABASE_URL: postgresql://agromarket:agromarket@localhost:5432/agromarket_test
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run typecheck
+      - run: npx prisma migrate deploy
+      - run: npm test
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build

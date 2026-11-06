@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+  body { @apply bg-cream font-sans text-ink antialiased; font-feature-settings: 'ss01', 'cv11'; }
+  :focus-visible { outline: 2px solid #8BC34A; outline-offset: 2px; }
+  input[type='number']::-webkit-inner-spin-button { opacity: .4; }
+  ::selection { background: #E2F1CF; color: #123B2A; }
+}
+
+@layer utilities {
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+}
+
+/* Harakatni kamaytirish so'ralgan bo'lsa — barcha animatsiyalar deyarli o'chiriladi */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
+
+@media print {
+  aside, header, nav, footer, .print\:hidden { display: none !important; }
+  body { background: #fff; }
+  main { padding: 0 !important; }
+  .lg\:pl-64 { padding-left: 0 !important; }
+}

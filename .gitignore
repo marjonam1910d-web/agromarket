@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+backend/uploads/
+backend/uploads-test/
+backups/
+.testenv/
+*.log
+coverage/
+test-results/
+*.tsbuildinfo
+dump.rdb
