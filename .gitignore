@@ -10,3 +10,4 @@ coverage/
 test-results/
 *.tsbuildinfo
 dump.rdb
+_to_delete/
