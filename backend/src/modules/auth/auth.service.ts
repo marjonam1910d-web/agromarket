@@ -57,11 +57,49 @@ export async function requestOtp(rawTarget: string, purpose: OtpPurpose) {
   await prisma.otpCode.create({
     data: { target, purpose, codeHash: hashOtp(target, purpose, code), expiresAt: new Date(Date.now() + OTP_TTL_MS) },
   });
+  const otp = await prisma.otpCode.findFirst({ where: { target, purpose }, orderBy: { createdAt: 'desc' }, select: { id: true } });
   const text = `AgroMarket tasdiqlash kodi: ${code}. Kodni hech kimga bermang.`;
-  if (kind === 'phone') await sendSms(target, text);
-  else await sendEmail(target, 'AgroMarket tasdiqlash kodi', text);
+  const result =
+    kind === 'phone'
+      ? await sendSms(target, text)
+      : await sendEmail(target, `AgroMarket: ${code} — tasdiqlash kodi`, otpEmailText(code), otpEmailHtml(code));
 
-  return { target, sent: true, resendIn: OTP_RESEND_MS / 1000, ...(env.otpDevEcho ? { devCode: code } : {}) };
+  if (!result.delivered && !env.otpDevEcho) {
+    // Yetkazilmagan kod bilan foydalanuvchini kuttirib qo'ymaymiz: yozuvni o'chirib, darhol qayta urinishga ruxsat
+    if (otp) await prisma.otpCode.delete({ where: { id: otp.id } }).catch(() => undefined);
+    throw new AppError(503, 'OTP_SEND_FAILED', "Kodni yuborib bo'lmadi. Birozdan keyin qayta urinib ko'ring");
+  }
+
+  // Demo/development: kod faqat haqiqatda yetkazilmaganda ekranda ko'rsatiladi
+  return { target, sent: true, resendIn: OTP_RESEND_MS / 1000, ...(env.otpDevEcho && !result.delivered ? { devCode: code } : {}) };
+}
+
+function otpEmailText(code: string) {
+  const min = OTP_TTL_MS / 60000;
+  return [
+    `AgroMarket tasdiqlash kodi: ${code}`,
+    `Kod ${min} daqiqa amal qiladi. Uni hech kimga bermang.`,
+    '',
+    `Код подтверждения: ${code} (действует ${min} мин.)`,
+    `Verification code: ${code} (valid for ${min} min)`,
+    '',
+    "Agar siz so'ramagan bo'lsangiz, bu xatni e'tiborsiz qoldiring.",
+  ].join('\n');
+}
+
+function otpEmailHtml(code: string) {
+  const min = OTP_TTL_MS / 60000;
+  return `<!doctype html><html><body style="margin:0;background:#F6F3EA;font-family:Segoe UI,Arial,sans-serif;color:#1C2A22">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:24px 12px"><tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #E8E1CF">
+<tr><td style="background:#1F4D36;padding:18px 24px;color:#D8F07A;font-size:20px;font-weight:800">🌱 AgroMarket</td></tr>
+<tr><td style="padding:24px">
+<p style="margin:0 0 8px;font-size:16px;font-weight:700">Tasdiqlash kodi</p>
+<p style="margin:0 0 16px;font-size:14px;color:#5A6B60">Kodni saytdagi maydonga kiriting. U ${min} daqiqa amal qiladi.</p>
+<div style="font-size:34px;letter-spacing:10px;font-weight:800;background:#F1F7E4;border-radius:12px;padding:14px 0;text-align:center;color:#1F4D36">${code}</div>
+<p style="margin:16px 0 0;font-size:13px;color:#5A6B60">Код подтверждения · Verification code</p>
+<p style="margin:16px 0 0;font-size:12px;color:#8A968E">Kodni hech kimga, hatto AgroMarket xodimiga ham bermang. Agar siz so'ramagan bo'lsangiz, xatni e'tiborsiz qoldiring.</p>
+</td></tr></table></td></tr></table></body></html>`;
 }
 
 /** Kodni tekshiradi va 15 daqiqalik bir martalik otpToken qaytaradi */

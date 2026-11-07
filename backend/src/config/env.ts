@@ -55,7 +55,10 @@ const schema = z.object({
   ESKIZ_PASSWORD: z.string().optional().default(''),
   ESKIZ_FROM: z.string().optional().default('4546'),
 
-  EMAIL_DRIVER: z.enum(['console', 'smtp']).default('console'),
+  // console | smtp (masalan smtp.gmail.com) | gmail_https (Gmail, Google Apps Script orqali HTTPS — Render free uchun)
+  EMAIL_DRIVER: z.enum(['console', 'smtp', 'gmail_https']).default('console'),
+  GMAIL_SCRIPT_URL: z.string().optional().default(''),
+  GMAIL_SCRIPT_SECRET: z.string().optional().default(''),
   SMTP_HOST: z.string().optional().default(''),
   SMTP_PORT: z.coerce.number().default(587),
   SMTP_USER: z.string().optional().default(''),

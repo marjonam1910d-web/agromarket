@@ -52,33 +52,64 @@ export async function sendSms(phone: string, message: string): Promise<SendResul
   }
 }
 
-// ───────── Email: SMTP ─────────
+// ───────── Email ─────────
+// smtp        — har qanday SMTP (Gmail: smtp.gmail.com:465 + App Password). Render FREE'da SMTP portlari bloklangan!
+// gmail_https — Gmail'dan HTTPS orqali: Google Apps Script veb-ilovasi (docs/gmail-apps-script.gs).
+//               443-port ishlatadi, shuning uchun Render free'da ham ishlaydi.
 let transporter: nodemailer.Transporter | null = null;
 
-export async function sendEmail(to: string, subject: string, text: string): Promise<SendResult> {
-  if (env.EMAIL_DRIVER !== 'smtp' || !env.SMTP_HOST) {
+export function emailConfigured() {
+  if (env.EMAIL_DRIVER === 'smtp') return Boolean(env.SMTP_HOST);
+  if (env.EMAIL_DRIVER === 'gmail_https') return Boolean(env.GMAIL_SCRIPT_URL && env.GMAIL_SCRIPT_SECRET);
+  return false;
+}
+
+const fromName = () => env.SMTP_FROM.replace(/\s*<.*>\s*$/, '').replace(/"/g, '') || 'AgroMarket';
+
+export async function sendEmail(to: string, subject: string, text: string, html?: string): Promise<SendResult> {
+  if (!emailConfigured()) {
     logger.info(`[EMAIL:console] ${to}: ${subject} — ${text}`);
     return { delivered: false, driver: 'console' };
   }
   try {
+    if (env.EMAIL_DRIVER === 'gmail_https') {
+      const r = await fetch(env.GMAIL_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Apps Script CORS/preflight'siz qabul qiladi
+        body: JSON.stringify({ secret: env.GMAIL_SCRIPT_SECRET, to, subject, text, html, fromName: fromName() }),
+        redirect: 'follow',
+        signal: AbortSignal.timeout(15_000),
+      });
+      const raw = await r.text();
+      let j: { ok?: boolean; error?: string } = {};
+      try {
+        j = JSON.parse(raw);
+      } catch {
+        throw new Error(`Apps Script javobi JSON emas (HTTP ${r.status}). Deploy "Anyone" ruxsati bilan qilinganini tekshiring`);
+      }
+      if (!j.ok) throw new Error(`Apps Script: ${j.error ?? 'noma\'lum xato'}`);
+      return { delivered: true, driver: 'gmail_https' };
+    }
     transporter ??= nodemailer.createTransport({
       host: env.SMTP_HOST,
       port: env.SMTP_PORT,
       secure: env.SMTP_PORT === 465,
       auth: env.SMTP_USER ? { user: env.SMTP_USER, pass: env.SMTP_PASS } : undefined,
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
     });
-    await transporter.sendMail({ from: env.SMTP_FROM, to, subject, text });
+    await transporter.sendMail({ from: env.SMTP_FROM, to, subject, text, html });
     return { delivered: true, driver: 'smtp' };
   } catch (e) {
-    logger.warn('Email yuborilmadi', { err: (e as Error).message });
-    return { delivered: false, driver: 'smtp' };
+    logger.warn('Email yuborilmadi', { driver: env.EMAIL_DRIVER, err: (e as Error).message });
+    return { delivered: false, driver: env.EMAIL_DRIVER };
   }
 }
 
 export function channelStatus() {
   return {
     sms: env.SMS_DRIVER === 'eskiz' && env.ESKIZ_EMAIL ? 'eskiz' : 'console (sozlanmagan)',
-    email: env.EMAIL_DRIVER === 'smtp' && env.SMTP_HOST ? 'smtp' : 'console (sozlanmagan)',
+    email: emailConfigured() ? env.EMAIL_DRIVER : 'console (sozlanmagan)',
     push: 'tayyor arxitektura (FCM/Web Push kalitlari kerak)',
   };
 }

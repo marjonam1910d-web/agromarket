@@ -90,7 +90,7 @@ To'liq ro'yxat izohlari bilan: `backend/.env.example` (development) va `.env.exa
 | `PAYMENT_SANDBOX` | Kalitlar yo'q bo'lganda test to'lov (productionda doim o'chiq) |
 | `PAYME_*`, `CLICK_*`, `CARD_PROVIDER` | To'lov provayderlari — [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) |
 | `SMS_DRIVER`, `ESKIZ_*` | SMS (Eskiz.uz) |
-| `EMAIL_DRIVER`, `SMTP_*` | Email |
+| `EMAIL_DRIVER`, `SMTP_*`, `GMAIL_SCRIPT_*` | Email: `smtp` (masalan smtp.gmail.com) yoki `gmail_https` (Gmail HTTPS orqali — Render free uchun) |
 | `OTP_DEV_ECHO` | Faqat development: OTP kodini ekranda ko'rsatish |
 | `FRONTEND_DIR` | Berilsa backend tayyor frontendni ham beradi (bitta servis, Render) |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Ishga tushishda admin avtomatik yaratiladi/yangilanadi |

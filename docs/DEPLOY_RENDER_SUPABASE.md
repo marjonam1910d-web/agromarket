@@ -65,6 +65,8 @@ Jadvallarni qo'lda yaratish shart emas — sayt birinchi ishga tushganda o'zi ya
    | `DATABASE_URL` | 2-qadamdagi manzil |
    | `ADMIN_EMAIL` | Admin panelga kiradigan emailingiz |
    | `ADMIN_PASSWORD` | Admin paroli (kamida 10 belgi) |
+   | `GMAIL_SCRIPT_URL` | 4-qadamdagi Apps Script URL (hozircha bo'sh qoldirsa ham bo'ladi) |
+   | `GMAIL_SCRIPT_SECRET` | 4-qadamdagi maxfiy satr (hozircha bo'sh qoldirsa ham bo'ladi) |
 
    Qolganlari (maxfiy JWT kalitlari va boshqalar) **avtomatik** yaratiladi.
 4. **Apply** → build boshlanadi (birinchi marta 5–8 daqiqa). **Logs** bo'limida oxirida
@@ -76,6 +78,42 @@ Jadvallarni qo'lda yaratish shart emas — sayt birinchi ishga tushganda o'zi ya
    AgroMarket API → ... env: production
    ```
 5. Servis sahifasining yuqorisidagi `https://agromarket-xxxx.onrender.com` manzilini oching. 🎉
+
+## 4-qadam. Email kodlari Gmail orqali (≈5 daqiqa)
+
+> ⚠️ Render **bepul** tarifida SMTP portlari (25, 465, 587) bloklangan — `smtp.gmail.com` u yerda ishlamaydi.
+> Shuning uchun xatlar Gmail'ingizdan **HTTPS** orqali, Google Apps Script yordamida yuboriladi. Bepul, kuniga ~100 ta xat.
+
+1. Maxfiy satr yarating (masalan parol generatoridan 40 belgi, faqat harf va raqam). Uni yozib qo'ying.
+2. Xat yuboriladigan Gmail akkauntingiz bilan https://script.google.com ga kiring → **New project**.
+3. Ochilgan oynadagi hamma kodni o'chirib, loyihadagi **`docs/gmail-apps-script.gs`** fayli ichidagini joylang.
+4. `const SECRET = '...'` qatoriga 1-banddagi satrni yozing → 💾 **Save**.
+5. **Deploy → New deployment** → ⚙️ **Web app**:
+   - Execute as: **Me**
+   - Who has access: **Anyone**
+   - **Deploy** → **Authorize access** → Gmail akkauntingizni tanlang →
+     "Google hasn't verified this app" chiqsa: **Advanced → Go to … (unsafe) → Allow**
+     (bu sizning o'zingizning skriptingiz, xavfsiz).
+6. **Web app URL** (`https://script.google.com/macros/s/…/exec`) ni nusxalang.
+   Tekshirish: uni brauzerda oching — `{"ok":true,"service":"agromarket-mail",...}` chiqishi kerak.
+7. Render → servis → **Environment**: `GMAIL_SCRIPT_URL` = 6-banddagi URL, `GMAIL_SCRIPT_SECRET` = 1-banddagi satr →
+   **Save, rebuild and deploy**.
+8. Saytda **email** bilan ro'yxatdan o'ting — kod pochtangizga keladi.
+   Holat: `https://<sayt>/api/v1/health` → `"channels":{"email":"gmail_https"}`.
+
+Email sozlanmaguncha (yoki xat ketmay qolsa) demo rejimda kod ekranda ko'rsatiladi.
+Email ishlay boshlagach, kod ekranda **ko'rinmaydi** — faqat pochtaga keladi.
+
+**Kompyuterda / Docker'da / Render pullik tarifida** oddiy SMTP ham ishlaydi:
+Google akkaunt → **Security → 2-Step Verification** ni yoqing → **App passwords** → 16 belgili parol oling, keyin:
+```
+EMAIL_DRIVER=smtp
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_USER=siz@gmail.com
+SMTP_PASS=abcdefghijklmnop
+SMTP_FROM=AgroMarket <siz@gmail.com>
+```
 
 ### Kirish ma'lumotlari (demo rejim)
 
@@ -131,7 +169,7 @@ Render → servis → **Environment** bo'limida:
    | Payme | `PAYME_MERCHANT_ID`, `PAYME_KEY`, `PAYME_TEST_MODE=false` |
    | Click | `CLICK_SERVICE_ID`, `CLICK_MERCHANT_ID`, `CLICK_SECRET_KEY`, `CLICK_MERCHANT_USER_ID` |
    | SMS (Eskiz.uz) | `SMS_DRIVER=eskiz`, `ESKIZ_EMAIL`, `ESKIZ_PASSWORD`, `ESKIZ_FROM` |
-   | Email | `EMAIL_DRIVER=smtp`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` |
+   | Email | Gmail (4-qadam) yoki ko'p xat uchun korporativ SMTP: `EMAIL_DRIVER=smtp`, `SMTP_*` (Starter tarifida SMTP ochiq) |
 
    To'lov tizimlari kabinetiga yoziladigan callback manzillar:
    - Payme: `https://<sizning-domen>/api/v1/payments/payme`
@@ -166,6 +204,9 @@ S3_PUBLIC_URL=https://<ref>.supabase.co/storage/v1/object/public/agromarket
 | `P1001: Can't reach database server` | `DATABASE_URL` noto'g'ri yoki Supabase loyiha pauzada → manzilni tekshiring / **Restore** bosing |
 | `password authentication failed` | `[YOUR-PASSWORD]` o'rniga noto'g'ri parol yozilgan. Supabase → **Database → Settings → Reset password** |
 | `prepared statement ... already exists` | Transaction pooler (6543) ishlatilgan → **Session pooler (5432)** manzilini oling |
+| `Email yuborilmadi ... Apps Script javobi JSON emas` | Deploy'da "Who has access: **Anyone**" tanlanmagan → qayta deploy qiling |
+| `Email yuborilmadi ... forbidden` | Skriptdagi `SECRET` va Render'dagi `GMAIL_SCRIPT_SECRET` bir xil emas |
+| `Kodni yuborib bo'lmadi` (saytda) | Yuqoridagi ikki sabab yoki kunlik limit (≈100 xat) tugagan |
 | `Environment xatosi` | Qaysi kalit yetishmasligi logda yozilgan → **Environment** bo'limida qo'shing |
 | Sayt 1 daqiqa ochilmaydi | Bepul tarifda server uyg'onmoqda — kuting |
 | Build `npm ci` da yiqildi | **Manual Deploy → Clear build cache & deploy** |

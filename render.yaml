@@ -44,6 +44,15 @@ services:
         sync: false
       - key: ADMIN_PASSWORD
         sync: false
+      # Email: Gmail HTTPS orqali (Render free'da SMTP portlari bloklangan). docs/gmail-apps-script.gs
+      - key: EMAIL_DRIVER
+        value: gmail_https
+      - key: GMAIL_SCRIPT_URL
+        sync: false
+      - key: GMAIL_SCRIPT_SECRET
+        sync: false
+      - key: SMTP_FROM
+        value: AgroMarket <no-reply@agromarket.uz>
       - key: UNPAID_ORDER_TTL_MIN
         value: "30"
       - key: RATE_LIMIT_PER_MIN
