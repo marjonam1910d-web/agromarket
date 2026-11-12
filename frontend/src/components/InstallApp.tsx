@@ -7,7 +7,7 @@ import { useToast } from '@/store/toast';
 import { cx } from '@/utils/format';
 
 /** "Ilovani yuklab olish" tugmasi: Android/Chrome'da darhol o'rnatadi, iPhone'da yo'riqnoma ko'rsatadi */
-export function InstallAppButton({ variant = 'solid', className, block }: { variant?: 'solid' | 'light' | 'ghost'; className?: string; block?: boolean }) {
+export function InstallAppButton({ variant = 'solid', className, block }: { variant?: 'solid' | 'light' | 'ghost' | 'header'; className?: string; block?: boolean }) {
   const { t } = useI18n();
   const toast = useToast();
   const p = useInstallPrompt();
@@ -26,17 +26,20 @@ export function InstallAppButton({ variant = 'solid', className, block }: { vari
       <button
         type="button"
         onClick={() => void click()}
+        aria-label={t('x.install.button')}
+        title={t('x.install.button')}
         className={cx(
           'inline-flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-bold transition active:scale-[.98]',
           variant === 'solid' && 'bg-sun text-brand-900 shadow-[0_8px_24px_-8px_rgba(242,193,78,.8)] hover:bg-sun-400',
           variant === 'light' && 'bg-white/10 text-white ring-1 ring-white/25 backdrop-blur hover:bg-white/20',
           variant === 'ghost' && 'bg-brand-50 text-brand hover:bg-brand-100',
+          variant === 'header' && 'h-10 bg-sun px-3 text-brand-900 shadow-sm hover:bg-sun-400 sm:px-3.5',
           block && 'w-full',
           className,
         )}
       >
         <Download className="h-4 w-4" />
-        {t('x.install.button')}
+        {variant === 'header' ? <span className="hidden sm:inline">{t('y.nav.install')}</span> : t('x.install.button')}
       </button>
       <InstallModal open={open} onClose={() => setOpen(false)} ios={p.ios} />
     </>

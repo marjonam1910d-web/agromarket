@@ -31,6 +31,10 @@ Modulni vaqtincha o'chirish: `.env` da `MODULES_DISABLED=chat,complaints` (auth,
 | Parol/OTP/sessiya qoidalari | `modules/auth/auth.service.ts` |
 | Rate limit, CSRF | `middleware/security.ts` |
 | Fayl saqlash (local/S3) | `lib/storage.ts` |
+| Sotuv nuqtalari, jonli kuzatuv | `modules/maps/` (`LARGE_ORDER_KG`) |
+| Shartnoma matni, imzo, muhr, QR | `modules/contracts/` (`contracts.service.ts` — xesh va imzo), `lib/qr.ts` |
+| Hamyon, yechib olish | `modules/wallet/` (`settleSellerWallet` → `orders/lifecycle.ts` dan chaqiriladi) |
+| Chat tarjimasi, admin bilan aloqa | `modules/chat/translate.ts`, `chat.routes.ts` (`/support`, `/admin/:id`, `/with-buyer/:id`) |
 | Ma'lumotlar bazasi tuzilmasi | `prisma/schema.prisma` → `npx prisma migrate dev --name <nom>` |
 
 ## Frontend: `frontend/src/`
@@ -42,6 +46,7 @@ Modulni vaqtincha o'chirish: `.env` da `MODULES_DISABLED=chat,complaints` (auth,
 | `pages/buyer/` | Savatcha, Checkout, Xaridor kabineti |
 | `pages/seller/` | Har bir sotuvchi sahifasi alohida fayl (`SellerDashboard.tsx`, `ProductForm.tsx`, ...) + `shared.tsx` |
 | `pages/admin/` | Har bir admin sahifasi alohida fayl + `shared.tsx` |
+| `pages/maps/`, `pages/contracts/`, `pages/wallet/` | Xarita va sotuv nuqtalari; shartnomalar va QR tekshiruv; hamyon, admin hamyon, admin bilan aloqa |
 | `pages/shared/` | Xabarlar, Bildirishnomalar, Sozlamalar (barcha rollar uchun) |
 | `components/ui/` | Dizayn tizimi: Button, Input, Modal, Table ... (rang/shakl bir joyda) |
 | `components/common.tsx` | ProductCard, OrderTimeline, RegionSelect, ImageUploader |

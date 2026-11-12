@@ -24,6 +24,29 @@ const pageQ = { page: z.coerce.number().optional(), limit: z.coerce.number().opt
 
 // ───────── Foydalanuvchilar ─────────
 const usersQ = z.object({ ...pageQ, q: z.string().max(80).optional(), role: z.enum(['BUYER', 'SELLER', 'ADMIN']).optional(), status: z.enum(['ACTIVE', 'BLOCKED']).optional() });
+/** Foydalanuvchilar kategoriyalar bo'yicha: rol, holat, tasdiq, hudud */
+r.get(
+  '/users/stats',
+  ah(async (_req, res) => {
+    const [byRole, byStatus, sellersByStatus, byRegion, newWeek, wholesale] = await Promise.all([
+      prisma.user.groupBy({ by: ['role'], where: { deletedAt: null }, _count: { _all: true } }),
+      prisma.user.groupBy({ by: ['status'], where: { deletedAt: null }, _count: { _all: true } }),
+      prisma.sellerProfile.groupBy({ by: ['verificationStatus'], _count: { _all: true } }),
+      prisma.sellerProfile.groupBy({ by: ['region'], _count: { _all: true } }),
+      prisma.user.count({ where: { deletedAt: null, createdAt: { gte: new Date(Date.now() - 7 * 86400_000) } } }),
+      prisma.buyerProfile.count({ where: { isWholesale: true } }),
+    ]);
+    ok(res, {
+      roles: Object.fromEntries(byRole.map((x) => [x.role, x._count._all])),
+      statuses: Object.fromEntries(byStatus.map((x) => [x.status, x._count._all])),
+      sellerVerification: Object.fromEntries(sellersByStatus.map((x) => [x.verificationStatus, x._count._all])),
+      sellerRegions: Object.fromEntries(byRegion.map((x) => [x.region, x._count._all])),
+      newThisWeek: newWeek,
+      wholesaleBuyers: wholesale,
+    });
+  }),
+);
+
 r.get(
   '/users',
   validate({ query: usersQ }),

@@ -3,7 +3,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   BarChart3, Bell, BookOpen, UserCog, BadgeCheck, ClipboardList, CreditCard, FileClock, FolderTree, Heart, Home, LayoutDashboard, LifeBuoy, LogOut, MapPin, Megaphone, Menu,
-  MessageCircle, MessageSquareWarning, Package, PackagePlus, Settings, ShoppingBag, Star, Store, Truck, Users, Wallet, X,
+  MessageCircle, MessageSquareWarning, Package, PackagePlus, Settings, ShoppingBag, Star, Store, Truck, Users, Wallet, WalletCards, X, FileSignature, Headset, Map, MapPinned,
 } from 'lucide-react';
 import { useI18n, type TKey } from '@/i18n';
 import { useAuth } from '@/store/auth';
@@ -24,7 +24,10 @@ const NAV: Record<Role, Item[]> = {
     { to: '/account/addresses', icon: MapPin, label: 'account.addresses' },
     { to: '/account/reviews', icon: Star, label: 'account.reviews' },
     { to: '/account/notifications', icon: Bell, label: 'nav.notifications' },
+    { to: '/contracts', icon: FileSignature, label: 'y.nav.contracts' },
+    { to: '/map', icon: Map, label: 'y.nav.map' },
     { to: '/account/support', icon: LifeBuoy, label: 'account.support' },
+    { to: '/contact-admin', icon: Headset, label: 'y.nav.contactAdmin' },
     { to: '/help', icon: BookOpen, label: 'x.nav.help' },
     { to: '/account/settings', icon: Settings, label: 'account.settings', mobile: true },
   ],
@@ -34,6 +37,9 @@ const NAV: Record<Role, Item[]> = {
     { to: '/seller/products/new', icon: PackagePlus, label: 'seller.addProduct' },
     { to: '/seller/orders', icon: ClipboardList, label: 'seller.orders', mobile: true },
     { to: '/seller/delivery', icon: Truck, label: 'seller.delivery' },
+    { to: '/seller/points', icon: MapPinned, label: 'y.nav.points' },
+    { to: '/contracts', icon: FileSignature, label: 'y.nav.contracts' },
+    { to: '/wallet', icon: WalletCards, label: 'y.nav.wallet' },
     { to: '/seller/promotions', icon: Megaphone, label: 'seller.promotions' },
     { to: '/seller/reviews', icon: Star, label: 'seller.reviews' },
     { to: '/seller/earnings', icon: Wallet, label: 'seller.earnings' },
@@ -41,6 +47,7 @@ const NAV: Record<Role, Item[]> = {
     { to: '/messages', icon: MessageCircle, label: 'nav.messages', mobile: true },
     { to: '/seller/notifications', icon: Bell, label: 'nav.notifications' },
     { to: '/seller/profile', icon: Store, label: 'seller.profile' },
+    { to: '/contact-admin', icon: Headset, label: 'y.nav.contactAdmin' },
     { to: '/seller/settings', icon: Settings, label: 'account.settings' },
     { to: '/help', icon: BookOpen, label: 'x.nav.help' },
   ],
@@ -53,6 +60,9 @@ const NAV: Record<Role, Item[]> = {
     { to: '/admin/categories', icon: FolderTree, label: 'admin.categories' },
     { to: '/admin/orders', icon: ClipboardList, label: 'admin.orders' },
     { to: '/admin/payments', icon: CreditCard, label: 'admin.payments' },
+    { to: '/admin/wallet', icon: WalletCards, label: 'y.nav.wallet' },
+    { to: '/contracts', icon: FileSignature, label: 'y.nav.contracts' },
+    { to: '/map', icon: Map, label: 'y.nav.map' },
     { to: '/admin/complaints', icon: MessageSquareWarning, label: 'admin.complaints' },
     { to: '/admin/reviews', icon: Star, label: 'admin.reviews' },
     { to: '/admin/settings', icon: Settings, label: 'admin.settings', mobile: true },
@@ -111,7 +121,7 @@ export default function DashboardLayout() {
       <div className="mt-6 flex-1 overflow-y-auto no-scrollbar"><SideNav role={role} onNavigate={() => setOpen(false)} /></div>
       <div className="mt-4 space-y-3 border-t border-white/10 px-2 pt-4">
         <InstallAppButton variant="light" block className="!py-2 text-xs" />
-        <LanguageSwitcher dark />
+        <LanguageSwitcher dark up align="left" />
         <Link to="/" className="flex items-center gap-2 text-sm text-white/70 hover:text-white"><Home className="h-4 w-4" />{t('nav.home')}</Link>
         <button onClick={() => void logout()} className="flex items-center gap-2 text-sm text-white/70 hover:text-white"><LogOut className="h-4 w-4" />{t('nav.logout')}</button>
       </div>

@@ -1,8 +1,8 @@
-import { useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Apple, Bean, Beef, BadgeCheck, Camera, Carrot, Drumstick, Egg, Globe, Heart, Hexagon, ImagePlus, Leaf, Loader2, MapPin, Milk, ShoppingBasket, Sprout, Sun, Wheat, X,
+  Apple, Bean, Beef, BadgeCheck, Camera, Carrot, Check, ChevronDown, Drumstick, Egg, Globe, Heart, Hexagon, ImagePlus, Leaf, Loader2, MapPin, Milk, ShoppingBasket, Sprout, Sun, Wheat, X,
 } from 'lucide-react';
 import { useI18n, LANGS, type TKey } from '@/i18n';
 import { api, img } from '@/services/api';
@@ -32,29 +32,75 @@ export function Logo({ light, compact }: { light?: boolean; compact?: boolean })
   );
 }
 
-export function LanguageSwitcher({ dark }: { dark?: boolean }) {
+/** Til tanlash: joriy til (UZ) ko'rinadi, bosilganda qolganlari (RU, EN) ochiladi */
+export function LanguageSwitcher({ dark, up, align = 'right' }: { dark?: boolean; up?: boolean; align?: 'left' | 'right' }) {
   const { lang, setLang } = useI18n();
   const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent | TouchEvent) => {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('mousedown', close);
+    document.addEventListener('touchstart', close);
+    document.addEventListener('keydown', esc);
+    return () => {
+      document.removeEventListener('mousedown', close);
+      document.removeEventListener('touchstart', close);
+      document.removeEventListener('keydown', esc);
+    };
+  }, [open]);
+  const cur = LANGS.find((l) => l.code === lang) ?? LANGS[0];
   return (
-    <div className={cx('relative inline-flex items-center rounded-xl p-0.5', dark ? 'bg-white/10' : 'bg-cream-100')} role="group" aria-label="Language">
-      <Globe className={cx('ml-1.5 mr-0.5 h-3.5 w-3.5', dark ? 'text-white/70' : 'text-muted')} />
-      {LANGS.map((l) => (
-        <button
-          key={l.code}
-          onClick={() => {
-            setLang(l.code);
-            if (user) void api.patch('/users/me', { locale: l.code }).catch(() => undefined);
-          }}
-          className={cx(
-            'rounded-lg px-2 py-1 text-xs font-bold transition',
-            lang === l.code ? (dark ? 'bg-white text-brand-800' : 'bg-white text-brand shadow-sm') : dark ? 'text-white/70 hover:text-white' : 'text-muted hover:text-ink',
-          )}
-          aria-pressed={lang === l.code}
-          title={l.label}
-        >
-          {l.short}
-        </button>
-      ))}
+    <div ref={ref} className="relative inline-block">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={`Language: ${cur.label}`}
+        className={cx('flex h-10 items-center gap-1.5 rounded-xl px-2.5 text-xs font-extrabold tracking-wide transition', dark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-cream-100 text-ink hover:bg-cream-200')}
+      >
+        <Globe className={cx('h-4 w-4', dark ? 'text-white/70' : 'text-brand')} />
+        {cur.short}
+        <ChevronDown className={cx('h-3.5 w-3.5 opacity-60 transition', open && 'rotate-180')} />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.ul
+            role="listbox"
+            initial={{ opacity: 0, y: up ? 6 : -6, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: up ? 6 : -6, scale: 0.97 }}
+            transition={{ duration: 0.14 }}
+            className={cx('absolute z-[90]', align === 'right' ? 'right-0' : 'left-0', ' min-w-[150px] overflow-hidden rounded-xl bg-white p-1 shadow-xl ring-1 ring-cream-200', up ? 'bottom-full mb-2' : 'top-full mt-2')}
+          >
+            {LANGS.map((l) => (
+              <li key={l.code}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={lang === l.code}
+                  onClick={() => {
+                    setOpen(false);
+                    if (l.code === lang) return;
+                    setLang(l.code);
+                    if (user) void api.patch('/users/me', { locale: l.code }).catch(() => undefined);
+                  }}
+                  className={cx('flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-semibold', lang === l.code ? 'bg-brand-50 text-brand' : 'text-ink hover:bg-cream-100')}
+                >
+                  <span className="w-6 text-xs font-extrabold">{l.short}</span>
+                  <span className="flex-1">{l.label}</span>
+                  {lang === l.code && <Check className="h-4 w-4" />}
+                </button>
+              </li>
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

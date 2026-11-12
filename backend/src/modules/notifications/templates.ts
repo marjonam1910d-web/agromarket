@@ -7,6 +7,46 @@ export type Lang = 'uz' | 'ru' | 'en';
 type T = Record<Lang, { title: string; body: string }>;
 
 export const TEMPLATES = {
+  'delivery.tracking': {
+    uz: { title: "Buyurtmangiz yo'lda", body: "{number}: kuryerni xaritada jonli kuzating" },
+    ru: { title: 'Заказ в пути', body: '{number}: следите за курьером на карте в реальном времени' },
+    en: { title: 'Your order is on the way', body: '{number}: track the courier live on the map' },
+  },
+  'contract.received': {
+    uz: { title: 'Yangi shartnoma', body: "{from} sizga {number} shartnomani imzolash uchun yubordi" },
+    ru: { title: 'Новый договор', body: '{from} отправил вам договор {number} на подпись' },
+    en: { title: 'New contract', body: '{from} sent you contract {number} to sign' },
+  },
+  'contract.signed': {
+    uz: { title: 'Shartnoma imzolandi', body: "{number} shartnoma ikki tomon tomonidan imzolandi" },
+    ru: { title: 'Договор подписан', body: 'Договор {number} подписан обеими сторонами' },
+    en: { title: 'Contract signed', body: 'Contract {number} has been signed by both parties' },
+  },
+  'contract.rejected': {
+    uz: { title: 'Shartnoma rad etildi', body: '{number}: {reason}' },
+    ru: { title: 'Договор отклонён', body: '{number}: {reason}' },
+    en: { title: 'Contract rejected', body: '{number}: {reason}' },
+  },
+  'wallet.credited': {
+    uz: { title: "Hamyonga pul tushdi", body: "{number} buyurtma uchun {amount} so'm hamyoningizga o'tkazildi" },
+    ru: { title: 'Поступление в кошелёк', body: '{amount} сум за заказ {number} зачислены в кошелёк' },
+    en: { title: 'Wallet credited', body: '{amount} UZS for order {number} added to your wallet' },
+  },
+  'wallet.withdrawn': {
+    uz: { title: "Pul kartaga o'tkazildi", body: "{amount} so'm {card} kartaga o'tkazildi" },
+    ru: { title: 'Деньги отправлены на карту', body: '{amount} сум отправлены на карту {card}' },
+    en: { title: 'Money sent to card', body: '{amount} UZS sent to card {card}' },
+  },
+  'wallet.rejected': {
+    uz: { title: "Yechib olish rad etildi", body: "{amount} so'm: {reason}" },
+    ru: { title: 'Вывод отклонён', body: '{amount} сум: {reason}' },
+    en: { title: 'Withdrawal rejected', body: '{amount} UZS: {reason}' },
+  },
+  'support.message': {
+    uz: { title: 'Qo\'llab-quvvatlash', body: '{from}: {text}' },
+    ru: { title: 'Поддержка', body: '{from}: {text}' },
+    en: { title: 'Support', body: '{from}: {text}' },
+  },
   'order.new.seller': {
     uz: { title: 'Yangi buyurtma', body: '{number} raqamli buyurtma keldi. Summa: {total} so\'m' },
     ru: { title: 'Новый заказ', body: 'Поступил заказ {number}. Сумма: {total} сум' },

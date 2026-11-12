@@ -97,6 +97,9 @@ To'liq ro'yxat izohlari bilan: `backend/.env.example` (development) va `.env.exa
 | `SEED_DEMO` | `true` — baza bo'sh bo'lsa demo ma'lumotlar |
 | `DEMO_MODE` | `true` — taqdimot: productionda sandbox to'lov + SMS kodi ekranda. **Real biznesda `false`** |
 | `UNPAID_ORDER_TTL_MIN` | To'lanmagan onlayn buyurtma bekor qilinish muddati |
+| `CONTRACT_SIGNING_SECRET` | Elektron shartnoma imzolari kaliti (Render avtomatik yaratadi). **O'rnatilgandan keyin o'zgartirmang** |
+| `TRANSLATE_PROVIDER`, `TRANSLATE_API_KEY`, `TRANSLATE_URL` | Chatdagi xabarlarni tarjima qilish: `google` (Cloud Translation API kaliti) yoki `libre` (LibreTranslate). `none` — tugma ko'rinmaydi |
+| `LARGE_ORDER_KG` | "Katta buyurtma" chegarasi (standart 100 kg) |
 | `RATE_LIMIT_PER_MIN` | Bitta IP uchun daqiqasiga so'rovlar chegarasi (standart 600) |
 | `MODULES_DISABLED` | Vergul bilan o'chiriladigan modullar, masalan `chat,complaints` — [docs/MODULES.md](docs/MODULES.md) |
 
@@ -155,6 +158,15 @@ Oxirgi natijalar (to'liq: [docs/TESTING.md](docs/TESTING.md)):
 - **Demo rejim:** bir bosishda demo xaridor/fermer; **real fotosuratlar** (Unsplash).
 - Raqobatchilar tahlili: [docs/RESEARCH.md](docs/RESEARCH.md). Ishlash qoidalari: [CLAUDE.md](CLAUDE.md).
 
+### Yangi imkoniyatlar (2026-11-12, 2-qism)
+- **Xarita:** fermerlarning xo'jalik, sotuv markazi, ombor va olib ketish nuqtalari (`/map`), fermer o'z nuqtalarini xaritada belgilaydi (`/seller/points`). OpenStreetMap, tashqi kutubxonasiz.
+- **Jonli kuzatuv:** fermer/kuryer "Jonli yetkazish" ni yoqsa, xaridor kuryer joylashuvini buyurtma sahifasida real vaqtda ko'radi (WebSocket).
+- **Elektron shartnomalar** (`/contracts`): buyurtmadan yoki erkin tuziladi, parol bilan imzo + shaxsiy muhr, SHA-256 iz va HMAC imzo, har bir shartnoma uchun QR-kod → ommaviy tekshiruv sahifasi `/c/<id>`.
+- **Hamyon** (`/wallet`): onlayn to'langan buyurtma yetkazilganda tushum, naqdda komissiya yechiladi, saqlangan kartaga yechib olish; admin `/admin/wallet` da tasdiqlaydi.
+- **Aloqa:** "Admin bilan bog'lanish", admin istalgan foydalanuvchiga yozadi, fermer buyurtma bergan xaridorga yozadi; xabarlarni tarjima qilish (sozlansa).
+- **Admin → Foydalanuvchilar:** kategoriyalar (xaridor, fermer, ulgurji, bloklangan, yangi) va hududlar bo'yicha.
+- **Interfeys:** "Bo'limlar" menyusi (katalog, kategoriyalar, xarita, fermerlar), til ro'yxati (UZ → RU/EN), yuqorida "Ilova" tugmasi; bank kartasiga o'xshash Uzcard/Humo; bosh sahifada haqiqiy fotosuratlar.
+
 ### Modullik
 Backend har bir yo'nalish alohida modul (`src/modules/<nom>/index.ts`) va `src/modules/registry.ts` orqali ulanadi.
 Bitta modulni o'zgartirish boshqalariga ta'sir qilmaydi; qaysi o'zgarish qaysi faylga tegishi — [docs/MODULES.md](docs/MODULES.md).
@@ -167,8 +179,8 @@ Bitta modulni o'zgartirish boshqalariga ta'sir qilmaydi; qaysi o'zgarish qaysi f
 |---|---|---|
 | Admin | `admin@agromarket.uz` | `Admin12345` |
 | Xaridor | `+998 90 123 45 67` (yoki `buyer@agromarket.uz`) | `Buyer12345` |
-| Ulgurji xaridor | `+998 90 111 22 33` | `Buyer12345` |
-| Sotuvchi (tasdiqlangan) | `+998 91 123 45 67` | `Seller12345` |
+| Ulgurji xaridor | `+998 90 111 22 33` (yoki `ulgurji@agromarket.uz`) | `Buyer12345` |
+| Sotuvchi (tasdiqlangan) | `+998 91 123 45 67` (yoki `fermer@agromarket.uz`) | `Seller12345` |
 | Sotuvchi (tekshiruvda) | `+998 93 123 45 67` | `Seller12345` |
 
 Demo kupon: `AGRO10` (10%, 100 000 so'mdan, maks. 30 000).

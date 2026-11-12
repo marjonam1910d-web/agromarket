@@ -40,6 +40,18 @@ const rep = () => import('@/pages/shared/Reports');
 const CategoryReports = lazy(() => rep().then((m) => ({ default: m.CategoryReports })));
 const CategoryReportDetail = lazy(() => rep().then((m) => ({ default: m.CategoryReportDetail })));
 
+const ctr = () => import('@/pages/contracts/Contracts');
+const ContractsList = lazy(() => ctr().then((m) => ({ default: m.ContractsList })));
+const ContractNew = lazy(() => ctr().then((m) => ({ default: m.ContractNew })));
+const ContractDetail = lazy(() => ctr().then((m) => ({ default: m.ContractDetail })));
+const ContractVerify = lazy(() => ctr().then((m) => ({ default: m.ContractVerify })));
+const wal = () => import('@/pages/wallet/Wallet');
+const WalletPage = lazy(() => wal().then((m) => ({ default: m.WalletPage })));
+const AdminWallet = lazy(() => wal().then((m) => ({ default: m.AdminWallet })));
+const ContactAdmin = lazy(() => wal().then((m) => ({ default: m.ContactAdmin })));
+const MapPage = lazy(() => import('@/pages/maps/Maps').then((m) => ({ default: m.MapPage })));
+const SalesPoints = lazy(() => import('@/pages/maps/Maps').then((m) => ({ default: m.SalesPointsPage })));
+
 const SellerDashboard = lazy(() => import('@/pages/seller/SellerDashboard').then((m) => ({ default: m.SellerDashboard })));
 const SellerProducts = lazy(() => import('@/pages/seller/SellerProducts').then((m) => ({ default: m.SellerProducts })));
 const ProductForm = lazy(() => import('@/pages/seller/ProductForm').then((m) => ({ default: m.ProductForm })));
@@ -91,6 +103,8 @@ export default function AppRoutes() {
           <Route path="farmers/:slug" element={<FarmerDetail />} />
           <Route path="about" element={<About />} />
           <Route path="help" element={<Help />} />
+          <Route path="map" element={<MapPage />} />
+          <Route path="c/:publicId" element={<ContractVerify />} />
           <Route path="cart" element={<RequireAuth roles={['BUYER', 'SELLER']}><Cart /></RequireAuth>} />
           <Route path="checkout" element={<RequireAuth roles={['BUYER', 'SELLER']}><Checkout /></RequireAuth>} />
           <Route path="checkout/success/:id" element={<RequireAuth><CheckoutSuccess /></RequireAuth>} />
@@ -100,6 +114,11 @@ export default function AppRoutes() {
         <Route element={<RequireAuth><DashboardLayout /></RequireAuth>}>
           <Route path="messages" element={<Messages />} />
           <Route path="messages/:id" element={<Messages />} />
+          <Route path="contracts" element={<ContractsList />} />
+          <Route path="contracts/new" element={<ContractNew />} />
+          <Route path="contracts/:id" element={<ContractDetail />} />
+          <Route path="contact-admin" element={<RequireAuth roles={['BUYER', 'SELLER']}><ContactAdmin /></RequireAuth>} />
+          <Route path="wallet" element={<RequireAuth roles={['SELLER']}><WalletPage /></RequireAuth>} />
           <Route path="account">
             <Route index element={<BuyerOverview />} />
             <Route path="orders" element={<BuyerOrders />} />
@@ -120,6 +139,7 @@ export default function AppRoutes() {
             <Route path="orders" element={<SellerOrders />} />
             <Route path="orders/:id" element={<SellerOrderDetail />} />
             <Route path="delivery" element={<DeliveryZones />} />
+            <Route path="points" element={<SalesPoints />} />
             <Route path="promotions" element={<Promotions />} />
             <Route path="reviews" element={<SellerReviews />} />
             <Route path="earnings" element={<Earnings />} />
@@ -137,6 +157,7 @@ export default function AppRoutes() {
             <Route path="categories" element={<AdminCategories />} />
             <Route path="orders" element={<AdminOrders />} />
             <Route path="payments" element={<AdminPayments />} />
+            <Route path="wallet" element={<AdminWallet />} />
             <Route path="complaints" element={<AdminComplaints />} />
             <Route path="reviews" element={<AdminReviews />} />
             <Route path="settings" element={<AdminSettings />} />

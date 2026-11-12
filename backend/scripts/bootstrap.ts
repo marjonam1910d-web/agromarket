@@ -10,7 +10,7 @@ import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
-import { CATEGORY_PHOTOS, PRODUCT_PHOTOS } from '../src/common/demo-photos';
+import { upgradeDemo } from '../src/common/demo-upgrade';
 
 const prisma = new PrismaClient();
 
@@ -47,18 +47,10 @@ async function main() {
   }
 }
 
-/** Oldingi versiyada chizilgan (SVG) demo rasmlarni real fotolarga almashtiradi. Faqat demo yozuvlarga tegadi. */
+/** Demo ma'lumotlarni yangi imkoniyatlar bilan boyitish (idempotent) */
 async function refreshDemoPhotos() {
-  let n = 0;
-  for (const [key, url] of Object.entries(PRODUCT_PHOTOS)) {
-    const old = `/uploads/public/seed/${key}.svg`;
-    n += (await prisma.productImage.updateMany({ where: { url: old }, data: { url } })).count;
-    await prisma.orderItem.updateMany({ where: { imageUrl: old }, data: { imageUrl: url } });
-  }
-  for (const [slug, url] of Object.entries(CATEGORY_PHOTOS)) {
-    await prisma.category.updateMany({ where: { slug, imageUrl: null }, data: { imageUrl: url } });
-  }
-  if (n) console.log(`🖼  ${n} ta demo rasm real fotoga almashtirildi`);
+  const r = await upgradeDemo(prisma);
+  if (r.photos || r.emails || r.points) console.log(`🖼  Demo yangilandi: ${r.photos} rasm, ${r.emails} email, ${r.points} sotuv nuqtasi`);
 }
 
 main()

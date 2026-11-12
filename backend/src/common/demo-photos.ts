@@ -51,6 +51,17 @@ export const CATEGORY_PHOTOS: Record<string, string> = {
   boshqa: u('1550989460-0adf9ea622e2', 600),
 };
 
-const DEMO_SET = new Set([...Object.values(PRODUCT_PHOTOS), ...Object.values(CATEGORY_PHOTOS)]);
-/** Demo fotoning o'zi (sotuvchi demo mahsulotni tahrirlaganda rasm saqlanib qolishi uchun) */
-export const isDemoPhoto = (url: string) => DEMO_SET.has(url);
+let DEMO_SET: Set<string> | null = null;
+/** Demo fotoning o'zi (sotuvchi demo mahsulot/profilni tahrirlaganda rasm saqlanib qolishi uchun) */
+export const isDemoPhoto = (url: string) => {
+  DEMO_SET ??= new Set([...Object.values(PRODUCT_PHOTOS), ...Object.values(CATEGORY_PHOTOS), ...Object.values(FARM_PHOTOS)]);
+  return DEMO_SET.has(url);
+};
+
+/** Fermer xo'jaliklari muqovasi (demo) */
+export const FARM_PHOTOS: Record<string, string> = {
+  '+998911234567': u('1563514227147-6d2ff665a6a0', 1400), // uzumzor
+  '+998912345678': u('1560340325-e71cad0e133a', 1400), // bug'doy dalasi
+  '+998913456789': u('1440428099904-c6d459a7e7b5', 1400), // sut fermasi
+  '+998931234567': u('1761839257946-4616bcfafec7', 1400), // issiqxona
+};

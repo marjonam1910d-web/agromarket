@@ -56,6 +56,29 @@ const uz: GuideContent = {
       "Yetkazilgan mahsulotga 1–5 yulduz va rasm bilan sharh qoldiring — faqat haqiqiy xaridorlar sharh yoza oladi.",
       "Mahsulot sifatsiz bo'lsa, «Qo'llab-quvvatlash» orqali shikoyat yuboring — administrator ko'rib chiqadi.",
     ] },
+    { id: 'map', icon: 'search', title: "Xarita va sotuv markazlari", steps: [
+      "Yuqoridagi «Bo'limlar» → «Xarita» ni oching: fermer xo'jaliklari, sotuv markazlari, omborlar va olib ketish nuqtalari ko'rinadi.",
+      "Turini tanlang yoki fermer nomi bilan qidiring; nuqtani bosib ish vaqti va telefonni ko'ring.",
+      "«Yo'nalish» tugmasi xaritalar ilovasida yo'lni ochadi, «Fermer sahifasi» — uning mahsulotlarini.",
+    ] },
+    { id: 'live', icon: 'truck', title: 'Kuryerni jonli kuzatish', steps: [
+      "Fermer jo'natib, jonli kuzatuvni yoqqach, buyurtma sahifasida xarita paydo bo'ladi — kuryer joylashuvi har 10 soniyada yangilanadi.",
+      "Xaritada ferma va kuryer belgilari, oxirgi yangilanish vaqti va kuryerga qo'ng'iroq tugmasi bor.",
+      "Katta buyurtmalar (100 kg dan ortiq) uchun yetkazib berish va jonli kuzatuv tavsiya etiladi.",
+    ] },
+    { id: 'contracts', icon: 'shield', title: 'Elektron shartnoma va shaxsiy muhr', steps: [
+      "Buyurtma sahifasida «Shartnoma tuzish» ni bosing — mahsulotlar, narx va manzil avtomatik to'ldiriladi. Yoki «Shartnomalar» → «Yangi shartnoma» da fermer telefonini kiriting.",
+      "Shartlarni (oldindan to'lov, yetkazish muddati, sifat, jarima) tekshiring va «Yuborish» ni bosing.",
+      "Imzolash uchun parolingizni kiriting va rozilikni belgilang — shartnomaga shaxsiy muhringiz bosiladi.",
+      "Ikkala tomon imzolagach shartnoma kuchga kiradi. Har bir shartnomada alohida QR-kod bor: skaner qilgan har kim uning haqiqiyligini tekshira oladi.",
+      "Muhringizni Sozlamalar → «Shaxsiy elektron muhr» da oldindan yaratishingiz mumkin (nomi va rangi bir marta tanlanadi).",
+    ] },
+    { id: 'contact', icon: 'chat', title: "Admin va fermer bilan bog'lanish, til", steps: [
+      "Kabinetdagi «Admin bilan bog'lanish» orqali administratorga yozing — javob «Xabarlar» da keladi.",
+      "Fermerga mahsulot yoki buyurtma sahifasidan yozing; fermer ham buyurtma bergan xaridoriga yoza oladi.",
+      "Yuqoridagi til tugmasini (UZ) bosing va RU yoki EN ni tanlang — butun interfeys va xato xabarlari shu tilga o'tadi.",
+      "Tarjima xizmati yoqilgan bo'lsa, suhbatdagi har bir xabar ostida «Tarjima qilish» tugmasi chiqadi.",
+    ] },
   ],
   seller: [
     { id: 'verify', icon: 'store', title: "Fermer sifatida ro'yxatdan o'tish", steps: [
@@ -78,6 +101,28 @@ const uz: GuideContent = {
       "«Hisobotlar» da mahsulot turlari kesimida savdo, buyurtma, xaridorlar va o'sish foizi. Kategoriyani bosing — kunlik grafik, eng ko'p sotilganlar va hududlar ochiladi.",
       "Aksiya va promokodlar bilan savdoni oshiring.",
     ] },
+    { id: 'points', icon: 'store', title: 'Sotuv nuqtalari xaritada', steps: [
+      "Kabinet → «Sotuv nuqtalari» → «Nuqta qo'shish»: nomi, turi (xo'jalik, sotuv markazi, ombor, olib ketish nuqtasi), manzil va ish vaqtini kiriting.",
+      "Xaritani bosib aniq joyni belgilang yoki «Mening joylashuvim» ni bosing. 30 tagacha nuqta qo'shish mumkin.",
+      "Faol nuqtalar xaridorlarga umumiy xaritada ko'rinadi (faqat tasdiqlangan fermerlar).",
+    ] },
+    { id: 'live', icon: 'truck', title: 'Jonli yetkazish', steps: [
+      "Buyurtma «Yetkazishga tayyor» yoki «Yo'lda» bo'lganda, buyurtma sahifasida «Jonli yetkazishni boshlash» ni bosing.",
+      "Telefon joylashuvga ruxsat so'raydi — ruxsat bering. Ilovani ochiq qoldiring: joylashuv har 10 soniyada xaridorga yuboriladi.",
+      "Yetkazib bo'lgach «Kuzatuvni to'xtatish» ni bosing. Buyurtma yetkazilganda kuzatuv avtomatik to'xtaydi.",
+    ] },
+    { id: 'contracts', icon: 'shield', title: 'Shartnomalar', steps: [
+      "Buyurtma sahifasida «Shartnoma tuzish» yoki «Shartnomalar» → «Yangi shartnoma» (xaridor telefoni yoki emaili bilan).",
+      "Shartlarni tahrirlang va yuboring; xaridor rad etsa, sababini ko'rib, tuzatib qayta yuborasiz.",
+      "Imzolash parol bilan tasdiqlanadi va shaxsiy muhringiz bosiladi. Imzolangan shartnomani o'zgartirib bo'lmaydi.",
+      "«Chop etish» bilan PDF yoki qog'ozga chiqaring — QR-kod hujjatning haqiqiyligini tasdiqlaydi.",
+    ] },
+    { id: 'wallet', icon: 'card', title: 'Hamyon va pul yechish', steps: [
+      "Onlayn to'langan buyurtma yetkazilgach, summa (komissiyasiz) avtomatik «Hamyon» ga tushadi.",
+      "Naqd buyurtmalarda pulni o'zingiz olasiz — platforma komissiyasi hamyondan yechiladi.",
+      "«Kartaga yechib olish» ni bosing, summani (kamida 10 000 so'm) va saqlangan kartangizni tanlang.",
+      "Barcha kirim-chiqimlar «Harakatlar tarixi» da sana va holat bilan ko'rinadi.",
+    ] },
   ],
   admin: [
     { id: 'moderation', icon: 'shield', title: 'Moderatsiya', steps: [
@@ -92,6 +137,16 @@ const uz: GuideContent = {
       "Komissiya foizi, yetkazish vaqt oraliqlari va qo'llab-quvvatlash telefoni «Sozlamalar» da.",
       "Har bir muhim amal «Audit jurnali» ga yoziladi: kim, qachon, nima qildi.",
     ] },
+    { id: 'users', icon: 'users', title: 'Foydalanuvchilar kategoriyalar bo\'yicha', steps: [
+      "«Foydalanuvchilar» sahifasining yuqorisida xaridorlar, fermerlar, adminlar, ulgurji xaridorlar, bloklanganlar va shu haftadagi yangilar soni.",
+      "Kartochka yoki tabni bosib ro'yxatni shu toifaga filtrlang; fermerlar hududlar bo'yicha ham ko'rsatiladi.",
+      "«Yozish» tugmasi bilan istalgan foydalanuvchiga to'g'ridan-to'g'ri xabar yuboring — suhbat «Xabarlar» da ochiladi.",
+    ] },
+    { id: 'wallet', icon: 'card', title: "Hamyon va o'tkazmalar", steps: [
+      "Admin → «Hamyon»: fermerlarga o'tkazilgan summa, komissiya daromadi va kartalarga yechilgan mablag'.",
+      "Kutilayotgan yechib olish so'rovlarini tasdiqlang yoki sabab bilan rad eting — fermerga bildirishnoma boradi.",
+      "Shartnomalar bo'limida platformadagi barcha shartnomalarni ko'rishingiz mumkin.",
+    ] },
   ],
   security: [
     { title: 'PIN-kod va barmoq izi', text: "O'rnatilgan ilovada PIN-kod majburiy. Ilova fonga o'tsa yoki yopilsa, qayta ochilganda PIN yoki barmoq izi so'raladi. PIN 5 marta xato kiritilsa, barcha qurilmalarda tizimdan chiqiladi." },
@@ -100,6 +155,9 @@ const uz: GuideContent = {
     { title: "To'lov faqat platforma ichida", text: "Fermer «kartamga o'tkazing» desa, rozi bo'lmang — platformadan tashqaridagi to'lov himoyalanmaydi." },
     { title: 'Telefon yo\'qolsa', text: "Boshqa qurilmadan kiring → Sozlamalar → Xavfsizlik → «Barcha qurilmalardan chiqish» va «Qurilmalar» ro'yxatidan yo'qolgan telefonni o'chiring." },
     { title: 'Himoyalangan aloqa', text: "Barcha ma'lumotlar HTTPS orqali shifrlanadi, parollar ochiq saqlanmaydi, ko'p marta xato kirishda hisob vaqtincha bloklanadi." },
+    { title: 'Shartnoma va muhr', text: "Imzolashda parol qayta so'raladi. Shartnoma matnidan SHA-256 iz olinadi va imzo server kaliti bilan muhrlanadi — imzolangan matn o'zgartirilsa, QR orqali tekshiruvda darhol «buzilgan» deb ko'rinadi. Muhrni o'zgartirib bo'lmaydi." },
+    { title: 'Hamyondan pul yechish', text: "Pul faqat o'zingiz saqlagan kartaga yechiladi. Bir vaqtda bir nechta so'rov yuborilsa ham balans ikki marta sarflanmaydi; har bir harakat jurnalga yoziladi." },
+    { title: 'Joylashuv', text: "Joylashuvingiz faqat siz «Jonli yetkazish» ni yoqqaningizda va faqat shu buyurtma xaridoriga ko'rsatiladi. To'xtatganingizda yuborish to'xtaydi." },
   ],
   faq: [
     { q: "Yetkazish qancha turadi?", a: "Har bir fermer o'z viloyatlari uchun narx belgilaydi. Summa ma'lum chegaradan oshsa, yetkazish bepul bo'lishi mumkin — savatchada aniq summa ko'rinadi." },
@@ -109,7 +167,7 @@ const uz: GuideContent = {
     { q: "Ilova Play Market'dami?", a: "AgroMarket — PWA ilova: saytdan bevosita o'rnatiladi, Play Market shart emas. Kerak bo'lsa, Play Market uchun APK ham tayyorlash mumkin." },
   ],
   changelog: [
-    { date: '2026-11-12', items: [
+    { date: '2026-11-12', items: ["Fermerlarning sotuv markazlari xaritasi va kuryerni jonli kuzatish.", "Elektron shartnomalar: shaxsiy muhr, parol bilan imzo, har bir shartnoma uchun QR-kod.", "Hamyon: buyurtma tushumlari va kartaga yechib olish; admin uchun tasdiqlash.", "Admin bilan bog'lanish, fermer — xaridorga yozish, xabarlarni tarjima qilish.", "«Bo'limlar» menyusi, til tanlash ro'yxati va yuqorida «Ilova» tugmasi.", "Bank kartasiga o'xshash Uzcard va Humo kartalari.", "Bosh sahifa haqiqiy fotosuratlar bilan yangilandi.", 
       "Ilovani yuklab olish (Android, iPhone, kompyuter).",
       "Ilova qulfi: majburiy PIN-kod va barmoq izi / Face ID.",
       "Uzcard/Humo kartalarini saqlash va bir bosishda to'lash.",
@@ -155,6 +213,29 @@ const ru: GuideContent = {
       'Оставьте отзыв на доставленный товар (1–5 звёзд и фото) — писать могут только реальные покупатели.',
       'Если товар некачественный — отправьте жалобу через «Поддержку», администратор рассмотрит её.',
     ] },
+    { id: 'map', icon: 'search', title: 'Карта и точки продаж', steps: [
+      "Откройте «Разделы» → «Карта»: фермерские хозяйства, центры продаж, склады и точки самовывоза.",
+      "Выберите тип или ищите по названию фермера; нажмите на точку, чтобы увидеть часы работы и телефон.",
+      "Кнопка «Маршрут» открывает навигатор, «Страница фермера» — его товары.",
+    ] },
+    { id: 'live', icon: 'truck', title: 'Отслеживание курьера в реальном времени', steps: [
+      "Когда фермер отправит заказ и включит отслеживание, на странице заказа появится карта — позиция курьера обновляется каждые 10 секунд.",
+      "На карте отмечены ферма и курьер, время последнего обновления и кнопка звонка курьеру.",
+      "Для крупных заказов (более 100 кг) рекомендуется доставка с отслеживанием.",
+    ] },
+    { id: 'contracts', icon: 'shield', title: 'Электронный договор и личная печать', steps: [
+      "На странице заказа нажмите «Составить договор» — товары, цены и адрес заполнятся автоматически. Или «Договоры» → «Новый договор» с телефоном фермера.",
+      "Проверьте условия (предоплата, срок поставки, качество, неустойка) и нажмите «Отправить».",
+      "Для подписи введите пароль и отметьте согласие — на договор ставится ваша личная печать.",
+      "Договор вступает в силу после подписи обеих сторон. У каждого договора свой QR-код: любой может проверить его подлинность.",
+      "Печать можно создать заранее: Настройки → «Личная электронная печать» (название и цвет выбираются один раз).",
+    ] },
+    { id: 'contact', icon: 'chat', title: 'Связь с админом и фермером, язык', steps: [
+      "«Связаться с админом» в кабинете — ответ придёт в «Сообщения».",
+      "Пишите фермеру со страницы товара или заказа; фермер тоже может написать покупателю, сделавшему заказ.",
+      "Нажмите кнопку языка (UZ) вверху и выберите RU или EN — весь интерфейс и сообщения об ошибках переключатся.",
+      "Если сервис перевода включён, под каждым сообщением в чате есть кнопка «Перевести».",
+    ] },
   ],
   seller: [
     { id: 'verify', icon: 'store', title: 'Регистрация фермера', steps: [
@@ -177,6 +258,28 @@ const ru: GuideContent = {
       '«Отчёты» — продажи, заказы, покупатели и рост по видам товаров. Нажмите на категорию — откроются график по дням, лидеры продаж и регионы.',
       'Увеличивайте продажи с помощью акций и промокодов.',
     ] },
+    { id: 'points', icon: 'store', title: 'Точки продаж на карте', steps: [
+      "Кабинет → «Точки продаж» → «Добавить точку»: название, тип (хозяйство, центр продаж, склад, самовывоз), адрес и часы работы.",
+      "Нажмите на карту, чтобы указать место, или «Моё местоположение». До 30 точек.",
+      "Активные точки видны покупателям на общей карте (только у проверенных фермеров).",
+    ] },
+    { id: 'live', icon: 'truck', title: 'Доставка с отслеживанием', steps: [
+      "Когда заказ «Готов к доставке» или «В пути», нажмите на странице заказа «Начать отслеживание».",
+      "Разрешите доступ к геолокации. Держите приложение открытым: позиция отправляется покупателю каждые 10 секунд.",
+      "После доставки нажмите «Остановить отслеживание». При статусе «Доставлен» оно останавливается автоматически.",
+    ] },
+    { id: 'contracts', icon: 'shield', title: 'Договоры', steps: [
+      "«Составить договор» на странице заказа или «Договоры» → «Новый договор» (телефон или email покупателя).",
+      "Отредактируйте условия и отправьте; если покупатель отклонит, увидите причину, исправите и отправите снова.",
+      "Подпись подтверждается паролем и ставится ваша личная печать. Подписанный договор изменить нельзя.",
+      "«Печать» — в PDF или на бумагу; QR-код подтверждает подлинность документа.",
+    ] },
+    { id: 'wallet', icon: 'card', title: 'Кошелёк и вывод средств', steps: [
+      "После доставки оплаченного онлайн заказа сумма (за вычетом комиссии) автоматически поступает в «Кошелёк».",
+      "По заказам за наличные деньги получаете вы — комиссия платформы списывается из кошелька.",
+      "Нажмите «Вывести на карту», укажите сумму (от 10 000 сум) и сохранённую карту.",
+      "Все поступления и списания видны в «Истории операций» с датой и статусом.",
+    ] },
   ],
   admin: [
     { id: 'moderation', icon: 'shield', title: 'Модерация', steps: [
@@ -191,6 +294,16 @@ const ru: GuideContent = {
       'Комиссия, интервалы доставки и телефон поддержки — в «Настройках».',
       'Каждое важное действие записывается в «Журнал аудита»: кто, когда и что сделал.',
     ] },
+    { id: 'users', icon: 'users', title: 'Пользователи по категориям', steps: [
+      "Вверху страницы «Пользователи» — число покупателей, фермеров, админов, оптовиков, заблокированных и новых за неделю.",
+      "Нажмите карточку или вкладку, чтобы отфильтровать список; фермеры показаны и по регионам.",
+      "Кнопка «Написать» — сообщение любому пользователю, чат откроется в «Сообщениях».",
+    ] },
+    { id: 'wallet', icon: 'card', title: 'Кошелёк и переводы', steps: [
+      "Админ → «Кошелёк»: выплаты фермерам, доход от комиссии и выведенные на карты средства.",
+      "Подтверждайте или отклоняйте с причиной запросы на вывод — фермер получит уведомление.",
+      "В разделе «Договоры» доступны все договоры платформы.",
+    ] },
   ],
   security: [
     { title: 'PIN-код и отпечаток пальца', text: 'В установленном приложении PIN-код обязателен. Если приложение свернуть или закрыть, при открытии запрашивается PIN или отпечаток. После 5 неверных PIN выполняется выход на всех устройствах.' },
@@ -199,6 +312,9 @@ const ru: GuideContent = {
     { title: 'Оплата только внутри платформы', text: 'Если фермер просит «переведите на карту» — не соглашайтесь: оплата вне платформы не защищена.' },
     { title: 'Если потеряли телефон', text: 'Войдите с другого устройства → Настройки → Безопасность → «Выйти на всех устройствах» и удалите потерянный телефон из списка устройств.' },
     { title: 'Защищённое соединение', text: 'Все данные шифруются (HTTPS), пароли не хранятся в открытом виде, при многократных неудачных входах аккаунт временно блокируется.' },
+    { title: 'Договор и печать', text: "При подписи повторно запрашивается пароль. От текста договора берётся отпечаток SHA-256, подпись заверяется ключом сервера — при изменении подписанного текста проверка по QR сразу покажет «нарушен». Печать изменить нельзя." },
+    { title: 'Вывод из кошелька', text: "Деньги выводятся только на вашу сохранённую карту. Даже при одновременных запросах баланс не будет списан дважды; каждая операция записывается в журнал." },
+    { title: 'Геолокация', text: "Ваше местоположение передаётся только когда вы включили «Доставку с отслеживанием» и только покупателю этого заказа." },
   ],
   faq: [
     { q: 'Сколько стоит доставка?', a: 'Каждый фермер задаёт цену для своих областей. При сумме выше порога доставка может быть бесплатной — точная сумма видна в корзине.' },
@@ -208,7 +324,7 @@ const ru: GuideContent = {
     { q: 'Есть ли приложение в Play Market?', a: 'AgroMarket — PWA-приложение: устанавливается прямо с сайта, Play Market не нужен. При необходимости можно подготовить и APK.' },
   ],
   changelog: [
-    { date: '2026-11-12', items: ['Установка приложения (Android, iPhone, компьютер).', 'Блокировка приложения: обязательный PIN и отпечаток / Face ID.', 'Сохранение карт Uzcard/Humo и оплата в одно касание.', 'Подробные отчёты по категориям (админ и фермер).', 'Электронный чек, который «печатается» после оплаты.', 'Демо-режим без регистрации.', 'Реальные фотографии товаров.'] },
+    { date: '2026-11-12', items: ["Карта точек продаж фермеров и отслеживание курьера в реальном времени.", "Электронные договоры: личная печать, подпись паролем, QR-код для каждого договора.", "Кошелёк: поступления по заказам и вывод на карту; подтверждение админом.", "Связь с админом, фермер может написать покупателю, перевод сообщений.", "Меню «Разделы», выпадающий выбор языка и кнопка «Приложение» вверху.", "Карты Uzcard и Humo в виде настоящих банковских карт.", "Главная страница обновлена реальными фотографиями.", 'Установка приложения (Android, iPhone, компьютер).', 'Блокировка приложения: обязательный PIN и отпечаток / Face ID.', 'Сохранение карт Uzcard/Humo и оплата в одно касание.', 'Подробные отчёты по категориям (админ и фермер).', 'Электронный чек, который «печатается» после оплаты.', 'Демо-режим без регистрации.', 'Реальные фотографии товаров.'] },
     { date: '2026-11-07', items: ['Коды подтверждения отправляются на email через Gmail.'] },
   ],
 };
@@ -246,6 +362,29 @@ const en: GuideContent = {
       'Review delivered products with 1–5 stars and photos — only real buyers can write reviews.',
       'If a product is poor quality, file a complaint via «Support» — an administrator reviews it.',
     ] },
+    { id: 'map', icon: 'search', title: 'Map and sales points', steps: [
+      "Open «Sections» → «Map»: farms, sales centers, warehouses and pickup points.",
+      "Filter by type or search by farmer; tap a point to see opening hours and phone.",
+      "«Directions» opens your maps app, «Farmer page» shows their products.",
+    ] },
+    { id: 'live', icon: 'truck', title: 'Live courier tracking', steps: [
+      "Once the farmer ships and starts live tracking, a map appears on the order page — the courier position refreshes every 10 seconds.",
+      "The map shows the farm and the courier, the last update time and a call button.",
+      "Delivery with live tracking is recommended for large orders (over 100 kg).",
+    ] },
+    { id: 'contracts', icon: 'shield', title: 'E-contracts and personal seal', steps: [
+      "On an order page tap «Create contract» — items, prices and address are filled in. Or «Contracts» → «New contract» with the farmer's phone.",
+      "Check the terms (prepayment, delivery date, quality, penalties) and tap «Send».",
+      "To sign, enter your password and tick the agreement — your personal seal is stamped on the contract.",
+      "The contract takes effect once both sides sign. Each contract has its own QR code anyone can scan to verify it.",
+      "You can create your seal in advance: Settings → «Personal electronic seal» (name and colour are chosen once).",
+    ] },
+    { id: 'contact', icon: 'chat', title: 'Contacting the admin and farmers, language', steps: [
+      "Use «Contact admin» in your account — the reply arrives in «Messages».",
+      "Message a farmer from a product or order page; farmers can also message buyers who ordered from them.",
+      "Tap the language button (UZ) at the top and pick RU or EN — the whole interface and error messages switch.",
+      "If the translation service is enabled, every chat message has a «Translate» button.",
+    ] },
   ],
   seller: [
     { id: 'verify', icon: 'store', title: 'Registering as a farmer', steps: [
@@ -268,6 +407,28 @@ const en: GuideContent = {
       '«Reports» — sales, orders, buyers and growth by product type. Click a category for daily charts, best sellers and regions.',
       'Boost sales with promotions and promo codes.',
     ] },
+    { id: 'points', icon: 'store', title: 'Sales points on the map', steps: [
+      "Account → «Sales points» → «Add point»: name, type (farm, sales center, warehouse, pickup), address and hours.",
+      "Tap the map to set the exact spot or use «My location». Up to 30 points.",
+      "Active points appear on the public map (verified farmers only).",
+    ] },
+    { id: 'live', icon: 'truck', title: 'Live delivery', steps: [
+      "When an order is «Ready for delivery» or «Shipped», tap «Start live delivery» on the order page.",
+      "Allow location access and keep the app open: your position is sent to the buyer every 10 seconds.",
+      "Tap «Stop tracking» when done. Tracking stops automatically when the order is delivered.",
+    ] },
+    { id: 'contracts', icon: 'shield', title: 'Contracts', steps: [
+      "«Create contract» on an order page, or «Contracts» → «New contract» (buyer phone or email).",
+      "Edit the terms and send; if the buyer rejects, you see the reason, fix it and resend.",
+      "Signing is confirmed with your password and stamps your personal seal. Signed contracts cannot be changed.",
+      "«Print» to PDF or paper — the QR code proves the document is genuine.",
+    ] },
+    { id: 'wallet', icon: 'card', title: 'Wallet and withdrawals', steps: [
+      "When an online-paid order is delivered, the amount (minus commission) is added to your «Wallet» automatically.",
+      "For cash orders you collect the money — the platform commission is deducted from the wallet.",
+      "Tap «Withdraw to card», enter the amount (min 10,000 UZS) and choose a saved card.",
+      "All movements are listed in «History» with date and status.",
+    ] },
   ],
   admin: [
     { id: 'moderation', icon: 'shield', title: 'Moderation', steps: [
@@ -282,6 +443,16 @@ const en: GuideContent = {
       'Commission, delivery slots and the support phone live in «Settings».',
       'Every important action is written to the «Audit log»: who did what and when.',
     ] },
+    { id: 'users', icon: 'users', title: 'Users by category', steps: [
+      "The top of «Users» shows buyers, farmers, admins, wholesale buyers, blocked users and new this week.",
+      "Tap a tile or tab to filter the list; farmers are also broken down by region.",
+      "«Message» sends a direct message to any user; the chat opens in «Messages».",
+    ] },
+    { id: 'wallet', icon: 'card', title: 'Wallet and transfers', steps: [
+      "Admin → «Wallet»: payouts to farmers, commission income and amounts withdrawn to cards.",
+      "Approve pending withdrawal requests or reject them with a reason — the farmer is notified.",
+      "All platform contracts are available under «Contracts».",
+    ] },
   ],
   security: [
     { title: 'PIN and fingerprint', text: 'A PIN is required in the installed app. When the app goes to background or is closed, a PIN or fingerprint is required to reopen it. After 5 wrong PINs you are signed out on all devices.' },
@@ -290,6 +461,9 @@ const en: GuideContent = {
     { title: 'Pay only inside the platform', text: 'If a farmer asks you to «transfer to my card», refuse — payments outside the platform are not protected.' },
     { title: 'Lost your phone?', text: 'Sign in from another device → Settings → Security → «Sign out on all devices» and remove the lost phone from the device list.' },
     { title: 'Secure connection', text: 'All data is encrypted (HTTPS), passwords are never stored in plain text, and repeated failed sign-ins temporarily lock the account.' },
+    { title: 'Contracts and seal', text: "Signing asks for your password again. A SHA-256 fingerprint of the text is signed with a server key — if a signed contract is altered, the QR check immediately shows it as tampered. The seal cannot be changed." },
+    { title: 'Wallet withdrawals', text: "Money goes only to a card you saved. Even with simultaneous requests the balance cannot be spent twice; every movement is logged." },
+    { title: 'Location', text: "Your location is shared only while you run «Live delivery», and only with that order's buyer." },
   ],
   faq: [
     { q: 'How much is delivery?', a: 'Each farmer sets prices for their regions. Above a threshold delivery may be free — the exact amount is shown in the cart.' },
@@ -299,7 +473,7 @@ const en: GuideContent = {
     { q: 'Is the app on Play Market?', a: 'AgroMarket is a PWA: it installs straight from the website, no store needed. An APK for Play Market can be prepared if required.' },
   ],
   changelog: [
-    { date: '2026-11-12', items: ['Install the app (Android, iPhone, desktop).', 'App lock: mandatory PIN and fingerprint / Face ID.', 'Save Uzcard/Humo cards and pay in one tap.', 'Detailed category reports (admin and farmer).', 'Electronic receipt that «prints» after payment.', 'Demo mode without signing up.', 'Real product photos.'] },
+    { date: '2026-11-12', items: ["Map of farmers' sales points and live courier tracking.", "E-contracts: personal seal, password signing, a QR code for every contract.", "Wallet: order income and withdrawals to card; admin approval.", "Contact admin, farmers can message buyers, message translation.", "«Sections» menu, language dropdown and an «App» button at the top.", "Uzcard and Humo shown as real-looking bank cards.", "Homepage refreshed with real photography.", 'Install the app (Android, iPhone, desktop).', 'App lock: mandatory PIN and fingerprint / Face ID.', 'Save Uzcard/Humo cards and pay in one tap.', 'Detailed category reports (admin and farmer).', 'Electronic receipt that «prints» after payment.', 'Demo mode without signing up.', 'Real product photos.'] },
     { date: '2026-11-07', items: ['Verification codes are emailed via Gmail.'] },
   ],
 };

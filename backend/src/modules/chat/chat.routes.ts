@@ -7,6 +7,8 @@ import { authenticate } from '../../middleware/auth';
 import { storage } from '../../lib/storage';
 import { emitToUser } from '../../lib/realtime';
 import { notify } from '../notifications/notifications.service';
+import { AppError } from '../../common/errors';
+import { translate, translateEnabled } from './translate';
 
 /**
  * Xaridor ↔ sotuvchi chati. Har bir juftlik uchun bitta suhbat; xabarlar mahsulot/buyurtma
@@ -76,8 +78,11 @@ r.get(
         lastMessage: c.messages[0] ?? null,
         unread: um.get(c.id) ?? 0,
         role: c.buyerId === uid ? 'buyer' : 'seller',
+        kind: c.kind,
         counterpart:
-          c.buyerId === uid
+          c.kind === 'SUPPORT' && c.buyerId === uid
+            ? { id: c.seller.id, name: 'AgroMarket · Qo\'llab-quvvatlash', avatarUrl: null }
+            : c.buyerId === uid
             ? { id: c.seller.id, name: c.seller.sellerProfile?.farmName ?? c.seller.fullName, avatarUrl: c.seller.sellerProfile?.logoUrl ?? c.seller.avatarUrl }
             : { id: c.buyer.id, name: c.buyer.fullName, avatarUrl: c.buyer.avatarUrl },
       })),
@@ -142,6 +147,81 @@ r.post(
     const recipient = isBuyer ? c.sellerUserId : c.buyerId;
     const name = isBuyer ? c.buyer.fullName : (await prisma.sellerProfile.findUnique({ where: { userId: c.sellerUserId }, select: { farmName: true } }))?.farmName ?? c.seller.fullName;
     created(res, await sendMessage(c.id, req.user!.id, recipient, name, req.body));
+  }),
+);
+
+
+/** Admin (qo'llab-quvvatlash) bilan bog'lanish — xaridor ham, fermer ham */
+r.post(
+  '/support',
+  validate({ body: z.object({ message: msgSchema }) }),
+  ah(async (req, res) => {
+    const me = await prisma.user.findUniqueOrThrow({ where: { id: req.user!.id }, select: { id: true, fullName: true, role: true } });
+    if (me.role === 'ADMIN') throw Errors.badRequest('Admin o\'ziga yoza olmaydi');
+    // Mavjud suhbat bo'lsa — o'sha admin; aks holda eng kam yuklangan faol admin
+    let conv = await prisma.conversation.findFirst({ where: { buyerId: me.id, kind: 'SUPPORT' } });
+    if (!conv) {
+      const admins = await prisma.user.findMany({ where: { role: 'ADMIN', status: 'ACTIVE', deletedAt: null }, select: { id: true, _count: { select: { sellerConvs: true } } } });
+      if (!admins.length) throw new AppError(503, 'NO_SUPPORT', "Hozircha administrator mavjud emas");
+      admins.sort((a, b) => a._count.sellerConvs - b._count.sellerConvs);
+      conv = await prisma.conversation.upsert({
+        where: { buyerId_sellerUserId: { buyerId: me.id, sellerUserId: admins[0].id } },
+        create: { buyerId: me.id, sellerUserId: admins[0].id, kind: 'SUPPORT' },
+        update: { kind: 'SUPPORT' },
+      });
+    }
+    const m = await sendMessage(conv.id, me.id, conv.sellerUserId, me.fullName, req.body.message);
+    created(res, { conversationId: conv.id, message: m });
+  }),
+);
+
+/** Admin istalgan foydalanuvchiga yozadi */
+r.post(
+  '/admin/:userId',
+  validate({ body: z.object({ message: msgSchema }) }),
+  ah(async (req, res) => {
+    if (req.user!.role !== 'ADMIN') throw Errors.forbidden();
+    const target = await prisma.user.findUnique({ where: { id: req.params.userId }, select: { id: true, role: true } });
+    if (!target || target.role === 'ADMIN') throw Errors.notFound('Foydalanuvchi');
+    const conv = await prisma.conversation.upsert({
+      where: { buyerId_sellerUserId: { buyerId: target.id, sellerUserId: req.user!.id } },
+      create: { buyerId: target.id, sellerUserId: req.user!.id, kind: 'SUPPORT' },
+      update: {},
+    });
+    const m = await sendMessage(conv.id, req.user!.id, target.id, "AgroMarket qo'llab-quvvatlash", req.body.message);
+    created(res, { conversationId: conv.id, message: m });
+  }),
+);
+
+/** Fermer o'z xaridoriga yozadi (faqat oramizda buyurtma bo'lsa) */
+r.post(
+  '/with-buyer/:buyerId',
+  validate({ body: z.object({ message: msgSchema }) }),
+  ah(async (req, res) => {
+    const sid = req.user!.sellerId;
+    if (!sid) throw Errors.forbidden();
+    const has = await prisma.sellerOrder.findFirst({ where: { sellerId: sid, order: { buyerId: req.params.buyerId } }, select: { id: true } });
+    if (!has) throw Errors.forbidden("Faqat buyurtma bergan xaridorga yozish mumkin");
+    const me = await prisma.user.findUniqueOrThrow({ where: { id: req.user!.id }, select: { fullName: true, sellerProfile: { select: { farmName: true } } } });
+    const conv = await prisma.conversation.upsert({
+      where: { buyerId_sellerUserId: { buyerId: req.params.buyerId, sellerUserId: req.user!.id } },
+      create: { buyerId: req.params.buyerId, sellerUserId: req.user!.id },
+      update: {},
+    });
+    const m = await sendMessage(conv.id, req.user!.id, req.params.buyerId, me.sellerProfile?.farmName ?? me.fullName, req.body.message);
+    created(res, { conversationId: conv.id, message: m });
+  }),
+);
+
+/** Xabarni foydalanuvchi tiliga tarjima qilish (xizmat sozlangan bo'lsa) */
+r.post(
+  '/translate',
+  validate({ body: z.object({ text: z.string().min(1).max(2000), to: z.enum(['uz', 'ru', 'en']) }) }),
+  ah(async (req, res) => {
+    if (!translateEnabled()) throw new AppError(503, 'TRANSLATE_UNAVAILABLE', 'Tarjima xizmati sozlanmagan');
+    const out = await translate(req.body.text, req.body.to);
+    if (!out) throw new AppError(502, 'TRANSLATE_FAILED', "Tarjima qilib bo'lmadi");
+    ok(res, { text: out });
   }),
 );
 

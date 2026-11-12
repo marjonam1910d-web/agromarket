@@ -13,7 +13,7 @@ const sockets = new Map<string, Set<WebSocket>>();
 const CHANNEL = 'agromarket:events';
 
 export interface RtEvent {
-  type: 'notification' | 'message' | 'order_update' | 'unread';
+  type: 'notification' | 'message' | 'order_update' | 'unread' | 'courier_location' | 'contract_update';
   payload: unknown;
 }
 

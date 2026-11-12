@@ -16,7 +16,11 @@ export type NotificationType =
   | 'complaint.update'
   | 'message.new'
   | 'stock.low'
-  | 'system';
+  | 'system'
+  | 'delivery.tracking'
+  | 'contract'
+  | 'wallet'
+  | 'support';
 
 interface NotifyInput {
   userId: string;

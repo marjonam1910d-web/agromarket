@@ -19,7 +19,17 @@ export function isStandalone() {
   return window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
 }
 
-export const isIos = () => typeof navigator !== 'undefined' && /iphone|ipad|ipod/i.test(navigator.userAgent) && !/crios|fxios/i.test(navigator.userAgent);
+/** iPhone/iPad (jumladan iPadOS "Macintosh" deb ko'rinadigan va iOS'dagi Chrome/Firefox — ularda ham faqat "Ulashish → Bosh ekranga") */
+export const isIos = () =>
+  typeof navigator !== 'undefined' && (/iphone|ipad|ipod/i.test(navigator.userAgent) || (/macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1));
+
+const wasInstalled = () => {
+  try {
+    return localStorage.getItem('am_installed') === '1';
+  } catch {
+    return false;
+  }
+};
 
 export function registerPwa() {
   if (typeof window === 'undefined') return;
@@ -60,7 +70,8 @@ export function useInstallPrompt() {
     canPrompt: Boolean(deferred) && !standalone,
     ios: isIos(),
     /** Tugmani ko'rsatish kerakmi (allaqachon ilova ichida bo'lsa — yo'q) */
-    available: !standalone,
+    // Android'da o'rnatilgan bo'lsa brauzer o'rnatish taklifini yubormaydi — tugmani yashiramiz
+    available: !standalone && !(wasInstalled() && !deferred && !isIos()),
     async install(): Promise<'accepted' | 'dismissed' | 'unavailable'> {
       if (!deferred) return 'unavailable';
       await deferred.prompt();

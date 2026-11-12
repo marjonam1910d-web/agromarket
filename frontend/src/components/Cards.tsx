@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
+import { motion } from 'framer-motion';
+import { useAuth } from '@/store/auth';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CreditCard, Lock, Plus, Star, Trash2 } from 'lucide-react';
 import { useI18n } from '@/i18n';
@@ -26,36 +28,118 @@ interface CardOptions {
 
 export const useCards = () => useQuery({ queryKey: ['cards'], queryFn: () => api.get<SavedCard[]>('/payments/cards') });
 
-/** Kartaning vizual ko'rinishi (Uzcard — yashil-ko'k, Humo — to'q sariq) */
+export type CardBrand = 'UZCARD' | 'HUMO' | null;
+/** Raqam boshiga qarab tizimni aniqlash: 8600/5614 — Uzcard, 9860 — Humo */
+export const brandOf = (pan: string): CardBrand => {
+  const d = pan.replace(/\D/g, '');
+  if (d.startsWith('9860')) return 'HUMO';
+  if (d.startsWith('8600') || d.startsWith('5614')) return 'UZCARD';
+  return null;
+};
+
+function Chip() {
+  return (
+    <svg viewBox="0 0 46 34" className="h-[26px] w-[35px] sm:h-[30px] sm:w-[40px]" aria-hidden>
+      <defs>
+        <linearGradient id="chipg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#F6E3A1" /><stop offset=".45" stopColor="#D4AF5A" /><stop offset="1" stopColor="#A47C2C" />
+        </linearGradient>
+      </defs>
+      <rect x="1" y="1" width="44" height="32" rx="6" fill="url(#chipg)" stroke="#8C6A24" strokeWidth=".8" />
+      <path d="M1 12h13M1 22h13M32 12h13M32 22h13M14 1v32M32 1v32M14 17h18" stroke="#8C6A24" strokeWidth=".8" fill="none" opacity=".75" />
+    </svg>
+  );
+}
+function Contactless({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
+      <path d="M8.5 8.5a5 5 0 0 1 0 7" /><path d="M12 6a8.5 8.5 0 0 1 0 12" /><path d="M15.5 3.5a12 12 0 0 1 0 17" />
+    </svg>
+  );
+}
+/** Faqat matnli belgi (rasmiy logotip emas) */
+function Wordmark({ brand }: { brand: CardBrand }) {
+  if (brand === 'HUMO') return <span className="font-black italic tracking-tight text-[#FFB547] [font-size:1.15em]">HUMO</span>;
+  if (brand === 'UZCARD') return <span className="font-black tracking-[0.06em] [font-size:1.05em]"><span className="text-white">UZ</span><span className="text-[#7FE3D6]">CARD</span></span>;
+  return <CreditCard className="h-6 w-6 text-white/80" />;
+}
+
+const SKIN: Record<'UZCARD' | 'HUMO' | 'NONE', string> = {
+  UZCARD: 'bg-[radial-gradient(120%_140%_at_0%_0%,#2C8C8C_0%,#0F4F6B_45%,#0A2540_100%)]',
+  HUMO: 'bg-[radial-gradient(120%_140%_at_100%_0%,#4A3A2A_0%,#1E1B24_50%,#0B0B10_100%)]',
+  NONE: 'bg-[radial-gradient(120%_140%_at_0%_0%,#2F7A55_0%,#16432F_60%,#0C2A1D_100%)]',
+};
+
+/** Bank kartasiga o'xshash ko'rinish: chip, kontaktsiz belgisi, raqam, egasi, amal qilish muddati */
+export function BankCard({ brand, pan, expire, holder, label, compact, badge }: { brand: CardBrand; pan: string; expire: string; holder?: string; label?: string | null; compact?: boolean; badge?: ReactNode }) {
+  const { t } = useI18n();
+  const skin = SKIN[brand ?? 'NONE'];
+  return (
+    <div className={cx('relative w-full overflow-hidden rounded-[18px] text-white shadow-[0_18px_40px_-18px_rgba(0,0,0,.55)] ring-1 ring-white/10', skin, compact ? 'p-3.5 text-[13px]' : 'aspect-[1.586/1] p-4 sm:p-5')}>
+      {/* gilosh naqsh — bank kartalaridagi mayda chiziqlar */}
+      <svg className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.13]" viewBox="0 0 320 200" preserveAspectRatio="none" aria-hidden>
+        {Array.from({ length: 14 }, (_, i) => (
+          <path key={i} d={`M-20 ${150 - i * 9} C 60 ${90 - i * 7}, 150 ${210 - i * 9}, 340 ${70 - i * 4}`} fill="none" stroke="white" strokeWidth=".7" />
+        ))}
+      </svg>
+      {brand === 'HUMO' && <span className="pointer-events-none absolute -right-14 -top-20 h-56 w-56 rounded-full bg-[#FF9F2E]/25 blur-2xl" aria-hidden />}
+      {brand === 'UZCARD' && <span className="pointer-events-none absolute -bottom-24 -left-10 h-60 w-60 rounded-full bg-[#5FE0C8]/20 blur-2xl" aria-hidden />}
+      <span className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.06] to-white/[0.14]" aria-hidden />
+
+      <div className="relative flex items-start justify-between">
+        <span className="max-w-[60%] truncate text-[11px] font-bold uppercase tracking-[0.18em] text-white/75">{label || 'AgroMarket'}</span>
+        <span className="text-lg sm:text-xl"><Wordmark brand={brand} /></span>
+      </div>
+      {!compact && (
+        <div className="relative mt-4 flex items-center gap-3 sm:mt-6">
+          <Chip />
+          <Contactless className="h-6 w-6 text-white/80" />
+        </div>
+      )}
+      <p className={cx('relative font-mono font-semibold tracking-[0.14em] [text-shadow:0_1px_1px_rgba(0,0,0,.35)]', compact ? 'mt-2 text-[15px]' : 'mt-3 text-[19px] sm:mt-4 sm:text-[22px]')}>{pan}</p>
+      <div className={cx('relative flex items-end justify-between gap-3', compact ? 'mt-1.5' : 'mt-3 sm:mt-4')}>
+        {!compact && (
+          <div className="min-w-0">
+            <p className="text-[8.5px] font-bold uppercase tracking-[0.2em] text-white/55">{t('y.card.holder')}</p>
+            <p className="truncate text-[13px] font-semibold uppercase tracking-wider">{holder || '—'}</p>
+          </div>
+        )}
+        <div className={cx('shrink-0', compact ? '' : 'text-right')}>
+          {!compact && <p className="text-[8.5px] font-bold uppercase tracking-[0.2em] text-white/55">{t('y.card.valid')}</p>}
+          <p className="font-mono text-[13px] font-semibold">{expire || 'MM/YY'}</p>
+        </div>
+        {badge && <span className="absolute -top-1 right-0 flex items-center gap-1 sm:static">{badge}</span>}
+      </div>
+    </div>
+  );
+}
+
+/** Saqlangan karta (bank kartasi ko'rinishida) */
 export function CardFace({ card, compact, selected, onClick }: { card: SavedCard; compact?: boolean; selected?: boolean; onClick?: () => void }) {
-  const humo = card.brand === 'HUMO';
+  const { user } = useAuth();
+  const brand: CardBrand = card.brand === 'HUMO' ? 'HUMO' : card.brand === 'UZCARD' ? 'UZCARD' : brandOf(card.maskedPan);
+  const pan = card.maskedPan.replace(/\*/g, '•');
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={!onClick}
-      className={cx(
-        'relative w-full overflow-hidden rounded-2xl p-4 text-left text-white shadow-lg transition',
-        humo ? 'bg-gradient-to-br from-[#F2994A] via-[#E2711D] to-[#9C4A12]' : 'bg-gradient-to-br from-brand-600 via-brand-800 to-[#0B3B5C]',
-        compact ? 'aspect-auto' : 'aspect-[1.6/1]',
-        onClick && 'hover:-translate-y-0.5',
-        selected && 'ring-4 ring-sun ring-offset-2 ring-offset-cream',
-      )}
+      className={cx('block w-full rounded-[18px] text-left transition', onClick && 'hover:-translate-y-0.5', selected && 'ring-4 ring-sun ring-offset-2 ring-offset-cream')}
     >
-      <span className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-white/10" aria-hidden />
-      <span className="absolute -bottom-16 -left-8 h-40 w-40 rounded-full bg-white/5" aria-hidden />
-      <div className="relative flex items-center justify-between">
-        <span className="text-xs font-bold uppercase tracking-widest text-white/80">{card.label || (humo ? 'Humo' : 'Uzcard')}</span>
-        <span className="rounded-md bg-white/15 px-2 py-0.5 text-[11px] font-extrabold tracking-wider">{humo ? 'HUMO' : 'UZCARD'}</span>
-      </div>
-      <p className={cx('relative font-mono font-bold tracking-[0.12em]', compact ? 'mt-3 text-base' : 'mt-8 text-lg sm:text-xl')}>{card.maskedPan}</p>
-      <div className="relative mt-2 flex items-center justify-between text-xs text-white/80">
-        <span>{card.expire}</span>
-        <span className="flex items-center gap-1">
-          {card.isDefault && <Star className="h-3.5 w-3.5 fill-sun text-sun" />}
-          {card.sandbox && <span className="rounded bg-white/20 px-1.5 py-0.5 text-[10px] font-bold">TEST</span>}
-        </span>
-      </div>
+      <BankCard
+        brand={brand}
+        pan={pan}
+        expire={card.expire}
+        holder={user?.fullName}
+        label={card.label}
+        compact={compact}
+        badge={(card.isDefault || card.sandbox) && (
+          <>
+            {card.isDefault && <Star className="h-3.5 w-3.5 fill-sun text-sun" />}
+            {card.sandbox && <span className="rounded bg-white/20 px-1.5 py-0.5 text-[10px] font-bold">TEST</span>}
+          </>
+        )}
+      />
     </button>
   );
 }
@@ -78,6 +162,7 @@ async function paymeRpc<T>(o: CardOptions, method: string, params: Record<string
 
 export function AddCardModal({ open, onClose, onAdded }: { open: boolean; onClose: () => void; onAdded?: (c: SavedCard) => void }) {
   const { t } = useI18n();
+  const { user } = useAuth();
   const toast = useToast();
   const err = useErrorText();
   const qc = useQueryClient();
@@ -161,11 +246,9 @@ export function AddCardModal({ open, onClose, onAdded }: { open: boolean; onClos
         <p className="text-sm text-muted">{t('x.cards.disabled')}</p>
       ) : step === 0 ? (
         <div className="space-y-4">
-          <div className="rounded-2xl bg-gradient-to-br from-brand-600 via-brand-800 to-[#0B3B5C] p-4 text-white">
-            <p className="text-xs font-bold uppercase tracking-widest text-white/70">Uzcard · Humo</p>
-            <p className="mt-6 font-mono text-lg tracking-[0.12em]">{fmtPan(pan) || '0000 0000 0000 0000'}</p>
-            <p className="mt-2 text-xs text-white/70">{exp || 'MM/YY'}</p>
-          </div>
+          <motion.div key={brandOf(pan) ?? 'none'} initial={{ rotateY: -12, opacity: 0.6 }} animate={{ rotateY: 0, opacity: 1 }} transition={{ duration: 0.35 }} style={{ perspective: 800 }}>
+            <BankCard brand={brandOf(pan)} pan={digits(pan).slice(0, 16).padEnd(16, '•').replace(/(.{4})(?=.)/g, '$1 ')} expire={exp} holder={user?.fullName} label={label || null} />
+          </motion.div>
           <Field label={t('x.cards.number')}>
             <Input value={fmtPan(pan)} onChange={(e) => setPan(e.target.value)} inputMode="numeric" autoComplete="cc-number" placeholder="8600 0000 0000 0000" left={<CreditCard className="h-4 w-4" />} />
           </Field>

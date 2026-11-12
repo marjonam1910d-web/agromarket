@@ -11,6 +11,7 @@ import crypto from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { PrismaClient, Prisma, type OrderStatus, type Unit } from '@prisma/client';
 import { CATEGORY_PHOTOS, PRODUCT_PHOTOS } from '../src/common/demo-photos';
+import { upgradeDemo } from '../src/common/demo-upgrade';
 import { REGIONS } from '../src/common/regions';
 
 const prisma = new PrismaClient();
@@ -396,11 +397,12 @@ async function main() {
   await prisma.complaint.create({ data: { reporterId: buyer2.id, subject: 'Mahsulot vazni kam chiqdi', description: "Buyurtmada 5 kg kartoshka bor edi, tortib ko'rsam 4.6 kg chiqdi.", againstId: sellers[0].user.id } });
 
   await flushFiles();
+  await upgradeDemo(prisma);
   console.log('✅ Seed tayyor.');
   console.log('   DEVELOPMENT login ma\'lumotlari:');
   console.log(`   Admin  : admin@agromarket.uz / ${adminPass}`);
-  console.log('   Xaridor: +998901234567 / Buyer12345');
-  console.log('   Sotuvchi (tasdiqlangan): +998911234567 / Seller12345');
+  console.log('   Xaridor: +998901234567 yoki buyer@agromarket.uz / Buyer12345');
+  console.log('   Sotuvchi (tasdiqlangan): +998911234567 yoki fermer@agromarket.uz / Seller12345');
   console.log('   Sotuvchi (kutilmoqda)  : +998931234567 / Seller12345');
 }
 

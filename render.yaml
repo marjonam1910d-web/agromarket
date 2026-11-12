@@ -27,6 +27,9 @@ services:
         generateValue: true
       - key: OTP_SECRET
         generateValue: true
+      # Elektron shartnoma imzolari uchun kalit — bir marta yaratiladi, o'zgartirmang (eski imzolar tekshiruvdan o'tmay qoladi)
+      - key: CONTRACT_SIGNING_SECRET
+        generateValue: true
       - key: COOKIE_SECURE
         value: "true"
       - key: FRONTEND_DIR

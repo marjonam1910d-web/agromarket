@@ -3,6 +3,7 @@ import { ah, ok } from '../../common/http';
 import { REGIONS } from '../../common/regions';
 import { getSetting } from '../../common/audit';
 import { env } from '../../config/env';
+import { translateEnabled } from '../chat/translate';
 
 const r = Router();
 
@@ -27,6 +28,7 @@ r.get(
       paymentSandbox: env.sandboxAllowed && !(env.paymeEnabled && env.clickEnabled),
       otpDevEcho: env.otpDevEcho,
       demoMode: env.DEMO_MODE || !env.isProd,
+      translate: translateEnabled(),
       deliverySlots: await getSetting('delivery.slots'),
       maxDaysAhead: await getSetting('delivery.maxDaysAhead'),
       supportPhone: await getSetting('platform.supportPhone'),

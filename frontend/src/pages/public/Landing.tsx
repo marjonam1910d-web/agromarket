@@ -8,7 +8,7 @@ import { api, img, qs } from '@/services/api';
 import { useRegions } from '@/hooks';
 import { catName, cx } from '@/utils/format';
 import { Button, Skeleton, Stars } from '@/components/ui';
-import { CategoryIcon, FloatingLeaves, ProductCard, ProductGrid } from '@/components/common';
+import { CategoryIcon, ProductCard, ProductGrid } from '@/components/common';
 import type { Category, ProductCard as PC } from '@/types';
 
 function Reveal({ children, delay = 0, className }: { children: React.ReactNode; delay?: number; className?: string }) {
@@ -62,67 +62,56 @@ function ProductRow({ params }: { params: Record<string, unknown> }) {
   return <ProductGrid>{q.data.map((p, i) => <ProductCard key={p.id} p={p} index={i} />)}</ProductGrid>;
 }
 
-/** Hero illyustratsiyasi: qatlamli dala, quyosh, daraxtlar va savat — to'liq SVG (tashqi rasm kerak emas) */
-function HeroArt() {
-  const { lang } = useI18n();
-  const { scrollY } = useScroll();
-  const y1 = useTransform(scrollY, [0, 500], [0, 60]);
-  const y2 = useTransform(scrollY, [0, 500], [0, 30]);
-  const chips = [
-    { e: '🍅', l: { uz: 'Pomidor', ru: 'Помидоры', en: 'Tomatoes' }[lang], c: 'left-[4%] top-[18%]', d: 0 },
-    { e: '🍇', l: { uz: 'Uzum', ru: 'Виноград', en: 'Grapes' }[lang], c: 'right-[6%] top-[10%]', d: 1.2 },
-    { e: '🍯', l: { uz: 'Asal', ru: 'Мёд', en: 'Honey' }[lang], c: 'right-[2%] bottom-[30%]', d: 2.1 },
-    { e: '🥛', l: { uz: 'Sut', ru: 'Молоко', en: 'Milk' }[lang], c: 'left-[8%] bottom-[22%]', d: 0.6 },
-  ];
+/** Unsplash rasmi (bepul litsenziya). Yuklanmasa — neytral fon qoladi, multfilm emas */
+const photo = (id: string, w = 1200) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=72`;
+const HERO_MAIN = '1545830790-68595959c491'; // fermer savatlar bilan
+const HERO_SIDE = '1560493676-04071c5f467b'; // quyosh botishidagi ekinzor
+const MAP_PHOTO = '1515276427842-f85802d514a2'; // bug'doy dalasi
+
+function Photo({ id, w, alt, className, eager }: { id: string; w?: number; alt: string; className?: string; eager?: boolean }) {
+  const [ok, setOk] = useState(true);
   return (
-    <div className="relative mx-auto aspect-[5/4] w-full max-w-[560px]">
-      <motion.svg style={{ y: y1 }} viewBox="0 0 560 448" className="absolute inset-0 h-full w-full drop-shadow-2xl" aria-hidden>
-        <defs>
-          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#FFF6DD" /><stop offset="1" stopColor="#E8F3D8" /></linearGradient>
-          <linearGradient id="h1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#8BC34A" /><stop offset="1" stopColor="#4C9A6C" /></linearGradient>
-          <linearGradient id="h2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#4C9A6C" /><stop offset="1" stopColor="#1F6B45" /></linearGradient>
-          <clipPath id="frame"><rect x="0" y="0" width="560" height="448" rx="36" /></clipPath>
-        </defs>
-        <g clipPath="url(#frame)">
-          <rect width="560" height="448" fill="url(#sky)" />
-          <motion.circle cx="420" cy="110" r="54" fill="#F2C14E" style={{ transformOrigin: '420px 110px', transformBox: 'view-box' }} animate={{ scale: [0.96, 1.07, 0.96] }} transition={{ duration: 6, repeat: Infinity }} />
-          <circle cx="420" cy="110" r="90" fill="#F2C14E" opacity=".18" />
-          <path d="M0 250 C 120 200, 220 230, 300 210 S 480 170, 560 200 L560 448 L0 448Z" fill="url(#h1)" opacity=".75" />
-          <path d="M0 300 C 140 260, 260 300, 380 270 S 520 250, 560 262 L560 448 L0 448Z" fill="url(#h2)" />
-          {Array.from({ length: 12 }).map((_, i) => (
-            <path key={i} d={`M${280 + (i - 6) * 10} 300 Q ${280 + (i - 6) * 40} 380 ${280 + (i - 6) * 80} 448`} stroke="#123B2A" strokeOpacity=".22" strokeWidth="2" fill="none" />
-          ))}
-          {[[90, 222], [130, 232], [470, 196]].map(([x, y], i) => (
-            <g key={i}>
-              <rect x={x - 3} y={y} width="6" height="26" fill="#6B4F2A" />
-              <circle cx={x} cy={y - 6} r="20" fill="#1F6B45" />
-              <circle cx={x - 9} cy={y + 2} r="12" fill="#2E7D52" />
-            </g>
-          ))}
-          {/* traktor */}
-          <motion.g animate={{ x: [0, 40, 0] }} transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}>
-            <rect x="200" y="214" width="40" height="18" rx="4" fill="#DC2626" />
-            <rect x="226" y="202" width="16" height="14" rx="2" fill="#B91C1C" />
-            <circle cx="208" cy="236" r="9" fill="#18251C" /><circle cx="236" cy="238" r="6" fill="#18251C" />
-          </motion.g>
-        </g>
-      </motion.svg>
-      {/* savat */}
-      <motion.div style={{ y: y2 }} className="absolute bottom-[6%] left-[38%] w-[50%]">
-        <svg viewBox="0 0 300 190" className="w-full drop-shadow-[0_20px_30px_rgba(18,59,42,.35)]" aria-hidden>
-          <text x="58" y="88" fontSize="64">🥬</text><text x="112" y="78" fontSize="70">🍅</text><text x="176" y="88" fontSize="62">🫑</text>
-          <text x="86" y="102" fontSize="54">🥕</text><text x="150" y="104" fontSize="54">🍆</text>
-          <path d="M20 96 H280 L252 180 H48 Z" fill="#B7793C" />
-          {Array.from({ length: 5 }).map((_, i) => <path key={i} d={`M${30 + i * 4} ${110 + i * 14} H${270 - i * 4}`} stroke="#8A5524" strokeWidth="3" />)}
-          <path d="M20 96 H280" stroke="#8A5524" strokeWidth="8" strokeLinecap="round" />
-        </svg>
+    <div className={cx('relative overflow-hidden bg-gradient-to-br from-brand-700 to-brand-900', className)}>
+      {ok && (
+        <img
+          src={photo(id, w)}
+          srcSet={`${photo(id, Math.round((w ?? 1200) / 2))} ${Math.round((w ?? 1200) / 2)}w, ${photo(id, w)} ${w ?? 1200}w`}
+          sizes="(max-width: 1024px) 100vw, 50vw"
+          alt={alt}
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+          data-fallback="1"
+          onError={() => setOk(false)}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      )}
+    </div>
+  );
+}
+
+/** Hero: haqiqiy fotosuratlar kompozitsiyasi */
+function HeroPhotos({ farmers, products }: { farmers?: number; products?: number }) {
+  const { t } = useI18n();
+  const { scrollY } = useScroll();
+  const y1 = useTransform(scrollY, [0, 500], [0, 40]);
+  const y2 = useTransform(scrollY, [0, 500], [0, -24]);
+  return (
+    <div className="relative mx-auto w-full max-w-[580px] pb-10 pl-0 sm:pl-10">
+      <motion.div style={{ y: y1 }}>
+        <Photo id={HERO_MAIN} w={1100} eager alt={t('y.home.realFarms')} className="aspect-[4/5] rounded-[28px] shadow-[0_30px_60px_-25px_rgba(18,59,42,.55)] ring-1 ring-black/5 sm:aspect-[5/6]" />
       </motion.div>
-      {chips.map((c) => (
-        <motion.div key={c.l} className={cx('absolute flex items-center gap-2 rounded-2xl bg-white/90 px-3 py-2 text-sm font-bold text-ink shadow-card backdrop-blur', c.c)} animate={{ y: [0, -10, 0] }} transition={{ duration: 5, delay: c.d, repeat: Infinity, ease: 'easeInOut' }}>
-          <span className="text-xl">{c.e}</span>
-          {c.l}
-        </motion.div>
-      ))}
+      <motion.div style={{ y: y2 }} className="absolute -bottom-2 left-0 hidden w-[44%] sm:block">
+        <Photo id={HERO_SIDE} w={600} alt="" className="aspect-[4/5] rounded-3xl border-[6px] border-cream shadow-card" />
+      </motion.div>
+      <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8 }} className="absolute right-3 top-5 flex items-center gap-2.5 rounded-2xl bg-white/95 px-3.5 py-2.5 shadow-card backdrop-blur sm:-right-4">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-white"><BadgeCheck className="h-5 w-5" /></span>
+        <span className="leading-tight"><b className="block text-sm text-ink">{t('y.home.verified')}</b><span className="text-[11px] text-muted">{t('y.home.direct')}</span></span>
+      </motion.div>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1 }} className="absolute bottom-16 right-3 rounded-2xl bg-brand-900/90 px-4 py-3 text-white shadow-card backdrop-blur sm:-right-4">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-lime">{t('y.home.fresh')}</p>
+        <p className="mt-0.5 text-sm font-bold">{farmers ?? '—'}+ {t('landing.statFarmers').toLowerCase()} · {products ?? '—'}+ {t('landing.statProducts').toLowerCase()}</p>
+      </motion.div>
+      <span className="absolute bottom-3 right-4 text-[10px] text-ink/40">{t('y.home.heroCredit')}</span>
     </div>
   );
 }
@@ -135,7 +124,7 @@ export default function Landing() {
   const [region, setRegion] = useState('namangan');
   const stats = useQuery({ queryKey: ['public', 'stats'], queryFn: () => api.get<{ farmers: number; products: number; buyers: number; deliveredOrders: number; regions: number }>('/analytics/public/stats') });
   const cats = useQuery({ queryKey: ['public', 'categories'], queryFn: () => api.get<Category[]>('/categories'), staleTime: 5 * 60_000 });
-  const farmers = useQuery({ queryKey: ['public', 'farmers', 'top'], queryFn: () => api.get<{ id: string; farmName: string; slug: string; region: string; district: string; ratingAvg: string; ratingCount: number; productCount: number; logoUrl: string | null }[]>('/sellers?limit=4') });
+  const farmers = useQuery({ queryKey: ['public', 'farmers', 'top'], queryFn: () => api.get<{ id: string; farmName: string; slug: string; region: string; district: string; ratingAvg: string; ratingCount: number; productCount: number; logoUrl: string | null; coverUrl: string | null }[]>('/sellers?limit=4') });
   const reviews = useQuery({ queryKey: ['public', 'reviews', 'latest'], queryFn: () => api.get<{ id: string; rating: number; text: string; buyer: { name: string }; product: { name: string; slug: string }; seller: { farmName: string } }[]>('/reviews/latest') });
   const [faq, setFaq] = useState<number | null>(0);
 
@@ -143,8 +132,7 @@ export default function Landing() {
     <div className="overflow-x-clip">
       {/* ═══ HERO ═══ */}
       <section className="relative">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(139,195,74,.22),transparent_45%),radial-gradient(circle_at_10%_80%,rgba(242,193,78,.16),transparent_40%)]" />
-        <FloatingLeaves count={10} />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_15%,rgba(139,195,74,.16),transparent_45%),radial-gradient(circle_at_5%_85%,rgba(242,193,78,.12),transparent_40%)]" />
         <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 pb-10 pt-8 sm:px-6 md:pt-14 lg:grid-cols-[1.05fr_1fr] lg:pb-16">
           <div className="min-w-0">
             <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-brand shadow-sm ring-1 ring-brand-100">
@@ -191,31 +179,49 @@ export default function Landing() {
             </div>
           </div>
           <motion.div initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.9, delay: 0.2 }}>
-            <HeroArt />
+            <HeroPhotos farmers={stats.data?.farmers} products={stats.data?.products} />
           </motion.div>
         </div>
       </section>
 
       {/* ═══ KATEGORIYALAR ═══ */}
       <Section title={t('landing.categories')} sub={t('landing.categoriesSub')} link="/catalog" className="!pt-4">
-        <div className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-4 sm:px-0 lg:grid-cols-6 xl:grid-cols-11">
-          {(cats.data ?? Array.from({ length: 8 }).map(() => null)).map((c, i) =>
+        <div className="no-scrollbar -mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:px-0 lg:grid-cols-4 xl:grid-cols-6">
+          {(cats.data ?? Array.from({ length: 6 }).map(() => null)).map((c, i) =>
             c ? (
-              <Reveal key={c.id} delay={i * 0.03} className="shrink-0">
-                <Link to={`/catalog?category=${c.slug}`} className="group flex w-24 flex-col items-center gap-2 rounded-2xl bg-white p-3 text-center shadow-soft ring-1 ring-cream-200 transition hover:-translate-y-1 hover:shadow-card sm:w-auto">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-50 to-lime-50 text-brand transition group-hover:scale-110">
-                    <CategoryIcon name={c.icon} className="h-6 w-6" />
+              <Reveal key={c.id} delay={i * 0.03} className="w-36 shrink-0 snap-start sm:w-auto">
+                <Link to={`/catalog?category=${c.slug}`} className="group relative block aspect-[4/5] overflow-hidden rounded-2xl bg-gradient-to-br from-brand-600 to-brand-900 shadow-soft ring-1 ring-black/5 transition hover:-translate-y-1 hover:shadow-card">
+                  <CategoryIcon name={c.icon} className="absolute left-1/2 top-[38%] h-10 w-10 -translate-x-1/2 -translate-y-1/2 text-white/30" />
+                  {c.imageUrl && <img src={img(c.imageUrl)} alt={catName(c, lang)} loading="lazy" decoding="async" data-fallback="1" onError={(e) => (e.currentTarget.style.display = 'none')} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />}
+                  <span className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+                  <span className="absolute inset-x-0 bottom-0 p-3">
+                    <span className="line-clamp-2 text-sm font-extrabold leading-tight text-white">{catName(c, lang)}</span>
+                    <span className="mt-0.5 block text-[11px] font-semibold text-white/75">{t('farmers.products', { n: c.productCount ?? 0 })}</span>
                   </span>
-                  <span className="line-clamp-2 text-xs font-bold text-ink">{catName(c, lang)}</span>
-                  <span className="text-[10px] text-muted">{c.productCount}</span>
                 </Link>
               </Reveal>
             ) : (
-              <Skeleton key={i} className="h-28 w-24 shrink-0 sm:w-auto" />
+              <Skeleton key={i} className="aspect-[4/5] w-36 shrink-0 sm:w-auto" />
             ),
           )}
         </div>
       </Section>
+
+      {/* ═══ XARITA ═══ */}
+      <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
+        <Reveal>
+          <Link to="/map" className="group relative flex min-h-[220px] items-end overflow-hidden rounded-3xl bg-brand-900 sm:min-h-[260px]">
+            <Photo id={MAP_PHOTO} w={1600} alt={t('y.home.realFarms')} className="!absolute inset-0 transition duration-700 group-hover:scale-[1.03]" />
+            <span className="absolute inset-0 bg-gradient-to-r from-brand-900/95 via-brand-900/70 to-transparent" />
+            <div className="relative max-w-xl p-6 sm:p-10">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-sun px-3 py-1 text-xs font-extrabold text-brand-900"><MapPin className="h-3.5 w-3.5" />{t('y.nav.map')}</span>
+              <h2 className="mt-3 text-2xl font-extrabold text-white sm:text-3xl">{t('y.home.realFarms')}</h2>
+              <p className="mt-2 text-sm text-white/80 sm:text-base">{t('y.home.mapText')}</p>
+              <span className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-brand-800 transition group-hover:gap-3">{t('y.home.seeMap')} <ArrowRight className="h-4 w-4" /></span>
+            </div>
+          </Link>
+        </Reveal>
+      </section>
 
       {/* ═══ MAVSUMIY ═══ */}
       <div className="bg-gradient-to-b from-transparent via-lime-50/60 to-transparent">
@@ -235,12 +241,13 @@ export default function Landing() {
           {(farmers.data ?? []).map((f, i) => (
             <Reveal key={f.id} delay={i * 0.06}>
               <Link to={`/farmers/${f.slug}`} className="group block overflow-hidden rounded-2xl bg-white shadow-soft ring-1 ring-cream-200 transition hover:-translate-y-1 hover:shadow-card">
-                <div className="relative h-24 bg-gradient-to-br from-brand to-brand-800">
-                  <svg viewBox="0 0 200 60" className="absolute bottom-0 w-full opacity-30" aria-hidden><path d="M0 40 Q 50 10 100 35 T 200 30 V60 H0Z" fill="#8BC34A" /></svg>
+                <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-brand-600 to-brand-900">
+                  {f.coverUrl && <img src={img(f.coverUrl)} alt={f.farmName} loading="lazy" decoding="async" data-fallback="1" onError={(e) => (e.currentTarget.style.display = 'none')} className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />}
+                  <span className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                 </div>
                 <div className="-mt-8 px-4 pb-4">
                   <span className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-lime-50 text-2xl shadow">
-                    {f.logoUrl ? <img src={img(f.logoUrl)} alt="" className="h-full w-full object-cover" /> : '👨‍🌾'}
+                    {f.logoUrl ? <img src={img(f.logoUrl)} alt="" loading="lazy" className="h-full w-full object-cover" /> : <span className="text-lg font-extrabold text-brand">{f.farmName.charAt(0)}</span>}
                   </span>
                   <p className="mt-2 flex items-center gap-1 font-bold text-ink group-hover:text-brand">{f.farmName}<BadgeCheck className="h-4 w-4 shrink-0 text-brand" /></p>
                   <p className="flex items-center gap-1 text-xs text-muted"><MapPin className="h-3 w-3" />{regions.find((r) => r.code === f.region)?.[lang]}, {f.district}</p>
@@ -271,7 +278,6 @@ export default function Landing() {
       <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
         <Reveal>
           <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-700 via-brand-800 to-brand-900 p-6 text-white sm:p-10">
-            <FloatingLeaves count={6} />
             <div className="relative flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <span className="rounded-full bg-sun px-3 py-1 text-xs font-extrabold text-brand-900">−%</span>

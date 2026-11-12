@@ -2,6 +2,7 @@ import type { DeliveryStatus, OrderStatus, Role } from '@prisma/client';
 import { type Tx } from '../../lib/prisma';
 import { AppError, Errors } from '../../common/errors';
 import { syncStockStatus } from '../products/products.service';
+import { settleSellerWallet } from '../wallet/wallet.service';
 
 /**
  * Buyurtma holatlari mashinasi (SellerOrder darajasida). Barcha o'tishlar faqat backendda tekshiriladi.
@@ -110,6 +111,7 @@ export async function transitionSellerOrder(tx: Tx, sellerOrderId: string, to: O
     for (const it of so.items) {
       await tx.product.update({ where: { id: it.productId }, data: { soldCount: { increment: it.quantity } } });
     }
+    await settleSellerWallet(tx, so);
   }
 
   // Yetkazish yozuvi va tarixi

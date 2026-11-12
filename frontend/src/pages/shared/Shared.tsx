@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Bell, CheckCheck, ImagePlus, Loader2, Send } from 'lucide-react';
+import { ArrowLeft, Bell, CheckCheck, Headset, ImagePlus, Languages, Loader2, Send } from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { api, img } from '@/services/api';
 import { useAuth } from '@/store/auth';
 import { useToast } from '@/store/toast';
-import { useErrorText } from '@/hooks';
+import { useConfig, useErrorText } from '@/hooks';
 import { cx, dateTime, relative } from '@/utils/format';
 import { Button, Card, Empty, Input, Pagination, Skeleton } from '@/components/ui';
 import { PageHeader } from '@/components/common';
@@ -50,8 +50,28 @@ export function NotificationsPage() {
   );
 }
 
-type Conv = { id: string; lastMessage: { body: string; createdAt: string; senderId: string } | null; unread: number; role: string; counterpart: { id: string; name: string; avatarUrl: string | null }; lastMessageAt: string };
+type Conv = { id: string; lastMessage: { body: string; createdAt: string; senderId: string } | null; unread: number; role: string; counterpart: { id: string; name: string; avatarUrl: string | null }; lastMessageAt: string; kind?: 'TRADE' | 'SUPPORT' };
 type Msg = { id: string; senderId: string; body: string; attachmentUrl: string | null; readAt: string | null; createdAt: string };
+
+/** Suhbatdagi xabarni joriy tilga tarjima qilish (server tarjima xizmati sozlangan bo'lsa) */
+function TranslatableBody({ body, mine }: { body: string; mine: boolean }) {
+  const { t, lang } = useI18n();
+  const cfg = useConfig();
+  const [out, setOut] = useState<string | null>(null);
+  const [showOrig, setShowOrig] = useState(false);
+  const m = useMutation({ mutationFn: () => api.post<{ text: string }>('/conversations/translate', { text: body, to: lang }), onSuccess: (r) => setOut(r.text) });
+  return (
+    <>
+      <p className="whitespace-pre-wrap break-words">{out && !showOrig ? out : body}</p>
+      {cfg.data?.translate && !mine && (
+        <button type="button" onClick={() => (out ? setShowOrig(!showOrig) : m.mutate())} className="mt-0.5 flex items-center gap-1 text-[11px] font-bold text-brand">
+          {m.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Languages className="h-3 w-3" />}
+          {out && !showOrig ? t('y.chat.original') : t('y.chat.translate')}
+        </button>
+      )}
+    </>
+  );
+}
 
 export function MessagesPage() {
   const { id } = useParams();
@@ -97,6 +117,7 @@ export function MessagesPage() {
     }
   };
   const current = list.data?.find((c) => c.id === id);
+  const cname = (c?: Conv) => (c?.kind === 'SUPPORT' && user?.role !== 'ADMIN' ? t('y.support.name') : c?.counterpart.name ?? '');
 
   return (
     <div>
@@ -105,9 +126,9 @@ export function MessagesPage() {
         <aside className={cx('overflow-y-auto border-r border-cream-200', id && 'hidden md:block')}>
           {list.isLoading ? <div className="space-y-2 p-3"><Skeleton className="h-14" /><Skeleton className="h-14" /></div> : !list.data?.length ? <p className="p-6 text-center text-sm text-muted">{t('chat.empty')}</p> : list.data.map((c) => (
             <Link key={c.id} to={`/messages/${c.id}`} className={cx('flex items-center gap-3 border-b border-cream-100 px-4 py-3 hover:bg-cream-50', c.id === id && 'bg-brand-50')}>
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand text-sm font-bold text-white">{c.counterpart.avatarUrl ? <img src={img(c.counterpart.avatarUrl)} alt="" className="h-full w-full object-cover" /> : c.counterpart.name.charAt(0)}</span>
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand text-sm font-bold text-white">{c.kind === 'SUPPORT' && user?.role !== 'ADMIN' ? <Headset className="h-5 w-5" /> : c.counterpart.avatarUrl ? <img src={img(c.counterpart.avatarUrl)} alt="" className="h-full w-full object-cover" /> : c.counterpart.name.charAt(0)}</span>
               <span className="min-w-0 flex-1">
-                <span className="flex justify-between gap-2"><span className="truncate font-bold">{c.counterpart.name}</span><span className="shrink-0 text-[11px] text-muted">{relative(c.lastMessageAt, lang)}</span></span>
+                <span className="flex justify-between gap-2"><span className="truncate font-bold">{cname(c)}{c.kind === 'SUPPORT' && user?.role === 'ADMIN' && <Headset className="ml-1 inline h-3.5 w-3.5 text-brand" />}</span><span className="shrink-0 text-[11px] text-muted">{relative(c.lastMessageAt, lang)}</span></span>
                 <span className="flex justify-between gap-2"><span className="truncate text-sm text-muted">{c.lastMessage?.body || '📎'}</span>{c.unread > 0 && <span className="rounded-full bg-brand px-1.5 text-[11px] font-bold text-white">{c.unread}</span>}</span>
               </span>
             </Link>
@@ -119,7 +140,7 @@ export function MessagesPage() {
               <div className="flex items-center gap-3 border-b border-cream-200 px-4 py-3">
                 <Link to="/messages" className="md:hidden" aria-label={t('common.back')}><ArrowLeft className="h-5 w-5" /></Link>
                 <div className="min-w-0">
-                  <p className="truncate font-bold">{current?.counterpart.name}</p>
+                  <p className="truncate font-bold">{cname(current)}</p>
                   {thread.data?.conversation.product && <Link to={`/product/${thread.data.conversation.product.slug}`} className="block truncate text-xs text-brand">{t('chat.product')}: {thread.data.conversation.product.name}</Link>}
                   {thread.data?.conversation.order && <p className="text-xs text-muted">{t('chat.order')}: #{thread.data.conversation.order.orderNumber}</p>}
                 </div>
@@ -131,7 +152,7 @@ export function MessagesPage() {
                     <div key={m.id} className={cx('flex', mine ? 'justify-end' : 'justify-start')}>
                       <div className={cx('max-w-[78%] rounded-2xl px-3.5 py-2 text-sm shadow-sm', mine ? 'rounded-br-md bg-brand text-white' : 'rounded-bl-md bg-white text-ink')}>
                         {m.attachmentUrl && <a href={img(m.attachmentUrl)} target="_blank" rel="noreferrer"><img src={img(m.attachmentUrl)} alt="" className="mb-1 max-h-56 rounded-xl" /></a>}
-                        {m.body && <p className="whitespace-pre-wrap break-words">{m.body}</p>}
+                        {m.body && <TranslatableBody body={m.body} mine={mine} />}
                         <p className={cx('mt-0.5 text-right text-[10px]', mine ? 'text-white/70' : 'text-muted')}>{dateTime(m.createdAt, lang)}{mine && (m.readAt ? ' ✓✓' : ' ✓')}</p>
                       </div>
                     </div>

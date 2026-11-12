@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Truck } from 'lucide-react';
+import { MessageCircle, Truck } from 'lucide-react';
+import { SellerTrackingControl } from '@/components/LiveTracking';
+import { ContractFromOrderButton } from '@/pages/contracts/Contracts';
+import { WriteToModal } from '@/pages/wallet/Wallet';
 import { useI18n, type TKey } from '@/i18n';
 import { api, img, qs } from '@/services/api';
 import { useToast } from '@/store/toast';
@@ -32,7 +35,7 @@ export function SellerOrders() {
 type SODetail = Omit<SellerOrderRow, 'items' | 'order' | 'delivery'> & {
   subtotal: string; deliveryFee: string; discount: string; commissionAmount: string; sellerPayout: string; rejectionReason: string | null; allowed: OrderStatus[];
   items: { id: string; productName: string; quantity: string; unit: string; unitPrice: string; lineTotal: string; imageUrl: string | null }[];
-  order: SellerOrderRow['order'] & { contactPhone: string; addressLine: string; deliveryNotes: string | null; createdAt: string };
+  order: SellerOrderRow['order'] & { contactPhone: string; addressLine: string; deliveryNotes: string | null; createdAt: string; buyerId: string };
   delivery: { status: string; courierName: string | null; courierPhone: string | null; trackingNote: string | null; history: { status: string; note: string | null; createdAt: string }[] } | null;
   statusHistory: { toStatus: string; createdAt: string; note: string | null }[];
 };
@@ -49,6 +52,7 @@ export function SellerOrderDetail() {
   const [reason, setReason] = useState('');
   const [courier, setCourier] = useState({ name: '', phone: '' });
   const [note, setNote] = useState('');
+  const [write, setWrite] = useState(false);
   const move = useMutation({
     mutationFn: (to: OrderStatus) => api.post(`/orders/seller/${id}/status`, { status: to, reason: reason || null, courierName: courier.name || null, courierPhone: courier.phone || null }),
     onSuccess: () => { setModal(null); setReason(''); void qc.invalidateQueries({ queryKey: ['seller-orders'] }); toast(t('common.saved')); },
@@ -88,6 +92,7 @@ export function SellerOrderDetail() {
               <div className="flex justify-between text-base font-extrabold"><dt>{t('seller.net')}</dt><dd className="text-brand-800">{money(o.sellerPayout, lang)}</dd></div>
             </dl>
           </Card>
+          <SellerTrackingControl sellerOrderId={o.id} status={o.status} />
           {o.delivery && ['ready_for_delivery', 'shipped'].includes(o.status) && (
             <Card className="p-4">
               <p className="mb-2 flex items-center gap-2 font-bold"><Truck className="h-4 w-4 text-brand" />{t('seller.trackingNote')}</p>
@@ -105,10 +110,15 @@ export function SellerOrderDetail() {
             {o.order.deliveryNotes && <p className="mt-1 text-muted">“{o.order.deliveryNotes}”</p>}
             <p className="mt-2 text-muted">{t('checkout.payment')}: <b>{t(`checkout.${o.order.paymentMethod}` as TKey)}</b></p>
             {o.delivery?.courierName && <p className="mt-2">{t('account.courier')}: <b>{o.delivery.courierName}</b> {phone(o.delivery.courierPhone)}</p>}
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" onClick={() => setWrite(true)}><MessageCircle className="h-4 w-4" />{t('y.support.writeBuyer')}</Button>
+              <ContractFromOrderButton sellerOrderId={o.id} />
+            </div>
           </Card>
           <Card className="p-4"><OrderTimeline status={o.status} history={o.statusHistory} /></Card>
         </div>
       </div>
+      <WriteToModal open={write} onClose={() => setWrite(false)} name={o.order.recipientName} endpoint={`/conversations/with-buyer/${o.order.buyerId}`} />
       <Modal open={modal === 'shipped'} onClose={() => setModal(null)} title={t('seller.ship')} footer={<Button loading={move.isPending} disabled={!courier.name} onClick={() => move.mutate('shipped')}>{t('seller.ship')}</Button>}>
         <div className="space-y-3">
           <Field label={t('seller.courierName')} required><Input value={courier.name} onChange={(e) => setCourier({ ...courier, name: e.target.value })} /></Field>

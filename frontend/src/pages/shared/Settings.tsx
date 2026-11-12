@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BookOpen, ChevronRight, CreditCard, Fingerprint, Globe, KeyRound, LogOut, MonitorSmartphone, ShieldCheck, Smartphone, Trash2, User as UserIcon } from 'lucide-react';
+import { BookOpen, ChevronRight, CreditCard, Fingerprint, Globe, KeyRound, LogOut, MonitorSmartphone, ShieldCheck, Smartphone, Stamp, Trash2, User as UserIcon } from 'lucide-react';
 import { LANGS, useI18n, type Lang, type TKey } from '@/i18n';
 import { useAuth } from '@/store/auth';
 import { useToast } from '@/store/toast';
@@ -15,12 +15,14 @@ import { Badge, Button, Card, Checkbox, Field, Input, Modal, PasswordInput } fro
 import { PageHeader } from '@/components/common';
 import { CardsManager } from '@/components/Cards';
 import { InstallAppButton } from '@/components/InstallApp';
+import { Seal, type SealData } from '@/components/Seal';
 
-type SectionId = 'profile' | 'security' | 'cards' | 'language' | 'app' | 'help';
+type SectionId = 'profile' | 'security' | 'cards' | 'seal' | 'language' | 'app' | 'help';
 const SECTIONS: { id: SectionId; icon: typeof UserIcon; label: TKey; roles?: string[] }[] = [
   { id: 'profile', icon: UserIcon, label: 'x.settings.profile' },
   { id: 'security', icon: ShieldCheck, label: 'x.settings.security' },
   { id: 'cards', icon: CreditCard, label: 'x.settings.cards', roles: ['BUYER', 'SELLER'] },
+  { id: 'seal', icon: Stamp, label: 'y.seal.title', roles: ['BUYER', 'SELLER'] },
   { id: 'language', icon: Globe, label: 'x.settings.language' },
   { id: 'app', icon: Smartphone, label: 'x.settings.app' },
   { id: 'help', icon: BookOpen, label: 'x.settings.help' },
@@ -73,6 +75,7 @@ export function SettingsPage() {
           {active === 'cards' && (
             <Section title={t('x.cards.title')} text={t('x.cards.text')}><CardsManager /></Section>
           )}
+          {active === 'seal' && <SealSection />}
           {active === 'language' && <LanguageSection />}
           {active === 'app' && <AppSection />}
           {active === 'help' && (
@@ -83,6 +86,52 @@ export function SettingsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+const SEAL_COLORS = ['#1F4D36', '#1E3A8A', '#7F1D1D', '#4C1D95', '#111827'];
+function SealSection() {
+  const { t } = useI18n();
+  const { user } = useAuth();
+  const toast = useToast();
+  const err = useErrorText();
+  const qc = useQueryClient();
+  const q = useQuery({ queryKey: ['seal'], queryFn: () => api.get<SealData | null>('/contracts/seal') });
+  const [title, setTitle] = useState(user?.fullName ?? '');
+  const [color, setColor] = useState(SEAL_COLORS[0]);
+  const [pressed, setPressed] = useState(false);
+  const m = useMutation({
+    mutationFn: () => api.post<SealData>('/contracts/seal', { title: title.trim(), color }),
+    onSuccess: (s) => { setPressed(true); qc.setQueryData(['seal'], s); toast(t('y.seal.created')); },
+    onError: (e) => toast(err(e), 'error'),
+  });
+  const seal = q.data;
+  return (
+    <Section title={t('y.seal.title')} text={t('y.seal.text')}>
+      {q.isLoading ? null : seal ? (
+        <div className="flex flex-wrap items-center gap-5">
+          <div className="rounded-2xl bg-cream-50 p-3"><Seal seal={seal} size={150} pressed={pressed} /></div>
+          <div className="text-sm">
+            <p className="text-muted">{t('y.seal.code')}</p>
+            <p className="font-mono text-lg font-extrabold text-ink">{seal.code}</p>
+            <p className="mt-2 font-bold">{seal.title}</p>
+          </div>
+        </div>
+      ) : (
+        <div className="grid items-center gap-5 sm:grid-cols-[1fr_170px]">
+          <div className="space-y-3">
+            <p className="rounded-xl bg-sun-100 px-3 py-2 text-xs font-semibold text-amber-800">{t('y.seal.none')}</p>
+            <Field label={t('y.seal.titleLabel')}><Input value={title} maxLength={60} onChange={(e) => setTitle(e.target.value)} /></Field>
+            <div>
+              <p className="mb-1.5 text-sm font-semibold text-ink">{t('y.seal.color')}</p>
+              <div className="flex gap-2">{SEAL_COLORS.map((c) => <button key={c} type="button" aria-label={c} onClick={() => setColor(c)} className={cx('h-8 w-8 rounded-full ring-2 ring-offset-2 transition', color === c ? 'ring-ink' : 'ring-transparent')} style={{ background: c }} />)}</div>
+            </div>
+            <Button loading={m.isPending} disabled={title.trim().length < 2} onClick={() => m.mutate()}><Stamp className="h-4 w-4" />{t('y.seal.create')}</Button>
+          </div>
+          <div className="justify-self-center opacity-70"><Seal seal={{ code: 'AM-•••••-•••••', title: title || '—', subtitle: user?.fullName, color }} size={150} /></div>
+        </div>
+      )}
+    </Section>
   );
 }
 

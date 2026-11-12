@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BadgeCheck, CreditCard, FileText, Heart, MapPin, MessageCircle, Package, Pencil, Plus, Printer, Receipt as ReceiptIcon, ShoppingBag, Star, Trash2, Truck } from 'lucide-react';
 import { useI18n, type TKey } from '@/i18n';
+import { BuyerTracking } from '@/components/LiveTracking';
+import { ContractFromOrderButton } from '@/pages/contracts/Contracts';
 import { api, img, qs } from '@/services/api';
 import { useAuth } from '@/store/auth';
 import { useToast } from '@/store/toast';
@@ -173,11 +175,12 @@ export function OrderDetail() {
                   <OrderTimeline status={so.status} history={so.statusHistory} />
                 </div>
               </div>
+              {o.viewer === 'buyer' && ['ready_for_delivery', 'shipped', 'in_transit'].includes(so.status) && <div className="px-4 pb-4 print:hidden"><BuyerTracking sellerOrderId={so.id} /></div>}
+              {o.viewer === 'buyer' && <div className="px-4 pb-4 print:hidden"><ContractFromOrderButton sellerOrderId={so.id} /></div>}
               {so.delivery && (so.delivery.courierName || so.delivery.trackingNote) && (
                 <div className="mx-4 mb-4 rounded-xl bg-brand-50 px-4 py-3 text-sm">
                   <p className="flex items-center gap-2 font-bold text-brand-800"><Truck className="h-4 w-4" />{t('account.courier')}: {so.delivery.courierName} {so.delivery.courierPhone && <a href={`tel:${so.delivery.courierPhone}`} className="underline">{phone(so.delivery.courierPhone)}</a>}</p>
                   {so.delivery.history.filter((h) => h.note && h.note !== 'created').slice(-2).map((h, i) => <p key={i} className="text-xs text-brand-700">{dateTime(h.createdAt, lang)} — {h.note}</p>)}
-                  <p className="mt-1 text-[11px] text-muted">{t('account.noGps')}</p>
                 </div>
               )}
               {so.rejectionReason && <p className="mx-4 mb-4 rounded-xl bg-red-50 px-3 py-2 text-sm text-danger">{t('common.reason')}: {so.rejectionReason}</p>}

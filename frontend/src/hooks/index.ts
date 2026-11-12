@@ -31,6 +31,7 @@ export interface PublicConfig {
   paymentSandbox: boolean;
   otpDevEcho: boolean;
   demoMode?: boolean;
+  translate?: boolean;
   deliverySlots: string[];
   maxDaysAhead: number;
   supportPhone: string;
@@ -126,6 +127,12 @@ export function useRealtime() {
           if (msg.type === 'message' || msg.type === 'unread') {
             void qc.invalidateQueries({ queryKey: ['conversations'] });
             void qc.invalidateQueries({ queryKey: ['notifications', 'count'] });
+          }
+          if (msg.type === 'courier_location') {
+            window.dispatchEvent(new CustomEvent('am:courier', { detail: msg.payload }));
+          }
+          if (msg.type === 'contract_update') {
+            void qc.invalidateQueries({ queryKey: ['contracts'] });
           }
           if (msg.type === 'order_update') {
             void qc.invalidateQueries({ queryKey: ['orders'] });

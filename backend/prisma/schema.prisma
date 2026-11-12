@@ -149,6 +149,11 @@ model User {
   sellerProfile  SellerProfile?
   sessions       Session[]
   appDevices     AppDevice[]
+  buyerContracts  Contract[] @relation("BuyerContracts")
+  sellerContracts Contract[] @relation("SellerContracts")
+  contractSignatures ContractSignature[]
+  seal           UserSeal?
+  walletTransactions WalletTransaction[]
   paymentCards   PaymentCard[]
   addresses      Address[]
   cart           Cart?
@@ -238,6 +243,7 @@ model SellerProfile {
 
   @@index([verificationStatus])
   @@index([region, district])
+  salesPoints        SalesPoint[]
 }
 
 model SellerVerification {
@@ -667,6 +673,15 @@ model Delivery {
   slot          String?
   shippedAt     DateTime?
   deliveredAt   DateTime?
+  // Jonli kuzatuv (kuryer telefonidan GPS)
+  trackingActive   Boolean   @default(false)
+  courierLat       Float?
+  courierLng       Float?
+  courierAccuracy  Float?
+  courierHeading   Float?
+  courierUpdatedAt DateTime?
+  originLat        Float?
+  originLng        Float?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
@@ -753,6 +768,7 @@ model Conversation {
   sellerUserId  String
   productId     String?
   orderId       String?
+  kind          ConversationKind @default(TRADE)
   lastMessageAt DateTime @default(now())
   createdAt     DateTime @default(now())
 
@@ -877,4 +893,144 @@ model PaymentCard {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+enum ConversationKind {
+  TRADE
+  SUPPORT
+}
+
+enum SalesPointType {
+  FARM
+  SALES_CENTER
+  WAREHOUSE
+  PICKUP
+}
+
+/// Fermerning xo'jaligi / sotuv markazi / ombori — xaritada ko'rinadi
+model SalesPoint {
+  id        String         @id @default(cuid())
+  sellerId  String
+  type      SalesPointType @default(SALES_CENTER)
+  name      String
+  region    String
+  district  String?
+  address   String
+  lat       Float
+  lng       Float
+  phone     String?
+  hours     String?
+  photoUrl  String?
+  isActive  Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  seller SellerProfile @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@index([sellerId])
+  @@index([lat, lng])
+}
+
+enum ContractStatus {
+  draft
+  pending
+  signed
+  rejected
+  cancelled
+}
+
+/// Elektron oldi-sotdi shartnomasi. Imzolangach matni o'zgarmaydi (contentHash), QR orqali tekshiriladi.
+model Contract {
+  id             String         @id @default(cuid())
+  number         String         @unique
+  publicId       String         @unique
+  sellerOrderId  String?        @unique
+  buyerId        String
+  sellerUserId   String
+  createdById    String
+  title          String
+  terms          Json
+  totalAmount    Decimal        @db.Decimal(14, 2)
+  status         ContractStatus @default(draft)
+  contentHash    String?
+  sentAt         DateTime?
+  signedAt       DateTime?
+  rejectedById   String?
+  rejectedReason String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  buyer      User                @relation("BuyerContracts", fields: [buyerId], references: [id], onDelete: Cascade)
+  seller     User                @relation("SellerContracts", fields: [sellerUserId], references: [id], onDelete: Cascade)
+  signatures ContractSignature[]
+
+  @@index([buyerId, createdAt])
+  @@index([sellerUserId, createdAt])
+}
+
+/// Imzo: foydalanuvchi parol bilan tasdiqlaydi; server HMAC imzosi + matn xeshi + vaqt + IP saqlanadi (rad etib bo'lmaydi)
+model ContractSignature {
+  id          String   @id @default(cuid())
+  contractId  String
+  userId      String
+  role        String
+  sealCode    String
+  contentHash String
+  signature   String
+  ip          String?
+  userAgent   String?
+  signedAt    DateTime @default(now())
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([contractId, userId])
+}
+
+/// Har bir foydalanuvchining shaxsiy elektron muhri (bir marta yaratiladi, o'zgarmaydi)
+model UserSeal {
+  userId    String   @id
+  code      String   @unique
+  title     String
+  subtitle  String?
+  color     String   @default("#1F4D36")
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum WalletTxKind {
+  order_payout
+  commission
+  withdrawal
+  withdrawal_reversal
+  adjustment
+}
+
+enum WalletTxStatus {
+  pending
+  completed
+  failed
+}
+
+/// Hamyon (ledger): har bir pul harakati alohida yozuv. Balans = yozuvlar yig'indisi.
+model WalletTransaction {
+  id          String         @id @default(cuid())
+  userId      String
+  kind        WalletTxKind
+  status      WalletTxStatus @default(completed)
+  amount      Decimal        @db.Decimal(14, 2)
+  refType     String?
+  refId       String?
+  note        String?
+  cardMasked  String?
+  processedBy String?
+  createdAt   DateTime       @default(now())
+  completedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([kind, refId])
+  @@index([userId, createdAt])
+  @@index([status, kind])
 }

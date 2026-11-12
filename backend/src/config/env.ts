@@ -21,6 +21,12 @@ const schema = z.object({
 
   JWT_ACCESS_SECRET: z.string().min(32),
   JWT_REFRESH_SECRET: z.string().min(32),
+  // Shartnoma imzolari uchun HMAC kaliti (o'zgartirilmasin — eski imzolar tekshirilmay qoladi). Bo'sh bo'lsa JWT_REFRESH_SECRET'dan olinadi
+  CONTRACT_SIGNING_SECRET: z.string().optional().default(''),
+  // Chat tarjimasi (ixtiyoriy): google | libre
+  TRANSLATE_PROVIDER: z.enum(['none', 'google', 'libre']).default('none'),
+  TRANSLATE_API_KEY: z.string().optional().default(''),
+  TRANSLATE_URL: z.string().optional().default(''),
   OTP_SECRET: z.string().min(32),
   COOKIE_SECURE: bool(false),
   COOKIE_DOMAIN: z.string().optional().default(''),
