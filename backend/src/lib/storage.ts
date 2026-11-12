@@ -3,6 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { env } from '../config/env';
 import { prisma } from './prisma';
+import { isDemoPhoto } from '../common/demo-photos';
 
 /**
  * Fayl saqlash abstraktsiyasi.
@@ -140,6 +141,6 @@ export const storage = {
   /** URL bizning saqlash joyimizga tegishlimi (tashqi URL'larni bazaga yozishni oldini olish) */
   isOwnPublicUrl(url: string) {
     const bases = [`${env.API_PUBLIC_URL}/uploads/public/`, env.S3_PUBLIC_URL ? `${env.S3_PUBLIC_URL}/public/` : null].filter(Boolean) as string[];
-    return bases.some((b) => url.startsWith(b)) || url.startsWith('/uploads/public/');
+    return bases.some((b) => url.startsWith(b)) || url.startsWith('/uploads/public/') || isDemoPhoto(url);
   },
 };

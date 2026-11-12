@@ -26,6 +26,7 @@ r.get(
       },
       paymentSandbox: env.sandboxAllowed && !(env.paymeEnabled && env.clickEnabled),
       otpDevEcho: env.otpDevEcho,
+      demoMode: env.DEMO_MODE || !env.isProd,
       deliverySlots: await getSetting('delivery.slots'),
       maxDaysAhead: await getSetting('delivery.maxDaysAhead'),
       supportPhone: await getSetting('platform.supportPhone'),

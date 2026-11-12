@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft, ArrowRight, Check, Mail, Phone, ShoppingCart, Sprout } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Mail, Phone, PlayCircle, ShoppingCart, Sprout } from 'lucide-react';
 import { useI18n, type TFn } from '@/i18n';
 import { api } from '@/services/api';
 import { useAuth } from '@/store/auth';
@@ -13,6 +13,7 @@ import { cx, normalizePhone } from '@/utils/format';
 import { Button, Checkbox, Field, Input, PasswordInput } from '@/components/ui';
 import { LanguageSwitcher, Logo, RegionDistrictSelect } from '@/components/common';
 import { dashboardPath } from '@/layouts/PublicLayout';
+import { InstallAppButton } from '@/components/InstallApp';
 import type { User } from '@/types';
 
 type Mode = 'login' | 'signup';
@@ -34,55 +35,32 @@ function Seeds({ count = 18 }: { count?: number }) {
   );
 }
 
-/** Bug'doy boshog'i — SVG, pastdan o'sib chiqadi */
-function WheatStalk({ x, h, delay, flip }: { x: number; h: number; delay: number; flip?: boolean }) {
-  const grains = Array.from({ length: 7 });
-  return (
-    <motion.g
-      style={{ originX: `${x}px`, originY: '300px', transformBox: 'view-box' }}
-      initial={{ scaleY: 0, opacity: 0 }}
-      animate={{ scaleY: 1, opacity: 1, rotate: [0, flip ? -2 : 2, 0] }}
-      transition={{ scaleY: { delay, duration: 1.2, ease: [0.22, 1, 0.36, 1] }, opacity: { delay, duration: 0.4 }, rotate: { delay: delay + 1.2, duration: 5, repeat: Infinity, ease: 'easeInOut' } }}
-    >
-      <path d={`M${x} 300 Q ${x + (flip ? -8 : 8)} ${300 - h / 2} ${x} ${300 - h}`} stroke="#C9A24A" strokeWidth="2.2" fill="none" />
-      {grains.map((_, i) => {
-        const y = 300 - h + 6 + i * 9;
-        return (
-          <g key={i}>
-            <ellipse cx={x - 5} cy={y} rx="3.4" ry="7" transform={`rotate(-28 ${x - 5} ${y})`} fill="#E9C46A" />
-            <ellipse cx={x + 5} cy={y + 4} rx="3.4" ry="7" transform={`rotate(28 ${x + 5} ${y + 4})`} fill="#F2C14E" />
-          </g>
-        );
-      })}
-      <path d={`M${x} ${300 - h * 0.45} q ${flip ? 18 : -18} -10 ${flip ? 26 : -26} -30`} stroke="#8BC34A" strokeWidth="2" fill="none" opacity=".8" />
-    </motion.g>
-  );
-}
+/** Real fotosuratlar (Unsplash litsenziyasi — tijoriy foydalanish bepul) */
+const PHOTO = (id: string, w = 1400) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=70`;
+export const AUTH_PHOTOS = {
+  login: PHOTO('1560493676-04071c5f467b'), // quyosh botayotgan dala egatlari
+  signup: PHOTO('1488459716781-31db52582fe9'), // bozordagi yangi meva-sabzavotlar
+  buyer: PHOTO('1550989460-0adf9ea622e2', 240), // sabzavot rastasi
+  seller: PHOTO('1625246333195-78d9c38ad449', 240), // tuproqdagi ko'chat
+};
 
-function FieldScene({ mode }: { mode: Mode }) {
+function PhotoScene({ mode }: { mode: Mode }) {
   return (
-    <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice" className="pointer-events-none absolute inset-x-0 bottom-0 h-[62%] w-full" aria-hidden>
-      <defs>
-        <linearGradient id="soil" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#1A5C3B" stopOpacity="0" />
-          <stop offset="1" stopColor="#0C2A1D" stopOpacity=".9" />
-        </linearGradient>
-      </defs>
-      {/* egatlar (perspektiva) */}
-      {Array.from({ length: 9 }).map((_, i) => (
-        <path key={i} d={`M${200 + (i - 4) * 12} 170 L ${200 + (i - 4) * 70} 300`} stroke="#8BC34A" strokeOpacity={0.12 + (i % 2) * 0.06} strokeWidth="1.2" />
-      ))}
-      <rect x="0" y="160" width="400" height="140" fill="url(#soil)" />
-      <AnimatePresence mode="wait">
-        <motion.g key={mode} exit={{ opacity: 0, transition: { duration: 0.25 } }}>
-          <WheatStalk x={70} h={120} delay={0.15} />
-          <WheatStalk x={96} h={90} delay={0.3} flip />
-          <WheatStalk x={300} h={110} delay={0.25} flip />
-          <WheatStalk x={330} h={140} delay={0.4} />
-          <WheatStalk x={355} h={95} delay={0.55} flip />
-        </motion.g>
+    <div className="absolute inset-0" aria-hidden>
+      <AnimatePresence initial={false}>
+        <motion.img
+          key={mode}
+          src={mode === 'login' ? AUTH_PHOTOS.login : AUTH_PHOTOS.signup}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+          initial={{ opacity: 0, scale: 1.12 }}
+          animate={{ opacity: 1, scale: 1.02, transition: { opacity: { duration: 0.8 }, scale: { duration: 14, ease: 'linear' } } }}
+          exit={{ opacity: 0, transition: { duration: 0.6 } }}
+        />
       </AnimatePresence>
-    </svg>
+      <div className="absolute inset-0 bg-gradient-to-t from-brand-900/95 via-brand-900/55 to-brand-800/30" />
+      <div className="absolute inset-0 bg-gradient-to-r from-brand-900/40 to-transparent" />
+    </div>
   );
 }
 
@@ -90,11 +68,8 @@ function FieldScene({ mode }: { mode: Mode }) {
 function BladeContent({ mode, t, compact }: { mode: Mode; t: TFn; compact?: boolean }) {
   return (
     <div className="relative h-full w-full overflow-hidden">
-      <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-sun/25 blur-3xl" />
-      <div className="absolute left-10 top-24 h-40 w-40 rounded-full bg-lime/20 blur-3xl" />
-      <Seeds />
-      {!compact && <FieldScene mode={mode} />}
-      <div className="relative z-10 flex h-full flex-col justify-center px-12">
+      <PhotoScene mode={mode} />
+      <div className={cx('relative z-10 flex h-full flex-col px-12', compact ? 'justify-end pb-6' : 'justify-end pb-24')}>
         <AnimatePresence mode="wait">
           <motion.div key={mode} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0, transition: { delay: 0.35, duration: 0.5 } }} exit={{ opacity: 0, y: -12, transition: { duration: 0.2 } }}>
             <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.3em] text-sun">AgroMarket</p>
@@ -103,10 +78,48 @@ function BladeContent({ mode, t, compact }: { mode: Mode; t: TFn; compact?: bool
               <br />
               <em className="text-lime">{mode === 'login' ? t('auth.welcomeBack2') : t('auth.startTitle2')}</em>
             </h2>
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/75">{mode === 'login' ? t('auth.welcomeText') : t('auth.startText')}</p>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/80">{mode === 'login' ? t('auth.welcomeText') : t('auth.startText')}</p>
           </motion.div>
         </AnimatePresence>
       </div>
+      {!compact && <span className="absolute bottom-3 right-6 z-10 text-[10px] text-white/45">{t('x.auth.photoCredit')}</span>}
+    </div>
+  );
+}
+
+/* ═════════════════ Demo kirish ═════════════════ */
+
+function DemoLogin() {
+  const { t } = useI18n();
+  const cfg = useConfig();
+  const nav = useNavigate();
+  const { setUser } = useAuth();
+  const errText = useErrorText();
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  if (!cfg.data?.demoMode) return null;
+  const go = async (role: 'BUYER' | 'SELLER') => {
+    setBusy(role);
+    setError(null);
+    try {
+      const r = await api.post<{ user: User }>('/auth/demo-login', { role });
+      setUser(r.user);
+      nav(dashboardPath(r.user.role), { replace: true });
+    } catch (e) {
+      setError(errText(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+  return (
+    <div className="mt-5 rounded-2xl border border-dashed border-brand/30 bg-brand-50/60 p-3">
+      <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-brand"><PlayCircle className="h-4 w-4" />{t('x.auth.demoTitle')}</p>
+      <p className="mt-0.5 text-xs text-muted">{t('x.auth.demoText')}</p>
+      <div className="mt-2.5 grid grid-cols-2 gap-2">
+        <Button type="button" size="sm" variant="outline" className="bg-white" loading={busy === 'BUYER'} onClick={() => void go('BUYER')}><ShoppingCart className="h-4 w-4" />{t('x.auth.demoBuyer')}</Button>
+        <Button type="button" size="sm" variant="outline" className="bg-white" loading={busy === 'SELLER'} onClick={() => void go('SELLER')}><Sprout className="h-4 w-4" />{t('x.auth.demoSeller')}</Button>
+      </div>
+      {error && <p className="mt-2 text-xs text-danger">{error}</p>}
     </div>
   );
 }
@@ -179,6 +192,7 @@ function LoginForm({ onSwitch, onForgot }: { onSwitch: () => void; onForgot: () 
         {t('auth.noAccount')}{' '}
         <button type="button" onClick={onSwitch} className="font-bold text-ink underline decoration-sun decoration-2 underline-offset-4">{t('auth.createAccount')}</button>
       </p>
+      <DemoLogin />
     </form>
   );
 }
@@ -364,11 +378,14 @@ function SignupForm({ onSwitch, initialRole }: { onSwitch: () => void; initialRo
           <motion.div key="role" {...slide} className="space-y-3">
             <p className="text-sm font-semibold text-muted">{t('auth.chooseRole')}</p>
             {([
-              { r: 'BUYER' as const, icon: ShoppingCart, title: t('auth.buyer'), desc: t('auth.buyerDesc') },
-              { r: 'SELLER' as const, icon: Sprout, title: t('auth.seller'), desc: t('auth.sellerDesc') },
+              { r: 'BUYER' as const, icon: ShoppingCart, photo: AUTH_PHOTOS.buyer, title: t('auth.buyer'), desc: t('auth.buyerDesc') },
+              { r: 'SELLER' as const, icon: Sprout, photo: AUTH_PHOTOS.seller, title: t('auth.seller'), desc: t('auth.sellerDesc') },
             ]).map((o) => (
               <button key={o.r} type="button" onClick={() => setRole(o.r)} className="group flex w-full items-center gap-4 rounded-2xl border-2 border-cream-200 bg-white p-4 text-left transition hover:border-brand hover:shadow-card">
-                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand text-white transition group-hover:scale-105"><o.icon className="h-6 w-6" /></span>
+                <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-brand-50 transition group-hover:scale-105">
+                  <img src={o.photo} alt="" loading="lazy" className="h-full w-full object-cover" />
+                  <span className="absolute bottom-0 right-0 flex h-6 w-6 items-center justify-center rounded-tl-lg bg-brand text-white"><o.icon className="h-3.5 w-3.5" /></span>
+                </span>
                 <span className="flex-1">
                   <span className="block font-bold text-ink">{o.title}</span>
                   <span className="block text-sm text-muted">{o.desc}</span>
@@ -376,6 +393,7 @@ function SignupForm({ onSwitch, initialRole }: { onSwitch: () => void; initialRo
                 <ArrowRight className="h-5 w-5 text-muted transition group-hover:translate-x-1 group-hover:text-brand" />
               </button>
             ))}
+            <DemoLogin />
           </motion.div>
         ) : (
           <motion.div key="steps" {...slide}>
@@ -577,7 +595,10 @@ export default function AuthPage() {
 
       <div className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-4 py-5 sm:px-6">
         <Logo light />
-        <LanguageSwitcher dark />
+        <div className="flex items-center gap-2">
+          <InstallAppButton variant="light" className="hidden md:inline-flex" />
+          <LanguageSwitcher dark />
+        </div>
       </div>
 
       <div className="relative z-10 mx-auto flex max-w-6xl flex-col items-center px-3 pb-10 sm:px-6">
@@ -593,12 +614,12 @@ export default function AuthPage() {
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="relative h-[660px] w-full max-w-[1040px] overflow-hidden rounded-[28px] bg-cream shadow-[0_40px_120px_-30px_rgba(0,0,0,.6)] ring-1 ring-white/10 md:block"
         >
-          <div className="absolute inset-y-0 left-0 flex w-1/2 items-center overflow-y-auto px-12 py-10 no-scrollbar" aria-hidden={mode !== 'login'} {...(mode !== 'login' ? { inert: '' } : {})}>
+          <div className="absolute inset-y-0 left-0 flex w-1/2 items-center overflow-y-auto py-10 pl-12 pr-24 no-scrollbar" aria-hidden={mode !== 'login'} {...(mode !== 'login' ? { inert: '' } : {})}>
             <motion.div className="w-full" animate={{ opacity: mode === 'login' ? 1 : 0, x: mode === 'login' ? 0 : -30 }} transition={{ duration: 0.4, delay: mode === 'login' ? 0.35 : 0 }}>
               {loginPane}
             </motion.div>
           </div>
-          <div className="absolute inset-y-0 right-0 flex w-1/2 items-center overflow-y-auto px-12 py-10 no-scrollbar" aria-hidden={mode !== 'signup'} {...(mode !== 'signup' ? { inert: '' } : {})}>
+          <div className="absolute inset-y-0 right-0 flex w-1/2 items-center overflow-y-auto py-10 pl-24 pr-12 no-scrollbar" aria-hidden={mode !== 'signup'} {...(mode !== 'signup' ? { inert: '' } : {})}>
             <motion.div className="w-full" animate={{ opacity: mode === 'signup' ? 1 : 0, x: mode === 'signup' ? 0 : 30 }} transition={{ duration: 0.4, delay: mode === 'signup' ? 0.35 : 0 }}>
               {signupPane}
             </motion.div>
@@ -612,7 +633,7 @@ export default function AuthPage() {
             animate={{ left: mode === 'login' ? '47%' : '-5%' }}
             transition={spring}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-brand-600 via-brand-800 to-brand-900" />
+            <div className="absolute inset-0 bg-brand-900" />
             {/* yorug' choklar (seams) */}
             <span className="absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b from-transparent via-sun to-transparent opacity-90 shadow-[0_0_24px_4px_rgba(242,193,78,.5)]" />
             <span className="absolute inset-y-0 right-0 w-[3px] bg-gradient-to-b from-transparent via-lime to-transparent opacity-80 shadow-[0_0_24px_4px_rgba(139,195,74,.45)]" />
@@ -630,22 +651,30 @@ export default function AuthPage() {
           </motion.div>
         </motion.div>
         ) : (
-        /* ── Mobil: yuqorida dala banneri, pastda forma ── */
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md overflow-hidden rounded-[26px] bg-cream shadow-2xl">
-          <div className="relative h-52 overflow-hidden bg-gradient-to-br from-brand-600 via-brand-800 to-brand-900">
-            <span className="absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-transparent via-sun to-transparent shadow-[0_0_20px_4px_rgba(242,193,78,.45)]" />
-            <div className="absolute inset-0 [&_h2]:text-[28px] [&>div>div:last-child]:px-6">
-              <BladeContent mode={mode} t={t} compact />
+        /* ── Mobil: animatsiyasiz, ilova uslubidagi ekran ── */
+        <div className="w-full max-w-md overflow-hidden rounded-[26px] bg-cream shadow-2xl">
+          <div className="relative h-48 overflow-hidden">
+            <img src={mode === 'login' ? AUTH_PHOTOS.login : AUTH_PHOTOS.signup} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-brand-900/95 via-brand-900/50 to-brand-900/10" />
+            <div className="absolute inset-x-5 bottom-4 text-white">
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-sun">AgroMarket</p>
+              <h2 className="mt-1 font-display text-[26px] leading-tight">
+                {mode === 'login' ? t('auth.welcomeBack') : t('auth.startTitle')} <em className="text-lime">{mode === 'login' ? t('auth.welcomeBack2') : t('auth.startTitle2')}</em>
+              </h2>
             </div>
           </div>
-          <div className="relative px-5 py-6">
-            <AnimatePresence mode="wait">
-              <motion.div key={mode + String(forgot)} initial={{ opacity: 0, x: mode === 'signup' ? 40 : -40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: mode === 'signup' ? -40 : 40 }} transition={{ duration: 0.3 }}>
-                {mode === 'login' ? loginPane : signupPane}
-              </motion.div>
-            </AnimatePresence>
+          <div className="px-5 pt-4">
+            <div className="grid grid-cols-2 rounded-2xl bg-cream-100 p-1" role="tablist">
+              {(['login', 'signup'] as const).map((m) => (
+                <button key={m} type="button" role="tab" aria-selected={mode === m} onClick={() => setMode(m)} className={cx('rounded-xl py-2.5 text-sm font-bold transition', mode === m ? 'bg-white text-brand shadow-sm' : 'text-muted')}>
+                  {m === 'login' ? t('x.auth.tabLogin') : t('x.auth.tabSignup')}
+                </button>
+              ))}
+            </div>
           </div>
-        </motion.div>
+          <div className="px-5 pb-6 pt-5">{mode === 'login' ? loginPane : signupPane}</div>
+          <div className="border-t border-cream-200 bg-white/60 px-5 py-4"><InstallAppButton block /></div>
+        </div>
         )}
       </div>
     </div>

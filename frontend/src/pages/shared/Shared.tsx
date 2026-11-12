@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Bell, CheckCheck, ImagePlus, Loader2, Send } from 'lucide-react';
-import { useI18n, LANGS, type Lang } from '@/i18n';
+import { useI18n } from '@/i18n';
 import { api, img } from '@/services/api';
 import { useAuth } from '@/store/auth';
 import { useToast } from '@/store/toast';
 import { useErrorText } from '@/hooks';
 import { cx, dateTime, relative } from '@/utils/format';
-import { Button, Card, Checkbox, Empty, Field, Input, Pagination, PasswordInput, Skeleton } from '@/components/ui';
+import { Button, Card, Empty, Input, Pagination, Skeleton } from '@/components/ui';
 import { PageHeader } from '@/components/common';
 import type { Notification } from '@/types';
 
@@ -153,50 +153,3 @@ export function MessagesPage() {
   );
 }
 
-export function SettingsPage() {
-  const { t, lang, setLang } = useI18n();
-  const { user, setUser, logout } = useAuth();
-  const toast = useToast();
-  const err = useErrorText();
-  const nav = useNavigate();
-  const [name, setName] = useState(user?.fullName ?? '');
-  const [wholesale, setWholesale] = useState(user?.buyerProfile?.isWholesale ?? false);
-  const [company, setCompany] = useState(user?.buyerProfile?.companyName ?? '');
-  const [cur, setCur] = useState('');
-  const [next, setNext] = useState('');
-  const save = useMutation({
-    mutationFn: () => api.patch<typeof user>('/users/me', { fullName: name, locale: lang, ...(user?.role === 'BUYER' ? { buyer: { isWholesale: wholesale, companyName: company || null } } : {}) }),
-    onSuccess: (u) => { setUser(u); toast(t('common.saved')); },
-    onError: (e) => toast(err(e), 'error'),
-  });
-  const pass = useMutation({
-    mutationFn: () => api.post('/users/me/password', { currentPassword: cur, newPassword: next }),
-    onSuccess: async () => { toast(t('auth.resetDone')); await logout(); nav('/auth'); },
-    onError: (e) => toast(err(e), 'error'),
-  });
-  const all = useMutation({ mutationFn: () => api.post('/auth/logout-all'), onSuccess: async () => { await logout(); nav('/auth'); } });
-  return (
-    <div className="max-w-2xl space-y-5">
-      <PageHeader title={t('account.settings')} />
-      <Card className="space-y-4 p-5">
-        <Field label={t('auth.fullName')}><Input value={name} onChange={(e) => setName(e.target.value)} /></Field>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label={t('common.phone')}><Input value={user?.phone ?? '—'} disabled /></Field>
-          <Field label={t('common.email')}><Input value={user?.email ?? '—'} disabled /></Field>
-        </div>
-        <Field label={t('account.language')}>
-          <div className="flex gap-2">{LANGS.map((l) => <Button key={l.code} type="button" variant={lang === l.code ? 'primary' : 'outline'} size="sm" onClick={() => setLang(l.code as Lang)}>{l.label}</Button>)}</div>
-        </Field>
-        {user?.role === 'BUYER' && (<><Checkbox checked={wholesale} onChange={(e) => setWholesale(e.target.checked)} label={t('account.wholesaleBuyer')} />{wholesale && <Field label={t('auth.company')}><Input value={company} onChange={(e) => setCompany(e.target.value)} /></Field>}</>)}
-        <Button loading={save.isPending} onClick={() => save.mutate()}>{t('common.save')}</Button>
-      </Card>
-      <Card className="space-y-4 p-5">
-        <h2 className="font-extrabold">{t('account.changePassword')}</h2>
-        <Field label={t('account.currentPassword')}><PasswordInput value={cur} onChange={(e) => setCur(e.target.value)} autoComplete="current-password" /></Field>
-        <Field label={t('auth.newPassword')} hint={t('auth.passwordHint')}><PasswordInput value={next} onChange={(e) => setNext(e.target.value)} autoComplete="new-password" /></Field>
-        <Button variant="outline" disabled={!cur || next.length < 8} loading={pass.isPending} onClick={() => pass.mutate()}>{t('common.save')}</Button>
-      </Card>
-      <Card className="p-5"><Button variant="danger" loading={all.isPending} onClick={() => all.mutate()}>{t('account.logoutAll')}</Button></Card>
-    </div>
-  );
-}

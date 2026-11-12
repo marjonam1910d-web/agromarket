@@ -34,7 +34,11 @@ const Support = lazy(() => acc().then((m) => ({ default: m.Support })));
 const sh = () => import('@/pages/shared/Shared');
 const Notifications = lazy(() => sh().then((m) => ({ default: m.NotificationsPage })));
 const Messages = lazy(() => sh().then((m) => ({ default: m.MessagesPage })));
-const Settings = lazy(() => sh().then((m) => ({ default: m.SettingsPage })));
+const Settings = lazy(() => import('@/pages/shared/Settings').then((m) => ({ default: m.SettingsPage })));
+const Help = lazy(() => import('@/pages/shared/Help'));
+const rep = () => import('@/pages/shared/Reports');
+const CategoryReports = lazy(() => rep().then((m) => ({ default: m.CategoryReports })));
+const CategoryReportDetail = lazy(() => rep().then((m) => ({ default: m.CategoryReportDetail })));
 
 const SellerDashboard = lazy(() => import('@/pages/seller/SellerDashboard').then((m) => ({ default: m.SellerDashboard })));
 const SellerProducts = lazy(() => import('@/pages/seller/SellerProducts').then((m) => ({ default: m.SellerProducts })));
@@ -86,6 +90,7 @@ export default function AppRoutes() {
           <Route path="farmers" element={<Farmers />} />
           <Route path="farmers/:slug" element={<FarmerDetail />} />
           <Route path="about" element={<About />} />
+          <Route path="help" element={<Help />} />
           <Route path="cart" element={<RequireAuth roles={['BUYER', 'SELLER']}><Cart /></RequireAuth>} />
           <Route path="checkout" element={<RequireAuth roles={['BUYER', 'SELLER']}><Checkout /></RequireAuth>} />
           <Route path="checkout/success/:id" element={<RequireAuth><CheckoutSuccess /></RequireAuth>} />
@@ -118,6 +123,8 @@ export default function AppRoutes() {
             <Route path="promotions" element={<Promotions />} />
             <Route path="reviews" element={<SellerReviews />} />
             <Route path="earnings" element={<Earnings />} />
+            <Route path="reports" element={<CategoryReports />} />
+            <Route path="reports/:slug" element={<CategoryReportDetail />} />
             <Route path="profile" element={<FarmProfile />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="settings" element={<Settings />} />
@@ -134,6 +141,9 @@ export default function AppRoutes() {
             <Route path="reviews" element={<AdminReviews />} />
             <Route path="settings" element={<AdminSettings />} />
             <Route path="audit" element={<AdminAudit />} />
+            <Route path="reports" element={<CategoryReports />} />
+            <Route path="reports/:slug" element={<CategoryReportDetail />} />
+            <Route path="account" element={<Settings />} />
             <Route path="notifications" element={<Notifications />} />
           </Route>
         </Route>

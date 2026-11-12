@@ -29,11 +29,11 @@ npm run load-test -- --users 100 --seconds 20
 | To'plam | Natija |
 |---|---|
 | Backend TypeScript | 0 xato |
-| Backend testlari | **36 / 36 o'tdi** |
+| Backend testlari | **47 / 47 o'tdi** (ilova qulfi, barmoq izi imzosi, kartalar, hisobotlar, email qo'shilgan) |
 | Frontend TypeScript | 0 xato |
 | Frontend testlari | **7 / 7 o'tdi** |
 | Frontend production build | muvaffaqiyatli (sahifalar alohida lazy chunk) |
-| E2E (Playwright) | **20 / 20 o'tdi** |
+| E2E (Playwright) | **20 / 20 o'tdi** + yangi imkoniyatlar **13 / 13** (2026-11-12) |
 | Yuklama (100 foydalanuvchi, 20 s) | 0 xato |
 
 ## 3. Backend testlari nimani tekshiradi

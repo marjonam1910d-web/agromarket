@@ -11,6 +11,8 @@ import { useAuth } from '@/store/auth';
 import { Badge, Button, Card, Checkbox, Field, Input, Skeleton, Textarea } from '@/components/ui';
 import { RegionDistrictSelect } from '@/components/common';
 import { CartSummary } from './Cart';
+import { AddCardModal, CardFace, useCards } from '@/components/Cards';
+import { ReceiptPrinter, type ReceiptData } from '@/components/ReceiptPrinter';
 import type { Address, PaymentMethod } from '@/types';
 
 type NewAddr = { recipientName: string; phone: string; region: string; district: string | null; street: string; landmark: string };
@@ -34,6 +36,13 @@ export default function Checkout() {
   const [terms, setTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const idem = useRef(crypto.randomUUID());
+  const cards = useCards();
+  const [cardId, setCardId] = useState<string | 'other' | null>(null);
+  const [addCard, setAddCard] = useState(false);
+  useEffect(() => {
+    if (cardId === null && cards.data) setCardId(cards.data.find((c) => c.isDefault)?.id ?? cards.data[0]?.id ?? 'other');
+  }, [cards.data, cardId]);
+  const savedCard = method === 'card' && cardId && cardId !== 'other' ? cardId : null;
 
   useEffect(() => {
     if (addrId === null && addresses.data) setAddrId(addresses.data.find((a) => a.isDefault)?.id ?? addresses.data[0]?.id ?? 'new');
@@ -59,9 +68,21 @@ export default function Checkout() {
       if (!selected) body.saveAddress = saveAddr;
       return api.post<{ order: { id: string; orderNumber: string }; payment: { id: string; checkoutUrl: string | null; provider: string } | null }>('/orders/checkout', body, { 'Idempotency-Key': idem.current });
     },
-    onSuccess: (r) => {
+    onSuccess: async (r) => {
       void qc.invalidateQueries({ queryKey: ['cart'] });
       void qc.invalidateQueries({ queryKey: ['orders'] });
+      if (savedCard) {
+        // Saqlangan karta: bir bosishda to'lov (karta tokeni bilan, server tomonida)
+        try {
+          await api.post('/payments/cards/pay', { orderId: r.order.id, cardId: savedCard });
+        } catch (e) {
+          setError(err(e));
+          nav(`/account/orders/${r.order.id}`);
+          return;
+        }
+        nav(`/checkout/success/${r.order.id}`);
+        return;
+      }
       if (r.payment && r.payment.provider !== 'cash' && r.payment.checkoutUrl) {
         if (r.payment.provider === 'sandbox') nav(new URL(r.payment.checkoutUrl).pathname);
         else window.location.href = r.payment.checkoutUrl;
@@ -159,7 +180,20 @@ export default function Checkout() {
                 );
               })}
             </div>
-            {method !== 'cash' && cfg.data?.paymentSandbox && <p className="mt-3 flex items-start gap-2 rounded-xl bg-sun-100 px-3 py-2 text-xs font-semibold text-amber-800"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />{t('checkout.sandboxNote')}</p>}
+            {method === 'card' && (
+              <div className="mt-4 space-y-3 rounded-2xl bg-cream-100 p-3">
+                <p className="text-sm font-bold text-ink">{t('x.cards.payWith')}</p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {cards.data?.map((c) => <CardFace key={c.id} card={c} compact selected={cardId === c.id} onClick={() => setCardId(c.id)} />)}
+                  <button type="button" onClick={() => setCardId('other')} className={cx('flex min-h-[88px] items-center justify-center gap-2 rounded-2xl border-2 border-dashed text-sm font-bold', cardId === 'other' ? 'border-brand bg-white text-brand' : 'border-cream-300 text-muted')}>
+                    <CreditCard className="h-4 w-4" />{t('x.cards.newCard')}
+                  </button>
+                </div>
+                <button type="button" onClick={() => setAddCard(true)} className="flex items-center gap-1.5 text-sm font-bold text-brand"><Plus className="h-4 w-4" />{t('x.cards.add')}</button>
+                <AddCardModal open={addCard} onClose={() => setAddCard(false)} onAdded={(c) => setCardId(c.id)} />
+              </div>
+            )}
+            {method !== 'cash' && !savedCard && cfg.data?.paymentSandbox && <p className="mt-3 flex items-start gap-2 rounded-xl bg-sun-100 px-3 py-2 text-xs font-semibold text-amber-800"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />{t('checkout.sandboxNote')}</p>}
             <p className="mt-3 flex items-center gap-2 text-xs text-muted"><ShieldCheck className="h-4 w-4 text-brand" />{t('checkout.cardSafe')}</p>
           </Card>
         </div>
@@ -174,7 +208,7 @@ export default function Checkout() {
               <div className="mt-4"><Checkbox checked={terms} onChange={(e) => setTerms(e.target.checked)} label={<span className="text-xs">{t('checkout.terms')}</span>} /></div>
               {error && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-danger" role="alert">{error}</p>}
               <Button block size="lg" className="mt-4" disabled={!canPlace} loading={place.isPending} onClick={() => { setError(null); place.mutate(); }}>
-                {place.isPending ? t('checkout.placing') : t('checkout.place')}
+                {place.isPending ? t('checkout.placing') : savedCard ? t('x.cards.payNow', { amount: money(cart.data.total, lang) }) : t('checkout.place')}
               </Button>
             </CartSummary>
           ) : <Skeleton className="h-64" />}
@@ -184,15 +218,42 @@ export default function Checkout() {
   );
 }
 
+type OrderForReceipt = {
+  orderNumber: string;
+  createdAt: string;
+  subtotal: string;
+  deliveryFee: string;
+  discountTotal: string;
+  total: string;
+  paymentMethod: string;
+  paymentStatus: string;
+  sellerOrders: { seller: { farmName: string }; items: { productName: string; quantity: string; unit: string; lineTotal: string }[] }[];
+};
+
+function toReceipt(o: OrderForReceipt): ReceiptData {
+  return {
+    orderNumber: o.orderNumber,
+    createdAt: o.createdAt,
+    items: o.sellerOrders.flatMap((so) => so.items.map((i) => ({ name: i.productName, quantity: i.quantity, unit: i.unit, lineTotal: i.lineTotal, farm: so.seller.farmName }))),
+    subtotal: o.subtotal,
+    deliveryFee: o.deliveryFee,
+    discountTotal: o.discountTotal,
+    total: o.total,
+    paymentMethod: o.paymentMethod,
+    paid: o.paymentStatus === 'paid',
+  };
+}
+
 export function CheckoutSuccess() {
   const { id = '' } = useParams();
   const { t } = useI18n();
-  const o = useQuery({ queryKey: ['orders', id], queryFn: () => api.get<{ orderNumber: string }>(`/orders/${id}`) });
+  const o = useQuery({ queryKey: ['orders', id], queryFn: () => api.get<OrderForReceipt>(`/orders/${id}`) });
   return (
-    <div className="mx-auto max-w-lg px-4 py-16 text-center">
-      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', damping: 12 }} className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-brand text-white shadow-glow"><CheckCircle2 className="h-10 w-10" /></motion.div>
-      <h1 className="mt-5 text-2xl font-extrabold">{t('checkout.success')}</h1>
-      <p className="mt-2 text-muted">{t('checkout.successHint', { n: o.data?.orderNumber ?? '…' })}</p>
+    <div className="mx-auto max-w-lg px-4 py-10 text-center">
+      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', damping: 12 }} className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand text-white shadow-glow"><CheckCircle2 className="h-8 w-8" /></motion.div>
+      <h1 className="mt-4 text-2xl font-extrabold">{t('checkout.success')}</h1>
+      <p className="mt-1 text-muted">{t('checkout.successHint', { n: o.data?.orderNumber ?? '…' })}</p>
+      <div className="mt-8">{o.data ? <ReceiptPrinter data={toReceipt(o.data)} /> : <Skeleton className="mx-auto h-96 max-w-[340px]" />}</div>
       <div className="mt-6 flex justify-center gap-2"><Link to={`/account/orders/${id}`}><Button>{t('checkout.toOrder')}</Button></Link><Link to="/catalog"><Button variant="outline">{t('nav.catalog')}</Button></Link></div>
     </div>
   );
@@ -215,7 +276,7 @@ export function PaymentResult() {
       {!q.data || s === 'pending' || s === 'processing' ? (
         <><Loader2 className="mx-auto h-14 w-14 animate-spin text-brand" /><h1 className="mt-4 text-xl font-extrabold">{t('checkout.pending')}</h1></>
       ) : s === 'paid' ? (
-        <><CheckCircle2 className="mx-auto h-16 w-16 text-success" /><h1 className="mt-4 text-2xl font-extrabold">{t('checkout.paid')}</h1><p className="mt-1 text-muted">{q.data.orderNumber} · {money(q.data.amount, lang)}</p></>
+        <><CheckCircle2 className="mx-auto h-16 w-16 text-success" /><h1 className="mt-4 text-2xl font-extrabold">{t('checkout.paid')}</h1><p className="mt-1 text-muted">{q.data.orderNumber} · {money(q.data.amount, lang)}</p><PaidReceipt orderId={q.data.orderId} /></>
       ) : (
         <><XCircle className="mx-auto h-16 w-16 text-danger" /><h1 className="mt-4 text-2xl font-extrabold">{t('checkout.failed')}</h1></>
       )}
@@ -263,4 +324,9 @@ export function SandboxPay() {
       </Card>
     </div>
   );
+}
+
+function PaidReceipt({ orderId }: { orderId: string }) {
+  const o = useQuery({ queryKey: ['orders', orderId], queryFn: () => api.get<OrderForReceipt>(`/orders/${orderId}`) });
+  return <div className="mt-8">{o.data && <ReceiptPrinter data={toReceipt(o.data)} />}</div>;
 }

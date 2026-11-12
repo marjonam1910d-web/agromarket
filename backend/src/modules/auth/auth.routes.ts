@@ -8,6 +8,7 @@ import { authLimiter, otpLimiter } from '../../middleware/security';
 import { isValidDistrict, isValidRegion } from '../../common/regions';
 import { uniqueSlug } from '../../common/utils';
 import { audit } from '../../common/audit';
+import { env } from '../../config/env';
 import { notifyAdmins } from '../notifications/notifications.service';
 import {
   destroySession,
@@ -152,6 +153,25 @@ r.post(
     const user = await login(req.body.login, req.body.password);
     const tokens = await issueSession(req, res, user, req.body.remember);
     ok(res, { user: await publicUser(user.id), ...(req.get('x-client') === 'mobile' ? tokens : {}) });
+  }),
+);
+
+/**
+ * Demo kirish (faqat DEMO_MODE yoki development): taqdimotda bir bosishda demo xaridor/sotuvchi sifatida kirish.
+ * Admin demo orqali ochilmaydi — admin faqat o'z paroli bilan kiradi.
+ */
+const DEMO_ACCOUNTS = { BUYER: '+998901234567', SELLER: '+998911234567' } as const;
+r.post(
+  '/demo-login',
+  authLimiter(),
+  validate({ body: z.object({ role: z.enum(['BUYER', 'SELLER']) }) }),
+  ah(async (req, res) => {
+    if (!(env.DEMO_MODE || !env.isProd)) throw Errors.notFound('Sahifa');
+    const user = await prisma.user.findFirst({ where: { phone: DEMO_ACCOUNTS[req.body.role as 'BUYER' | 'SELLER'], status: 'ACTIVE', deletedAt: null } });
+    if (!user) throw Errors.notFound('Demo akkaunt');
+    await issueSession(req, res, user, false);
+    await audit(req, 'auth.demo_login', 'User', user.id);
+    ok(res, { user: await publicUser(user.id) });
   }),
 );
 

@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { ah, ok, validate, q } from '../../common/http';
 import { prisma } from '../../lib/prisma';
 import { cache } from '../../lib/redis';
+import { AppError, Errors } from '../../common/errors';
 import { authenticate, requireRole, requireSeller, sellerId } from '../../middleware/auth';
 
 /** Barcha ko'rsatkichlar real DB so'rovlaridan olinadi (Asia/Tashkent vaqt zonasi bo'yicha guruhlanadi). */
@@ -186,6 +187,152 @@ r.get(
       return { farmers, products, buyers, deliveredOrders: delivered, regions: regions.length };
     });
     ok(res, data);
+  }),
+);
+
+
+// ───────── Kategoriyalar bo'yicha hisobot (admin: butun platforma, sotuvchi: o'z do'koni) ─────────
+const catQ = z.object({ days: z.coerce.number().int().min(7).max(365).default(30) });
+
+function scope(req: import('express').Request) {
+  if (req.user!.role === 'ADMIN') return null;
+  if (!req.user!.sellerId) throw new AppError(403, 'FORBIDDEN', "Hisobot faqat sotuvchi va admin uchun");
+  return req.user!.sellerId;
+}
+const sellerFilter = (sid: string | null) => (sid ? Prisma.sql`AND so."sellerId" = ${sid}` : Prisma.empty);
+const pct = (cur: number, prev: number) => (prev > 0 ? Math.round(((cur - prev) / prev) * 1000) / 10 : cur > 0 ? 100 : 0);
+
+r.get(
+  '/categories',
+  authenticate,
+  validate({ query: catQ }),
+  ah(async (req, res) => {
+    const f = q(req, catQ);
+    const sid = scope(req);
+    const now = Date.now();
+    const since = new Date(now - f.days * 86400_000);
+    const prevSince = new Date(now - 2 * f.days * 86400_000);
+    type R = { root: string; revenue: Prisma.Decimal | null; orders: bigint; qty: Prisma.Decimal | null; buyers: bigint; prev_revenue: Prisma.Decimal | null; prev_orders: bigint };
+    const [rows, cats, products, ratings] = await Promise.all([
+      prisma.$queryRaw<R[]>`
+        SELECT COALESCE(c."parentId", c.id) AS root,
+          SUM(oi."lineTotal") FILTER (WHERE so."createdAt" >= ${since}) AS revenue,
+          COUNT(DISTINCT so.id) FILTER (WHERE so."createdAt" >= ${since}) AS orders,
+          SUM(oi.quantity) FILTER (WHERE so."createdAt" >= ${since}) AS qty,
+          COUNT(DISTINCT o."buyerId") FILTER (WHERE so."createdAt" >= ${since}) AS buyers,
+          SUM(oi."lineTotal") FILTER (WHERE so."createdAt" < ${since}) AS prev_revenue,
+          COUNT(DISTINCT so.id) FILTER (WHERE so."createdAt" < ${since}) AS prev_orders
+        FROM "OrderItem" oi
+        JOIN "SellerOrder" so ON so.id = oi."sellerOrderId"
+        JOIN "Order" o ON o.id = oi."orderId"
+        JOIN "Product" p ON p.id = oi."productId"
+        JOIN "Category" c ON c.id = p."categoryId"
+        WHERE so.status NOT IN ('cancelled','refunded') AND so."createdAt" >= ${prevSince} ${sellerFilter(sid)}
+        GROUP BY 1`,
+      prisma.category.findMany({ where: { parentId: null, isActive: true }, orderBy: { sortOrder: 'asc' }, select: { id: true, slug: true, nameUz: true, nameRu: true, nameEn: true, icon: true, imageUrl: true } }),
+      prisma.$queryRaw<{ root: string; active: bigint; sellers: bigint; stock: Prisma.Decimal | null }[]>`
+        SELECT COALESCE(c."parentId", c.id) AS root, COUNT(*) FILTER (WHERE p.status = 'active') AS active,
+               COUNT(DISTINCT p."sellerId") AS sellers, SUM(i.quantity) AS stock
+        FROM "Product" p JOIN "Category" c ON c.id = p."categoryId" LEFT JOIN "ProductInventory" i ON i."productId" = p.id
+        WHERE p."deletedAt" IS NULL ${sid ? Prisma.sql`AND p."sellerId" = ${sid}` : Prisma.empty}
+        GROUP BY 1`,
+      prisma.$queryRaw<{ root: string; avg: number | null; cnt: bigint }[]>`
+        SELECT COALESCE(c."parentId", c.id) AS root, AVG(rv.rating)::float AS avg, COUNT(*) AS cnt
+        FROM "Review" rv JOIN "Product" p ON p.id = rv."productId" JOIN "Category" c ON c.id = p."categoryId"
+        WHERE rv.status = 'published' ${sid ? Prisma.sql`AND p."sellerId" = ${sid}` : Prisma.empty}
+        GROUP BY 1`,
+    ]);
+    const byRoot = new Map(rows.map((x) => [x.root, x]));
+    const prodBy = new Map(products.map((x) => [x.root, x]));
+    const rateBy = new Map(ratings.map((x) => [x.root, x]));
+    const totalRevenue = rows.reduce((a, x) => a + Number(x.revenue ?? 0), 0);
+    const list = cats.map((c) => {
+      const x = byRoot.get(c.id);
+      const pr = prodBy.get(c.id);
+      const rt = rateBy.get(c.id);
+      const revenue = Number(x?.revenue ?? 0);
+      const orders = Number(x?.orders ?? 0);
+      return {
+        ...c,
+        revenue,
+        orders,
+        quantity: Number(x?.qty ?? 0),
+        buyers: Number(x?.buyers ?? 0),
+        averageOrder: orders ? Math.round(revenue / orders) : 0,
+        share: totalRevenue ? Math.round((revenue / totalRevenue) * 1000) / 10 : 0,
+        growth: pct(revenue, Number(x?.prev_revenue ?? 0)),
+        ordersGrowth: pct(orders, Number(x?.prev_orders ?? 0)),
+        activeProducts: Number(pr?.active ?? 0),
+        sellers: Number(pr?.sellers ?? 0),
+        stock: Number(pr?.stock ?? 0),
+        rating: rt?.avg ? Math.round(rt.avg * 10) / 10 : null,
+        reviews: Number(rt?.cnt ?? 0),
+      };
+    });
+    list.sort((a, b) => b.revenue - a.revenue);
+    ok(res, { days: f.days, totalRevenue, totalOrders: list.reduce((a, x) => a + x.orders, 0), categories: list });
+  }),
+);
+
+r.get(
+  '/categories/:slug',
+  authenticate,
+  validate({ query: catQ }),
+  ah(async (req, res) => {
+    const f = q(req, catQ);
+    const sid = scope(req);
+    const cat = await prisma.category.findUnique({ where: { slug: req.params.slug }, include: { children: { select: { id: true, slug: true, nameUz: true, nameRu: true, nameEn: true } } } });
+    if (!cat) throw Errors.notFound('Kategoriya');
+    const ids = [cat.id, ...cat.children.map((c) => c.id)];
+    const since = new Date(Date.now() - f.days * 86400_000);
+    const base = Prisma.sql`FROM "OrderItem" oi
+        JOIN "SellerOrder" so ON so.id = oi."sellerOrderId"
+        JOIN "Order" o ON o.id = oi."orderId"
+        JOIN "Product" p ON p.id = oi."productId"
+        WHERE p."categoryId" IN (${Prisma.join(ids)}) AND so.status NOT IN ('cancelled','refunded') AND so."createdAt" >= ${since} ${sellerFilter(sid)}`;
+    const [daily, subs, top, sellersTop, regions, statuses, prices] = await Promise.all([
+      prisma.$queryRaw<{ d: Date; revenue: Prisma.Decimal; orders: bigint; qty: Prisma.Decimal }[]>`
+        SELECT date_trunc('day', so."createdAt" AT TIME ZONE 'Asia/Tashkent') AS d, SUM(oi."lineTotal") AS revenue, COUNT(DISTINCT so.id) AS orders, SUM(oi.quantity) AS qty ${base} GROUP BY 1 ORDER BY 1`,
+      prisma.$queryRaw<{ cid: string; revenue: Prisma.Decimal; orders: bigint }[]>`
+        SELECT p."categoryId" AS cid, SUM(oi."lineTotal") AS revenue, COUNT(DISTINCT so.id) AS orders ${base} GROUP BY 1`,
+      prisma.$queryRaw<{ id: string; name: string; revenue: Prisma.Decimal; qty: Prisma.Decimal; unit: string; orders: bigint }[]>`
+        SELECT oi."productId" AS id, MAX(oi."productName") AS name, SUM(oi."lineTotal") AS revenue, SUM(oi.quantity) AS qty, MAX(oi.unit::text) AS unit, COUNT(DISTINCT so.id) AS orders
+        ${base} GROUP BY 1 ORDER BY revenue DESC LIMIT 10`,
+      sid
+        ? Promise.resolve([] as { id: string; name: string; revenue: Prisma.Decimal; orders: bigint }[])
+        : prisma.$queryRaw<{ id: string; name: string; revenue: Prisma.Decimal; orders: bigint }[]>`
+        SELECT so."sellerId" AS id, MAX(sp."farmName") AS name, SUM(oi."lineTotal") AS revenue, COUNT(DISTINCT so.id) AS orders
+        FROM "OrderItem" oi
+        JOIN "SellerOrder" so ON so.id = oi."sellerOrderId"
+        JOIN "SellerProfile" sp ON sp.id = so."sellerId"
+        JOIN "Product" p ON p.id = oi."productId"
+        WHERE p."categoryId" IN (${Prisma.join(ids)}) AND so.status NOT IN ('cancelled','refunded') AND so."createdAt" >= ${since}
+        GROUP BY 1 ORDER BY revenue DESC LIMIT 10`,
+      prisma.$queryRaw<{ region: string; revenue: Prisma.Decimal; orders: bigint }[]>`
+        SELECT o.region, SUM(oi."lineTotal") AS revenue, COUNT(DISTINCT so.id) AS orders ${base} GROUP BY 1 ORDER BY revenue DESC`,
+      prisma.$queryRaw<{ status: string; n: bigint }[]>`
+        SELECT so.status::text AS status, COUNT(DISTINCT so.id) AS n
+        FROM "OrderItem" oi JOIN "SellerOrder" so ON so.id = oi."sellerOrderId" JOIN "Product" p ON p.id = oi."productId"
+        WHERE p."categoryId" IN (${Prisma.join(ids)}) AND so."createdAt" >= ${since} ${sellerFilter(sid)} GROUP BY 1`,
+      prisma.$queryRaw<{ min: Prisma.Decimal | null; max: Prisma.Decimal | null; avg: Prisma.Decimal | null }[]>`
+        SELECT MIN(oi."unitPrice") AS min, MAX(oi."unitPrice") AS max, AVG(oi."unitPrice") AS avg ${base}`,
+    ]);
+    const subBy = new Map(subs.map((x) => [x.cid, x]));
+    const revenue = daily.reduce((a, x) => a + Number(x.revenue), 0);
+    const orders = daily.reduce((a, x) => a + Number(x.orders), 0);
+    ok(res, {
+      category: { id: cat.id, slug: cat.slug, nameUz: cat.nameUz, nameRu: cat.nameRu, nameEn: cat.nameEn, icon: cat.icon, imageUrl: cat.imageUrl },
+      days: f.days,
+      summary: { revenue, orders, averageOrder: orders ? Math.round(revenue / orders) : 0, minPrice: Number(prices[0]?.min ?? 0), maxPrice: Number(prices[0]?.max ?? 0), avgPrice: Math.round(Number(prices[0]?.avg ?? 0)) },
+      series: daily.map((x) => ({ date: x.d.toISOString().slice(0, 10), revenue: Number(x.revenue), orders: Number(x.orders), quantity: Number(x.qty) })),
+      subcategories: [{ id: cat.id, slug: cat.slug, nameUz: cat.nameUz, nameRu: cat.nameRu, nameEn: cat.nameEn }, ...cat.children]
+        .map((c) => ({ ...c, revenue: Number(subBy.get(c.id)?.revenue ?? 0), orders: Number(subBy.get(c.id)?.orders ?? 0) }))
+        .filter((c) => c.revenue > 0 || c.id !== cat.id),
+      topProducts: top.map((x) => ({ id: x.id, name: x.name, revenue: Number(x.revenue), quantity: Number(x.qty), unit: x.unit, orders: Number(x.orders) })),
+      topSellers: sellersTop.map((x) => ({ id: x.id, name: x.name, revenue: Number(x.revenue), orders: Number(x.orders) })),
+      regions: regions.map((x) => ({ region: x.region, revenue: Number(x.revenue), orders: Number(x.orders) })),
+      statuses: Object.fromEntries(statuses.map((x) => [x.status, Number(x.n)])),
+    });
   }),
 );
 

@@ -167,6 +167,63 @@ const uz = {
     required: 'Majburiy maydon', phone: "Telefon raqam noto'g'ri (masalan: 90 123 45 67)", email: "Email noto'g'ri", min: 'Kamida {n} belgi',
     password: "Kamida 8 belgi, harf va raqam bo'lsin", match: 'Parollar mos emas', positive: "Musbat son kiriting", terms: 'Shartlarga rozilik kerak',
   },
+  x: {
+    nav: { reports: 'Hisobotlar', help: "Yordam va yo'riqnoma", mySettings: 'Mening sozlamalarim', install: "Ilovani yuklab olish" },
+    auth: {
+      tabLogin: 'Kirish', tabSignup: "Ro'yxatdan o'tish", demoTitle: 'Demo rejim', demoText: "Ro'yxatdan o'tmasdan tizimni sinab ko'ring",
+      demoBuyer: 'Demo xaridor', demoSeller: 'Demo fermer', photoCredit: 'Foto: Unsplash',
+    },
+    install: {
+      button: 'Ilovani yuklab olish', short: 'Ilova', title: "AgroMarket ilovasini o'rnating", text: "Telefoningiz bosh ekranida ilova kabi ochiladi: tezroq, PIN va barmoq izi bilan himoyalangan.",
+      iosTitle: "iPhone'ga o'rnatish", ios1: "Safari pastidagi «Ulashish» tugmasini bosing", ios2: "«Bosh ekranga qo'shish» (Add to Home Screen) ni tanlang", ios3: "«Qo'shish» ni bosing — AgroMarket belgisi paydo bo'ladi",
+      otherTitle: "O'rnatish", other1: "Brauzer menyusini oching (⋮)", other2: "«Ilovani o'rnatish» yoki «Bosh ekranga qo'shish» ni tanlang", done: "Ilova o'rnatildi! Endi uni bosh ekrandan oching.",
+      benefits1: 'Bir bosishda ochiladi', benefits2: 'PIN va barmoq izi himoyasi', benefits3: 'Buyurtma holati haqida bildirishnoma',
+    },
+    lock: {
+      setupTitle: "PIN-kod o'rnating", setupText: "Ilovani himoyalash uchun 4 xonali PIN-kod o'ylab toping. U har safar ilovaga qaytganingizda so'raladi.",
+      confirmTitle: 'PIN-kodni takrorlang', mismatch: 'PIN-kodlar mos kelmadi. Qaytadan kiriting', weak: "Juda oddiy PIN. Boshqa raqamlar tanlang",
+      unlockTitle: 'PIN-kodni kiriting', hello: 'Salom, {name}!', forgot: "PIN-kodni unutdingizmi? Parol bilan kiring", useBiometric: 'Barmoq izi bilan ochish',
+      attemptsLeft: "Noto'g'ri. Yana {n} ta urinish qoldi", resetDone: "Xavfsizlik uchun tizimdan chiqildi. Parol bilan qayta kiring",
+      biometricAsk: "Keyingi safar barmoq izi (yoki Face ID) bilan ochilsinmi?", biometricYes: 'Ha, yoqish', biometricNo: "Keyinroq",
+      biometricOn: 'Barmoq izi yoqildi', biometricOff: "Barmoq izi o'chirildi", biometricUnavailable: "Bu qurilmada barmoq izi/Face ID mavjud emas",
+      required: "Ilovada PIN-kod majburiy — bu sizning pul va buyurtmalaringiz himoyasi.", logout: 'Tizimdan chiqish',
+      sectionTitle: 'Ilova qulfi', sectionText: "Ilova fonga o'tsa yoki yopilsa, qayta ochilganda PIN-kod yoki barmoq izi so'raladi.",
+      status: 'Holati', on: 'Yoqilgan', off: "O'chirilgan", setup: "PIN-kod o'rnatish", changePin: "PIN-kodni o'zgartirish", currentPin: 'Joriy PIN-kod', newPin: 'Yangi PIN-kod',
+      biometric: 'Barmoq izi / Face ID', enableBiometric: 'Yoqish', disableBiometric: "O'chirish", lockInBrowser: 'Brauzerda ham qulflansin',
+      appOnly: "O'rnatilgan ilovada qulf doim yoqilgan. Brauzerda ixtiyoriy.", devices: "Qulf o'rnatilgan qurilmalar", thisDevice: 'Shu qurilma',
+      lastUnlock: 'Oxirgi ochilish', remove: "Ro'yxatdan chiqarish", removed: "Qurilma ro'yxatdan chiqarildi", pinChanged: "PIN-kod o'zgartirildi",
+    },
+    cards: {
+      title: "To'lov kartalari", text: 'Uzcard va Humo kartalarini saqlang — keyingi xaridlar bir bosishda.', add: "Karta qo'shish", number: 'Karta raqami', expire: 'Amal qilish muddati',
+      label: 'Nomi (ixtiyoriy)', labelPh: 'Masalan: Asosiy karta', next: 'Davom etish', smsSent: "{phone} raqamiga SMS kod yuborildi", smsCode: 'SMS kod',
+      verify: 'Tasdiqlash', added: "Karta qo'shildi", isDefault: 'Asosiy', makeDefault: 'Asosiy qilish', remove: "O'chirish", removed: "Karta o'chirildi",
+      empty: "Hali karta qo'shilmagan", sandboxHint: "Sinov rejimi: istalgan 8600… yoki 9860… raqam, SMS kod — {code}", disabled: "Karta qo'shish hozircha mavjud emas",
+      safe: "Karta raqami bizning serverda saqlanmaydi — u to'g'ridan-to'g'ri to'lov tizimiga (Payme) yuboriladi. Bizda faqat xavfsiz token va oxirgi 4 raqam turadi.",
+      payWith: "Saqlangan karta bilan to'lash", payNow: "{amount} to'lash", newCard: "Boshqa karta", paid: "To'lov muvaffaqiyatli",
+    },
+    settings: {
+      profile: 'Profil', security: 'Xavfsizlik', cards: "To'lov kartalari", language: 'Til', app: 'Ilova', help: 'Yordam', danger: 'Hisob',
+      helpText: "Tizimdan foydalanish yo'riqnomasi, xavfsizlik qoidalari va ko'p beriladigan savollar.", openHelp: "Yo'riqnomani ochish",
+      appText: "AgroMarket'ni telefoningizga ilova sifatida o'rnating.", installed: "Ilova o'rnatilgan va ishlamoqda",
+      sessionsText: "Barcha qurilmalardagi sessiyalarni yopish (telefon yo'qolsa foydali).",
+    },
+    reports: {
+      title: "Kategoriyalar bo'yicha hisobot", sellerTitle: "Mahsulot turlari bo'yicha hisobot", subtitle: "Kategoriyani bosing — batafsil ma'lumot ochiladi",
+      revenue: 'Savdo', orders: 'Buyurtmalar', quantity: 'Sotilgan miqdor', buyers: 'Xaridorlar', avgOrder: "O'rtacha chek", share: 'Ulushi', growth: "O'sish",
+      products: 'Faol mahsulotlar', sellers: 'Sotuvchilar', stock: 'Qoldiq', rating: 'Reyting', daily: 'Kunlik savdo', subcats: "Ichki bo'limlar",
+      topProducts: "Eng ko'p sotilgan mahsulotlar", topSellers: 'Yetakchi sotuvchilar', regions: 'Hududlar kesimida', statuses: 'Buyurtma holatlari',
+      priceRange: "Narx oralig'i (birlik)", days: 'Oxirgi {n} kun', noData: "Bu davrda savdo bo'lmagan", back: 'Barcha kategoriyalar', total: 'Jami', vsPrev: 'oldingi davrga nisbatan',
+    },
+    receipt: {
+      printing: 'Chek chop etilmoqda…', ready: 'Chek tayyor', thanks: 'Xaridingiz uchun rahmat!', order: 'Buyurtma', date: 'Sana', items: 'Mahsulotlar', subtotal: 'Mahsulotlar',
+      delivery: 'Yetkazish', discount: 'Chegirma', total: 'JAMI', payment: "To'lov", paid: "TO'LANDI", cod: "Qabul qilganda to'lanadi", tear: "Chekni ko'rish", farmFresh: "DALADAN — TO'G'RIDAN-TO'G'RI",
+    },
+    help: {
+      title: "Yordam va yo'riqnoma", subtitle: "AgroMarket'dan qanday foydalanish, xavfsizlik va savollarga javoblar", guide: "Foydalanish yo'riqnomasi",
+      security: 'Xavfsizlik', faq: "Ko'p beriladigan savollar", whatsNew: 'Yangiliklar', forBuyer: 'Xaridorlar uchun', forSeller: 'Fermerlar uchun', forAdmin: 'Administrator uchun',
+      contact: "Javob topmadingizmi? Qo'llab-quvvatlash xizmatiga yozing", updated: 'Yangilangan',
+    },
+  },
 };
 
 export default uz;

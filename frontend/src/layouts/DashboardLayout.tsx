@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  BarChart3, Bell, BadgeCheck, ClipboardList, CreditCard, FileClock, FolderTree, Heart, Home, LayoutDashboard, LifeBuoy, LogOut, MapPin, Megaphone, Menu,
+  BarChart3, Bell, BookOpen, UserCog, BadgeCheck, ClipboardList, CreditCard, FileClock, FolderTree, Heart, Home, LayoutDashboard, LifeBuoy, LogOut, MapPin, Megaphone, Menu,
   MessageCircle, MessageSquareWarning, Package, PackagePlus, Settings, ShoppingBag, Star, Store, Truck, Users, Wallet, X,
 } from 'lucide-react';
 import { useI18n, type TKey } from '@/i18n';
@@ -10,6 +10,7 @@ import { useAuth } from '@/store/auth';
 import { useUnreadCounts } from '@/hooks';
 import { cx } from '@/utils/format';
 import { LanguageSwitcher, Logo } from '@/components/common';
+import { InstallAppButton } from '@/components/InstallApp';
 import type { Role } from '@/types';
 
 type Item = { to: string; icon: typeof Home; label: TKey; end?: boolean; mobile?: boolean };
@@ -24,6 +25,7 @@ const NAV: Record<Role, Item[]> = {
     { to: '/account/reviews', icon: Star, label: 'account.reviews' },
     { to: '/account/notifications', icon: Bell, label: 'nav.notifications' },
     { to: '/account/support', icon: LifeBuoy, label: 'account.support' },
+    { to: '/help', icon: BookOpen, label: 'x.nav.help' },
     { to: '/account/settings', icon: Settings, label: 'account.settings', mobile: true },
   ],
   SELLER: [
@@ -35,13 +37,16 @@ const NAV: Record<Role, Item[]> = {
     { to: '/seller/promotions', icon: Megaphone, label: 'seller.promotions' },
     { to: '/seller/reviews', icon: Star, label: 'seller.reviews' },
     { to: '/seller/earnings', icon: Wallet, label: 'seller.earnings' },
+    { to: '/seller/reports', icon: BarChart3, label: 'x.nav.reports', mobile: true },
     { to: '/messages', icon: MessageCircle, label: 'nav.messages', mobile: true },
     { to: '/seller/notifications', icon: Bell, label: 'nav.notifications' },
     { to: '/seller/profile', icon: Store, label: 'seller.profile' },
     { to: '/seller/settings', icon: Settings, label: 'account.settings' },
+    { to: '/help', icon: BookOpen, label: 'x.nav.help' },
   ],
   ADMIN: [
     { to: '/admin', icon: LayoutDashboard, label: 'admin.overview', end: true, mobile: true },
+    { to: '/admin/reports', icon: BarChart3, label: 'x.nav.reports', mobile: true },
     { to: '/admin/users', icon: Users, label: 'admin.users', mobile: true },
     { to: '/admin/sellers', icon: BadgeCheck, label: 'admin.sellers', mobile: true },
     { to: '/admin/products', icon: Package, label: 'admin.products', mobile: true },
@@ -53,6 +58,8 @@ const NAV: Record<Role, Item[]> = {
     { to: '/admin/settings', icon: Settings, label: 'admin.settings', mobile: true },
     { to: '/admin/audit', icon: FileClock, label: 'admin.audit' },
     { to: '/admin/notifications', icon: Bell, label: 'nav.notifications' },
+    { to: '/admin/account', icon: UserCog, label: 'x.nav.mySettings' },
+    { to: '/help', icon: BookOpen, label: 'x.nav.help' },
   ],
 };
 
@@ -103,6 +110,7 @@ export default function DashboardLayout() {
       <p className="mt-1 px-2 text-xs font-semibold uppercase tracking-wider text-lime/80">{title}</p>
       <div className="mt-6 flex-1 overflow-y-auto no-scrollbar"><SideNav role={role} onNavigate={() => setOpen(false)} /></div>
       <div className="mt-4 space-y-3 border-t border-white/10 px-2 pt-4">
+        <InstallAppButton variant="light" block className="!py-2 text-xs" />
         <LanguageSwitcher dark />
         <Link to="/" className="flex items-center gap-2 text-sm text-white/70 hover:text-white"><Home className="h-4 w-4" />{t('nav.home')}</Link>
         <button onClick={() => void logout()} className="flex items-center gap-2 text-sm text-white/70 hover:text-white"><LogOut className="h-4 w-4" />{t('nav.logout')}</button>

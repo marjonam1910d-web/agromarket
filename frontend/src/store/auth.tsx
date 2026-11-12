@@ -8,7 +8,8 @@ interface AuthCtx {
   user: User | null;
   loading: boolean;
   setUser: (u: User | null) => void;
-  logout: () => Promise<void>;
+  /** Tizimdan chiqish. Standart: bosh sahifa ochiladi (qulf/PIN so'ralmaydi) */
+  logout: (opts?: { redirect?: string | false }) => Promise<void>;
   reload: () => Promise<unknown>;
 }
 const Ctx = createContext<AuthCtx | null>(null);
@@ -47,10 +48,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user?.id]);
 
   const setUser = useCallback((u: User | null) => qc.setQueryData(['me'], u), [qc]);
-  const logout = useCallback(async () => {
+  const logout = useCallback(async (opts?: { redirect?: string | false }) => {
     await api.post('/auth/logout').catch(() => undefined);
     qc.setQueryData(['me'], null);
     qc.removeQueries({ predicate: (q) => q.queryKey[0] !== 'me' && q.queryKey[0] !== 'public' });
+    const to = opts?.redirect === undefined ? '/' : opts.redirect;
+    // To'liq qayta yuklash: xotiradagi shaxsiy ma'lumotlar tozalanadi
+    if (to !== false) window.location.replace(to);
   }, [qc]);
 
   return (

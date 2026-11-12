@@ -45,7 +45,7 @@ agromarket/
 │   ├── nginx.conf · Dockerfile
 ├── e2e/                   Playwright E2E ssenariy
 ├── docker/nginx/          VPS uchun HTTPS konfiguratsiya
-├── docs/                  ARCHITECTURE · MODULES · INTEGRATIONS · DEPLOYMENT · DEPLOY_RENDER_SUPABASE · TESTING · CREDENTIALS
+├── docs/                  ARCHITECTURE · MODULES · INTEGRATIONS · DEPLOYMENT · DEPLOY_RENDER_SUPABASE · TESTING · CREDENTIALS · RESEARCH
 ├── scripts/               backup.sh · restore.sh
 ├── .github/workflows/     CI: har push'da testlar va build
 ├── render.yaml            Render Blueprint (bitta tugma bilan deploy)
@@ -144,6 +144,16 @@ Oxirgi natijalar (to'liq: [docs/TESTING.md](docs/TESTING.md)):
 | Frontend testlari | 7 / 7 ✅ |
 | E2E (haqiqiy brauzer, 20 ssenariy) | 20 / 20 ✅ |
 | Yuklama: 100 foydalanuvchi, 20 s | 0 xato, p95 ≈ 0.5 s |
+
+### Yangi imkoniyatlar (2026-11-12)
+- **Ilova (PWA):** "Ilovani yuklab olish" tugmasi (Android/kompyuter — bir bosishda, iPhone — yo'riqnoma bilan), oflayn sahifa.
+- **Ilova qulfi:** o'rnatilgan ilovada PIN majburiy, barmoq izi / Face ID (WebAuthn, server tomonida imzo tekshiriladi), fonga o'tganda yoki qayta ochilganda qulf; 5 xato PIN → barcha sessiyalar yopiladi; chiqishda bosh sahifa.
+- **Saqlangan kartalar:** Uzcard/Humo token sifatida (karta raqami serverda saqlanmaydi), bir bosishda to'lov; sinov rejimida SMS kod `666666`.
+- **Chek:** to'lovdan keyin "printerdan chiqayotgan" elektron chek.
+- **Hisobotlar:** admin va fermer uchun kategoriyalar bo'yicha, bosilsa batafsil (kunlik grafik, top mahsulot/sotuvchi, hududlar).
+- **Sozlamalar** bo'limlarga ajratildi; **Yordam** sahifasi: 3 tilda yo'riqnoma, xavfsizlik, FAQ, yangiliklar.
+- **Demo rejim:** bir bosishda demo xaridor/fermer; **real fotosuratlar** (Unsplash).
+- Raqobatchilar tahlili: [docs/RESEARCH.md](docs/RESEARCH.md). Ishlash qoidalari: [CLAUDE.md](CLAUDE.md).
 
 ### Modullik
 Backend har bir yo'nalish alohida modul (`src/modules/<nom>/index.ts`) va `src/modules/registry.ts` orqali ulanadi.

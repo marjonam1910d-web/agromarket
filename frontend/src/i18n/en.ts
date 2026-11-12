@@ -168,6 +168,63 @@ const en: Dict = {
     required: 'Required', phone: 'Invalid phone (e.g. 90 123 45 67)', email: 'Invalid email', min: 'At least {n} characters',
     password: 'At least 8 characters with letters and numbers', match: 'Passwords do not match', positive: 'Enter a positive number', terms: 'You must accept the terms',
   },
+  x: {
+    nav: { reports: 'Reports', help: 'Help & guide', mySettings: 'My settings', install: 'Get the app' },
+    auth: {
+      tabLogin: 'Sign in', tabSignup: 'Sign up', demoTitle: 'Demo mode', demoText: 'Try the platform without signing up',
+      demoBuyer: 'Demo buyer', demoSeller: 'Demo farmer', photoCredit: 'Photo: Unsplash',
+    },
+    install: {
+      button: 'Get the app', short: 'App', title: 'Install the AgroMarket app', text: 'Opens from your home screen like an app: faster, protected with a PIN and fingerprint.',
+      iosTitle: 'Install on iPhone', ios1: 'Tap «Share» at the bottom of Safari', ios2: 'Choose «Add to Home Screen»', ios3: 'Tap «Add» — the AgroMarket icon appears',
+      otherTitle: 'Install', other1: 'Open the browser menu (⋮)', other2: 'Choose «Install app» or «Add to Home screen»', done: 'App installed! Open it from your home screen.',
+      benefits1: 'Opens in one tap', benefits2: 'PIN & fingerprint protection', benefits3: 'Order status notifications',
+    },
+    lock: {
+      setupTitle: 'Set a PIN', setupText: 'Create a 4-digit PIN to protect the app. It is requested every time you return to the app.',
+      confirmTitle: 'Repeat the PIN', mismatch: "PINs don't match. Try again", weak: 'This PIN is too simple. Choose other digits',
+      unlockTitle: 'Enter your PIN', hello: 'Hello, {name}!', forgot: 'Forgot your PIN? Sign in with password', useBiometric: 'Unlock with fingerprint',
+      attemptsLeft: 'Wrong PIN. {n} attempts left', resetDone: 'For your security you were signed out. Sign in again with your password',
+      biometricAsk: 'Unlock with fingerprint (or Face ID) next time?', biometricYes: 'Yes, enable', biometricNo: 'Later',
+      biometricOn: 'Fingerprint enabled', biometricOff: 'Fingerprint disabled', biometricUnavailable: 'Fingerprint/Face ID is not available on this device',
+      required: 'A PIN is required in the app — it protects your money and orders.', logout: 'Sign out',
+      sectionTitle: 'App lock', sectionText: 'When the app goes to background or is closed, a PIN or fingerprint is required to open it again.',
+      status: 'Status', on: 'On', off: 'Off', setup: 'Set a PIN', changePin: 'Change PIN', currentPin: 'Current PIN', newPin: 'New PIN',
+      biometric: 'Fingerprint / Face ID', enableBiometric: 'Enable', disableBiometric: 'Disable', lockInBrowser: 'Lock in the browser too',
+      appOnly: 'The lock is always on in the installed app. Optional in the browser.', devices: 'Devices with app lock', thisDevice: 'This device',
+      lastUnlock: 'Last unlocked', remove: 'Remove', removed: 'Device removed', pinChanged: 'PIN changed',
+    },
+    cards: {
+      title: 'Payment cards', text: 'Save your Uzcard and Humo cards — future purchases in one tap.', add: 'Add card', number: 'Card number', expire: 'Expiry date',
+      label: 'Name (optional)', labelPh: 'e.g. Main card', next: 'Continue', smsSent: 'SMS code sent to {phone}', smsCode: 'SMS code',
+      verify: 'Verify', added: 'Card added', isDefault: 'Default', makeDefault: 'Make default', remove: 'Remove', removed: 'Card removed',
+      empty: 'No cards yet', sandboxHint: 'Test mode: any 8600… or 9860… number, SMS code — {code}', disabled: 'Adding cards is not available yet',
+      safe: 'Your card number is never stored on our server — it goes directly to the payment system (Payme). We keep only a secure token and the last 4 digits.',
+      payWith: 'Pay with a saved card', payNow: 'Pay {amount}', newCard: 'Another card', paid: 'Payment successful',
+    },
+    settings: {
+      profile: 'Profile', security: 'Security', cards: 'Payment cards', language: 'Language', app: 'App', help: 'Help', danger: 'Account',
+      helpText: 'How to use the platform, security rules and FAQ.', openHelp: 'Open the guide',
+      appText: 'Install AgroMarket on your phone as an app.', installed: 'The app is installed and running',
+      sessionsText: 'Sign out on all devices (useful if your phone is lost).',
+    },
+    reports: {
+      title: 'Report by category', sellerTitle: 'Report by product type', subtitle: 'Click a category to see the details',
+      revenue: 'Sales', orders: 'Orders', quantity: 'Quantity sold', buyers: 'Buyers', avgOrder: 'Average order', share: 'Share', growth: 'Growth',
+      products: 'Active products', sellers: 'Sellers', stock: 'Stock', rating: 'Rating', daily: 'Daily sales', subcats: 'Subcategories',
+      topProducts: 'Best-selling products', topSellers: 'Top sellers', regions: 'By region', statuses: 'Order statuses',
+      priceRange: 'Price range (per unit)', days: 'Last {n} days', noData: 'No sales in this period', back: 'All categories', total: 'Total', vsPrev: 'vs previous period',
+    },
+    receipt: {
+      printing: 'Printing your receipt…', ready: 'Receipt ready', thanks: 'Thank you for your purchase!', order: 'Order', date: 'Date', items: 'Items', subtotal: 'Items',
+      delivery: 'Delivery', discount: 'Discount', total: 'TOTAL', payment: 'Payment', paid: 'PAID', cod: 'Pay on delivery', tear: 'View receipt', farmFresh: 'FROM THE FIELD — STRAIGHT TO YOU',
+    },
+    help: {
+      title: 'Help & guide', subtitle: 'How to use AgroMarket, security and answers to questions', guide: 'User guide',
+      security: 'Security', faq: 'FAQ', whatsNew: "What's new", forBuyer: 'For buyers', forSeller: 'For farmers', forAdmin: 'For administrators',
+      contact: "Didn't find an answer? Contact support", updated: 'Updated',
+    },
+  },
 };
 
 export default en;

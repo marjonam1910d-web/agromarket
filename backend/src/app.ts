@@ -23,7 +23,7 @@ import fs from 'node:fs';
 // Frontend'ni backend o'zi berganda qo'llanadigan xavfsizlik sarlavhalari (frontend/nginx.conf bilan bir xil)
 const FRONTEND_CSP =
   "default-src 'self'; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-  "font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self' wss: ws:; frame-ancestors 'none'; " +
+  "font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self' wss: ws: https://checkout.paycom.uz https://checkout.test.paycom.uz; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none'; " +
   "form-action 'self' https://checkout.paycom.uz https://test.paycom.uz https://my.click.uz";
 
 export function createApp() {

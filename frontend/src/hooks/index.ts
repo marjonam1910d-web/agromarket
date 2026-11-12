@@ -30,6 +30,7 @@ export interface PublicConfig {
   paymentMethods: Record<'cash' | 'payme' | 'click' | 'card', boolean>;
   paymentSandbox: boolean;
   otpDevEcho: boolean;
+  demoMode?: boolean;
   deliverySlots: string[];
   maxDaysAhead: number;
   supportPhone: string;

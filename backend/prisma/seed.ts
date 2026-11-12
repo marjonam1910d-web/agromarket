@@ -10,6 +10,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { PrismaClient, Prisma, type OrderStatus, type Unit } from '@prisma/client';
+import { CATEGORY_PHOTOS, PRODUCT_PHOTOS } from '../src/common/demo-photos';
 import { REGIONS } from '../src/common/regions';
 
 const prisma = new PrismaClient();
@@ -231,7 +232,7 @@ async function main() {
   const catRoot: Record<string, string> = {};
   let order = 0;
   for (const c of CATEGORIES) {
-    const created = await prisma.category.create({ data: { slug: c.slug, nameUz: c.uz, nameRu: c.ru, nameEn: c.en, icon: c.icon, sortOrder: order++ } });
+    const created = await prisma.category.create({ data: { slug: c.slug, nameUz: c.uz, nameRu: c.ru, nameEn: c.en, icon: c.icon, imageUrl: CATEGORY_PHOTOS[c.slug] ?? null, sortOrder: order++ } });
     catId[c.slug] = created.id;
     catRoot[c.slug] = c.slug;
     for (const ch of c.children ?? []) {
@@ -246,7 +247,7 @@ async function main() {
   let i = 0;
   for (const p of PRODUCTS) {
     const s = sellers[p.seller];
-    const img = illustration(p.key, p.emoji, catRoot[p.cat]);
+    const img = PRODUCT_PHOTOS[p.key] ?? illustration(p.key, p.emoji, catRoot[p.cat]);
     const final = p.discount ?? p.price;
     const created = await prisma.product.create({
       data: {
@@ -266,7 +267,7 @@ async function main() {
     data: {
       sellerId: sellers[0].profile.id, categoryId: catId['mevalar'], name: 'Shaftoli (Anjir shaftoli)', slug: 'shaftoli-pending', description: "Yassi anjir shaftoli — moderatsiyani kutmoqda.",
       price: D(25000), effectivePrice: D(25000), unit: 'kg', region: 'namangan', district: 'Chust', status: 'pending_review', isSeasonal: true, seasonLabel: 'Mavsumiy',
-      images: { create: [{ url: illustration('shaftoli', '🍑', 'mevalar'), sortOrder: 0 }] }, inventory: { create: { quantity: D(700) } },
+      images: { create: [{ url: PRODUCT_PHOTOS.shaftoli, sortOrder: 0 }] }, inventory: { create: { quantity: D(700) } },
     },
   });
 

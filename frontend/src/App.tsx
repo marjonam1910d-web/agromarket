@@ -7,6 +7,7 @@ import { ToastProvider } from '@/store/toast';
 import { useRealtime } from '@/hooks';
 import { ApiError } from '@/services/api';
 import AppRoutes from '@/routes';
+import { AppLockProvider } from '@/security/AppLock';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,7 +33,9 @@ export default function App() {
             <AuthProvider>
               <BrowserRouter>
                 <Realtime />
-                <AppRoutes />
+                <AppLockProvider>
+                  <AppRoutes />
+                </AppLockProvider>
               </BrowserRouter>
             </AuthProvider>
           </ToastProvider>

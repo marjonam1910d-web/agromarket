@@ -10,6 +10,7 @@ import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
+import { CATEGORY_PHOTOS, PRODUCT_PHOTOS } from '../src/common/demo-photos';
 
 const prisma = new PrismaClient();
 
@@ -25,6 +26,8 @@ async function main() {
     });
     if (r.status !== 0) throw new Error('Demo seed xatosi');
   }
+
+  if (process.env.SEED_DEMO === 'true') await refreshDemoPhotos();
 
   if (email && password) {
     if (password.length < 10) throw new Error('ADMIN_PASSWORD kamida 10 belgi bo\'lsin');
@@ -42,6 +45,20 @@ async function main() {
       console.log(`✅ Admin yangilandi: ${email}`);
     }
   }
+}
+
+/** Oldingi versiyada chizilgan (SVG) demo rasmlarni real fotolarga almashtiradi. Faqat demo yozuvlarga tegadi. */
+async function refreshDemoPhotos() {
+  let n = 0;
+  for (const [key, url] of Object.entries(PRODUCT_PHOTOS)) {
+    const old = `/uploads/public/seed/${key}.svg`;
+    n += (await prisma.productImage.updateMany({ where: { url: old }, data: { url } })).count;
+    await prisma.orderItem.updateMany({ where: { imageUrl: old }, data: { imageUrl: url } });
+  }
+  for (const [slug, url] of Object.entries(CATEGORY_PHOTOS)) {
+    await prisma.category.updateMany({ where: { slug, imageUrl: null }, data: { imageUrl: url } });
+  }
+  if (n) console.log(`🖼  ${n} ta demo rasm real fotoga almashtirildi`);
 }
 
 main()

@@ -148,6 +148,8 @@ model User {
   buyerProfile   BuyerProfile?
   sellerProfile  SellerProfile?
   sessions       Session[]
+  appDevices     AppDevice[]
+  paymentCards   PaymentCard[]
   addresses      Address[]
   cart           Cart?
   favorites      Favorite[]
@@ -834,4 +836,45 @@ model StoredObject {
   size        Int
   data        Bytes
   createdAt   DateTime @default(now())
+}
+
+/// Ilova qulfi (bank ilovalari kabi): qurilma bo'yicha PIN va biometrik (WebAuthn) kalit.
+/// PIN faqat bcrypt xeshi ko'rinishida saqlanadi; biometrik ma'lumot qurilmadan chiqmaydi — faqat ochiq kalit.
+model AppDevice {
+  id               String    @id @default(cuid())
+  userId           String
+  name             String?
+  pinHash          String
+  failedAttempts   Int       @default(0)
+  credentialId     String?   @unique
+  publicKey        String?
+  publicKeyAlg     Int?
+  signCount        Int       @default(0)
+  pendingChallenge String?
+  challengeAt      DateTime?
+  lastUnlockAt     DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// Saqlangan to'lov kartasi: faqat provayder tokeni va niqoblangan raqam. Karta raqami/CVV hech qachon saqlanmaydi.
+model PaymentCard {
+  id        String          @id @default(cuid())
+  userId    String
+  provider  PaymentProvider
+  token     String
+  maskedPan String
+  expire    String
+  brand     String
+  label     String?
+  isDefault Boolean         @default(false)
+  createdAt DateTime        @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
