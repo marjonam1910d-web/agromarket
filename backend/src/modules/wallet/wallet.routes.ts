@@ -118,4 +118,30 @@ r.get(
   }),
 );
 
+/**
+ * Admin: qo'lda o'tkazma (tuzatish). Masalan, tashqi to'lovni hamyonga kiritish yoki demo uchun balans berish.
+ * Musbat — hamyonga qo'shiladi, manfiy — yechiladi (mavjud balansdan oshmaydi). Har biri audit logga yoziladi.
+ */
+r.post(
+  '/admin/adjust',
+  authenticate,
+  requireRole('ADMIN'),
+  validate({ body: z.object({ userId: z.string(), amount: z.number().int().min(-100_000_000).max(100_000_000).refine((v) => v !== 0), note: z.string().trim().min(3).max(300) }) }),
+  ah(async (req, res) => {
+    const u = await prisma.user.findFirst({ where: { id: req.body.userId, role: 'SELLER', deletedAt: null }, select: { id: true } });
+    if (!u) throw Errors.notFound('Fermer');
+    const tx = await prisma.$transaction(async (db) => {
+      await db.$queryRaw`SELECT id FROM "User" WHERE id = ${u.id} FOR UPDATE`;
+      if (req.body.amount < 0) {
+        const b = await walletBalance(u.id, db);
+        if (new Prisma.Decimal(b.available).add(req.body.amount).lt(0)) throw new AppError(409, 'INSUFFICIENT_FUNDS', "Hamyonda mablag' yetarli emas");
+      }
+      return db.walletTransaction.create({ data: { userId: u.id, kind: 'adjustment', amount: new Prisma.Decimal(req.body.amount), refType: 'Admin', refId: `adj-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, note: req.body.note, completedAt: new Date(), processedBy: req.user!.id } });
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    await audit(req, 'wallet.adjust', 'WalletTransaction', tx.id, { userId: u.id, amount: req.body.amount });
+    void notify({ userId: u.id, type: 'wallet', key: 'wallet.credited', params: { number: req.body.note.slice(0, 40), amount: String(req.body.amount) }, link: '/wallet' });
+    created(res, tx);
+  }),
+);
+
 export default r;

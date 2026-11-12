@@ -11,10 +11,11 @@ import { notify } from '../notifications/notifications.service';
  */
 export async function settleSellerWallet(
   tx: Tx,
-  so: { id: string; number: string; sellerId: string; sellerPayout: Prisma.Decimal; commissionAmount: Prisma.Decimal; order: { paymentMethod: string } },
+  so: { id: string; number: string; sellerId: string; sellerPayout: Prisma.Decimal; commissionAmount: Prisma.Decimal; deliveryFee?: Prisma.Decimal; order: { paymentMethod: string } },
 ) {
   const seller = await tx.sellerProfile.findUnique({ where: { id: so.sellerId }, select: { userId: true } });
   if (!seller) return;
+  await settlePartnerShare(tx, so, seller.userId);
   if (so.order.paymentMethod === 'cash') {
     if (so.commissionAmount.lte(0)) return;
     await tx.walletTransaction.createMany({
@@ -28,6 +29,20 @@ export async function settleSellerWallet(
     skipDuplicates: true,
   });
   if (r.count) void notify({ userId: seller.userId, type: 'wallet', key: 'wallet.credited', params: { number: so.number, amount: so.sellerPayout.toFixed(0) }, link: '/seller/wallet' });
+}
+
+/** Yetkazish hamkorligi faol bo'lsa: yetkazish to'lovining kelishilgan foizi platformaga (har buyurtma uchun bir marta) */
+export async function settlePartnerShare(tx: Tx, so: { id: string; number: string; sellerId: string; deliveryFee?: Prisma.Decimal }, userId: string) {
+  const fee = so.deliveryFee ?? (await tx.sellerOrder.findUnique({ where: { id: so.id }, select: { deliveryFee: true } }))?.deliveryFee;
+  if (!fee || fee.lte(0)) return;
+  const p = await tx.partnership.findFirst({ where: { sellerId: so.sellerId, status: 'active' }, orderBy: { startedAt: 'desc' } });
+  if (!p) return;
+  const share = fee.mul(p.deliverySharePercent).div(100).toDecimalPlaces(0);
+  if (share.lte(0)) return;
+  await tx.walletTransaction.createMany({
+    data: [{ userId, kind: 'partner_share', amount: share.neg(), refType: 'SellerOrder', refId: so.id, note: `${so.number}: yetkazish hamkorligi ${p.deliverySharePercent.toString()}% (${p.number})`, completedAt: new Date() }],
+    skipDuplicates: true,
+  });
 }
 
 /** available = yakunlangan yozuvlar + kutilayotgan yechib olishlar (ular darhol band qilinadi) */

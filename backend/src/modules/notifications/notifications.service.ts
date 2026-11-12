@@ -20,7 +20,10 @@ export type NotificationType =
   | 'delivery.tracking'
   | 'contract'
   | 'wallet'
-  | 'support';
+  | 'support'
+  | 'application'
+  | 'sanction'
+  | 'staff';
 
 interface NotifyInput {
   userId: string;

@@ -108,8 +108,8 @@ export async function sendEmail(to: string, subject: string, text: string, html?
 
 export function channelStatus() {
   return {
-    sms: env.SMS_DRIVER === 'eskiz' && env.ESKIZ_EMAIL ? 'eskiz' : 'console (sozlanmagan)',
-    email: emailConfigured() ? env.EMAIL_DRIVER : 'console (sozlanmagan)',
-    push: 'tayyor arxitektura (FCM/Web Push kalitlari kerak)',
+    sms: env.SMS_DRIVER === 'eskiz' && env.ESKIZ_EMAIL ? 'eskiz' : 'off',
+    email: emailConfigured() ? (env.EMAIL_DRIVER as string) : 'off',
+    push: 'pending',
   };
 }

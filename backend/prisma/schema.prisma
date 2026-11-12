@@ -141,6 +141,8 @@ model User {
   failedLoginCount Int        @default(0)
   lockedUntil      DateTime?
   lastLoginAt      DateTime?
+  /// Shu vaqtdan oldin berilgan access tokenlar yaroqsiz (parol almashganda, bloklanganda)
+  tokensValidAfter DateTime?
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
   deletedAt        DateTime?
@@ -244,6 +246,10 @@ model SellerProfile {
   @@index([verificationStatus])
   @@index([region, district])
   salesPoints        SalesPoint[]
+  applications       Application[]
+  staff              FarmStaff[]
+  partnerships       Partnership[]
+  sanctions          Sanction[]
 }
 
 model SellerVerification {
@@ -295,6 +301,8 @@ model Category {
   parentId  String?
   sortOrder Int      @default(0)
   isActive  Boolean  @default(true)
+  /// Fermer taklif qilgan kategoriya (admin tasdiqlaguncha faol emas)
+  proposedById String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -682,6 +690,8 @@ model Delivery {
   courierUpdatedAt DateTime?
   originLat        Float?
   originLng        Float?
+  /// Fermer xodimi (kuryer) biriktirilgan bo'lsa
+  courierUserId    String?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
@@ -1005,6 +1015,8 @@ enum WalletTxKind {
   withdrawal
   withdrawal_reversal
   adjustment
+  penalty
+  partner_share
 }
 
 enum WalletTxStatus {
@@ -1033,4 +1045,135 @@ model WalletTransaction {
   @@unique([kind, refId])
   @@index([userId, createdAt])
   @@index([status, kind])
+}
+
+
+// ───────────────────────── Arizalar, jarimalar, xodimlar, hamkorlik ─────────────────────────
+
+enum ApplicationKind {
+  SELLER
+  PRODUCTS
+  PARTNERSHIP
+}
+
+enum ApplicationStatus {
+  pending
+  approved
+  partially_approved
+  rejected
+  withdrawn
+}
+
+/// Elektron ariza: fermer ro'yxatdan o'tishi, mahsulotlar paketi yoki yetkazish hamkorligi
+model Application {
+  id           String            @id @default(cuid())
+  number       String            @unique
+  kind         ApplicationKind
+  status       ApplicationStatus @default(pending)
+  sellerId     String
+  applicantId  String
+  /// Ariza maydonlari (davlat namunasidagi ariza shakli bo'yicha)
+  data         Json
+  /// Ilova qilingan hujjatlar: [{ key, name, type }]
+  attachments  Json              @default("[]")
+  sealCode     String?
+  contentHash  String?
+  reviewedById String?
+  reviewedAt   DateTime?
+  reviewNote   String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  seller SellerProfile     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  items  ApplicationItem[]
+
+  @@index([kind, status, createdAt])
+  @@index([sellerId])
+}
+
+model ApplicationItem {
+  id            String   @id @default(cuid())
+  applicationId String
+  productId     String?
+  status        String   @default("pending") // pending | approved | rejected
+  note          String?
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+enum SanctionKind {
+  warning
+  fine
+  suspension
+  correction
+}
+
+/// Admin chorasi: ogohlantirish, jarima, faoliyatni to'xtatish, ma'lumotni tuzatish — har biri hujjat (dalolatnoma)
+model Sanction {
+  id          String       @id @default(cuid())
+  number      String       @unique
+  kind        SanctionKind
+  sellerId    String?
+  userId      String
+  complaintId String?
+  amount      Decimal?     @db.Decimal(14, 2)
+  reason      String
+  details     Json         @default("{}")
+  status      String       @default("active") // active | cancelled
+  createdById String
+  cancelledAt DateTime?
+  createdAt   DateTime     @default(now())
+
+  seller SellerProfile? @relation(fields: [sellerId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+}
+
+enum StaffRole {
+  COURIER
+  SALES
+}
+
+/// Fermer xo'jaligi xodimi (kuryer, sotuvchi) — ro'yxatdan o'tgan foydalanuvchi email kodi bilan biriktiriladi
+model FarmStaff {
+  id          String    @id @default(cuid())
+  sellerId    String
+  userId      String?
+  email       String
+  role        StaffRole
+  status      String    @default("invited") // invited | active | removed
+  codeHash    String?
+  codeExpires DateTime?
+  attempts    Int       @default(0)
+  invitedAt   DateTime  @default(now())
+  joinedAt    DateTime?
+  removedAt   DateTime?
+
+  seller SellerProfile @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@unique([sellerId, email])
+  @@index([userId, status])
+}
+
+/// Platforma bilan yetkazish hamkorligi: fermer yetkazish to'lovining belgilangan foizini platformaga beradi
+model Partnership {
+  id                   String    @id @default(cuid())
+  number               String    @unique
+  sellerId             String
+  applicationId        String?   @unique
+  deliverySharePercent Decimal   @db.Decimal(5, 2)
+  status               String    @default("active") // active | ended
+  terms                Json
+  contentHash          String
+  sellerSignedAt       DateTime
+  adminSignedAt        DateTime
+  adminId              String
+  startedAt            DateTime  @default(now())
+  endedAt              DateTime?
+
+  seller SellerProfile @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@index([sellerId, status])
 }

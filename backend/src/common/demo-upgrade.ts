@@ -1,4 +1,5 @@
-import type { PrismaClient } from '@prisma/client';
+import { Prisma, type PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 import { CATEGORY_PHOTOS, FARM_PHOTOS, PRODUCT_PHOTOS } from './demo-photos';
 
 /**
@@ -55,5 +56,49 @@ export async function upgradeDemo(prisma: PrismaClient) {
     if (!sp || sp._count.salesPoints) continue;
     points += (await prisma.salesPoint.createMany({ data: list.map((p) => ({ ...p, sellerId: sp.id })) })).count;
   }
-  return { photos, emails, points };
+  const extra = await demoWorkflows(prisma);
+  return { photos, emails, points: points + extra };
+}
+
+/**
+ * Yangi oqimlar uchun demo: tekshiruvdagi fermerga e-ariza, Bog'iston uchun yetkazish hamkorligi va demo kuryer
+ * (kuryer@agromarket.uz / Kuryer12345 — faqat demo).
+ */
+async function demoWorkflows(prisma: PrismaClient) {
+  let n = 0;
+  const pending = await prisma.sellerProfile.findMany({ where: { verificationStatus: 'PENDING', applications: { none: {} } }, include: { user: { select: { id: true, fullName: true, phone: true, email: true } }, verifications: true } });
+  for (const s of pending) {
+    const c = await prisma.application.count();
+    await prisma.application.create({
+      data: {
+        number: `AR-${new Date().getFullYear()}-${String(c + 1).padStart(6, '0')}`,
+        kind: 'SELLER',
+        sellerId: s.id,
+        applicantId: s.userId,
+        data: { fullName: s.user.fullName, position: 'rahbari', phone: s.user.phone, email: s.user.email, legalForm: 'dehqon', farmName: s.farmName, tin: s.tin ?? '000000000', regNumber: '—', regDate: s.createdAt.toISOString().slice(0, 10), region: s.region, district: s.district, address: s.address, landArea: 2.5, employees: 3, activity: ['Sabzavotlar', 'Mevalar'], extra: '' },
+        attachments: s.verifications.map((v) => ({ key: v.documentPath, name: "Fermer xo'jaligi guvohnomasi", type: v.documentType })) as Prisma.InputJsonValue,
+      },
+    });
+    n++;
+  }
+  const farm = await prisma.sellerProfile.findFirst({ where: { user: { phone: '+998911234567' } }, select: { id: true, userId: true, farmName: true } });
+  if (farm && !(await prisma.partnership.findFirst({ where: { sellerId: farm.id } }))) {
+    const now = new Date();
+    await prisma.partnership.create({
+      data: {
+        number: `HM-${now.getFullYear()}-000001`, sellerId: farm.id, deliverySharePercent: new Prisma.Decimal(10), contentHash: 'demo', sellerSignedAt: now, adminSignedAt: now, adminId: farm.userId,
+        terms: { subject: 'Demo hamkorlik', share: "Yetkazish to'lovidan 10% platforma ulushi", regions: ['namangan', 'toshkent-sh'], couriers: 1 },
+      },
+    });
+    n++;
+  }
+  if (farm) {
+    let courier = await prisma.user.findUnique({ where: { email: 'kuryer@agromarket.uz' }, select: { id: true } });
+    if (!courier) {
+      courier = await prisma.user.create({ data: { email: 'kuryer@agromarket.uz', phone: '+998901110011', fullName: 'Toshpo\'latov Jasur', passwordHash: await bcrypt.hash('Kuryer12345', 10), role: 'BUYER', emailVerifiedAt: new Date(), termsAcceptedAt: new Date(), buyerProfile: { create: {} } }, select: { id: true } });
+      n++;
+    }
+    await prisma.farmStaff.upsert({ where: { sellerId_email: { sellerId: farm.id, email: 'kuryer@agromarket.uz' } }, create: { sellerId: farm.id, email: 'kuryer@agromarket.uz', userId: courier.id, role: 'COURIER', status: 'active', joinedAt: new Date() }, update: {} });
+  }
+  return n;
 }

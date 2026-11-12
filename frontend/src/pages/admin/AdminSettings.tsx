@@ -6,15 +6,25 @@ import { api } from '@/services/api';
 import { useToast } from '@/store/toast';
 import { useErrorText } from '@/hooks';
 import { date, money } from '@/utils/format';
-import { Badge, Button, Card, Checkbox, Field, Input, Modal, Select, Skeleton, Table } from '@/components/ui';
-import { PageHeader } from '@/components/common';
-/* ═════════ Tizim sozlamalari + kuponlar ═════════ */
-export function AdminSettings() {
+import { Button, Card, Checkbox, Field, Input, Modal, Select, Skeleton, Table } from '@/components/ui';
+import { IntegrationsPanel } from '@/components/PayBrand';
+type SettingsData = { values: Record<string, unknown>; integrations: { payments: Record<string, string>; channels: Record<string, string> } };
+export const useAdminSettings = () => useQuery({ queryKey: ['admin', 'settings'], queryFn: () => api.get<SettingsData>('/admin/settings') });
+
+/** Sozlamalar → Integratsiyalar */
+export function AdminIntegrations() {
+  const q = useAdminSettings();
+  if (q.isLoading || !q.data) return <Skeleton className="h-40" />;
+  return <IntegrationsPanel data={q.data.integrations} />;
+}
+
+/* ═════════ Platforma sozlamalari va kuponlar (Sozlamalar sahifasining admin bo'limlari) ═════════ */
+export function AdminSettings({ part }: { part: 'platform' | 'coupons' }) {
   const { t, lang } = useI18n();
   const toast = useToast();
   const err = useErrorText();
   const qc = useQueryClient();
-  const q = useQuery({ queryKey: ['admin', 'settings'], queryFn: () => api.get<{ values: Record<string, unknown>; integrations: { payments: Record<string, string>; channels: Record<string, string> } }>('/admin/settings') });
+  const q = useAdminSettings();
   const coupons = useQuery({ queryKey: ['admin', 'coupons'], queryFn: () => api.get<{ id: string; code: string; type: string; value: string; usedCount: number; usageLimit: number | null; endsAt: string; isActive: boolean; seller: { farmName: string } | null }[]>('/admin/coupons') });
   const [draft, setDraft] = useState<Record<string, string>>({});
   const save = useMutation({
@@ -44,22 +54,16 @@ export function AdminSettings() {
   const today = new Date().toISOString().slice(0, 10);
   return (
     <div className="space-y-5">
-      <PageHeader title={t('admin.settings')} />
-      <Card className="p-5">
+      {part === 'platform' && <Card className="p-5">
         {row('commission.percent', 'admin.commissionPercent', 'number')}
         {row('products.autoApprove', 'admin.autoApprove', 'bool')}
         {row('delivery.slots', 'admin.slots', 'list')}
         {row('delivery.maxDaysAhead', 'admin.maxDays', 'number')}
         {row('reviews.autoHideReports', 'admin.autoHide', 'number')}
         {row('platform.supportPhone', 'admin.supportPhone', 'text')}
-      </Card>
-      <Card className="p-5">
-        <h2 className="mb-3 font-extrabold">{t('admin.integrations')}</h2>
-        <div className="flex flex-wrap gap-2">
-          {Object.entries({ ...q.data!.integrations.payments, ...q.data!.integrations.channels }).map(([k, s]) => <Badge key={k} tone={/sozlanmagan|console/.test(s) ? 'yellow' : 'green'}>{k}: {s}</Badge>)}
-        </div>
-      </Card>
-      <Card className="p-5">
+        {row('partner.deliverySharePercent', 'z.settings.partnerShare', 'number')}
+      </Card>}
+      {part === 'coupons' && <Card className="p-5">
         <div className="mb-3 flex items-center justify-between"><h2 className="font-extrabold">{t('admin.coupons')}</h2><Button size="sm" onClick={() => setNewC({ code: '', type: 'percent', value: '10', minOrderAmount: '0', maxDiscount: '', usageLimit: '', startsAt: today, endsAt: today })}><Plus className="h-4 w-4" />{t('common.add')}</Button></div>
         <Table rows={coupons.data ?? []} rowKey={(c) => c.id} empty={<p className="text-sm text-muted">{t('common.empty')}</p>} columns={[
           { key: 'c', title: t('seller.couponCode'), render: (c) => <b className="font-mono">{c.code}</b> },
@@ -69,7 +73,7 @@ export function AdminSettings() {
           { key: 'e', title: t('seller.endsAt'), render: (c) => date(c.endsAt, lang) },
           { key: 'a', title: '', render: (c) => <Checkbox checked={c.isActive} onChange={(e) => toggleCoupon.mutate({ id: c.id, isActive: e.target.checked })} label={t('admin.active')} /> },
         ]} />
-      </Card>
+      </Card>}
       <Modal open={Boolean(newC)} onClose={() => setNewC(null)} title={t('admin.coupons')} footer={<Button loading={createC.isPending} onClick={() => createC.mutate()}>{t('common.save')}</Button>}>
         {newC && (
           <div className="grid grid-cols-2 gap-3">

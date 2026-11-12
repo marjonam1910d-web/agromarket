@@ -35,6 +35,10 @@ Modulni vaqtincha o'chirish: `.env` da `MODULES_DISABLED=chat,complaints` (auth,
 | Shartnoma matni, imzo, muhr, QR | `modules/contracts/` (`contracts.service.ts` — xesh va imzo), `lib/qr.ts` |
 | Hamyon, yechib olish | `modules/wallet/` (`settleSellerWallet` → `orders/lifecycle.ts` dan chaqiriladi) |
 | Chat tarjimasi, admin bilan aloqa | `modules/chat/translate.ts`, `chat.routes.ts` (`/support`, `/admin/:id`, `/with-buyer/:id`) |
+| E-arizalar, kategoriya taklifi, hamkorlik | `modules/applications/` |
+| Admin: foydalanuvchi kartasi, choralar, chek; hisob-faktura | `modules/backoffice/` (`backoffice.routes.ts`, `documents.routes.ts`) |
+| Fermer xodimlari (kuryer, sotuvchi) | `modules/staff/` |
+| Hisobot konstruktori va CSV eksport | `modules/reports/` |
 | Ma'lumotlar bazasi tuzilmasi | `prisma/schema.prisma` → `npx prisma migrate dev --name <nom>` |
 
 ## Frontend: `frontend/src/`

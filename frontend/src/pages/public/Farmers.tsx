@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { BadgeCheck, MapPin, Package, Search, Star, Truck } from 'lucide-react';
 import { useI18n } from '@/i18n';
+import { FarmPointsSection } from '@/pages/maps/Maps';
 import { api, img, qs } from '@/services/api';
 import { useDebounce, useRegions } from '@/hooks';
 import { date, money } from '@/utils/format';
@@ -98,6 +99,7 @@ export function FarmerDetailPage() {
         {f.description && <p className="mt-5 max-w-3xl whitespace-pre-line text-ink-soft">{f.description}</p>}
         <h2 className="mb-4 mt-10 text-xl font-extrabold text-ink">{t('seller.products')}</h2>
         {f.products.length ? <ProductGrid>{f.products.map((p, i) => <ProductCard key={p.id} p={p} index={i} />)}</ProductGrid> : <Empty title={t('common.empty')} />}
+        <FarmPointsSection sellerId={f.id} />
         <div className="mt-10 grid gap-6 lg:grid-cols-2">
           <Card className="p-5">
             <h3 className="mb-3 font-extrabold text-ink">{t('farmers.deliversTo')}</h3>

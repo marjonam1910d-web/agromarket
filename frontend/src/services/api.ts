@@ -116,3 +116,24 @@ export function img(url?: string | null) {
   if (!url) return '/placeholder.svg';
   return url;
 }
+
+/** Faylni (CSV va h.k.) yuklab olish — sessiya cookie bilan; 401 bo'lsa tokenni yangilab qayta urinadi */
+export async function download(path: string, fallbackName = 'agromarket.csv') {
+  const get = () => fetch(`${BASE}${path}`, { credentials: 'include', headers: { 'Accept-Language': localStorage.getItem('am_lang') ?? 'uz' } });
+  let res = await get();
+  if (res.status === 401 && (await refresh())) res = await get();
+  if (!res.ok) {
+    const j = await res.json().catch(() => null);
+    throw new ApiError(res.status, j?.error?.code ?? 'INTERNAL', j?.error?.message ?? res.statusText);
+  }
+  const name = /filename="([^"]+)"/.exec(res.headers.get('Content-Disposition') ?? '')?.[1] ?? fallbackName;
+  const url = URL.createObjectURL(await res.blob());
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  return name;
+}

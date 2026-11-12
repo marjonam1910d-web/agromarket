@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { MessageCircle, Truck } from 'lucide-react';
 import { SellerTrackingControl } from '@/components/LiveTracking';
+import { InvoiceButton } from '@/components/Invoice';
+import { AssignCourier } from '@/pages/seller/Staff';
 import { ContractFromOrderButton } from '@/pages/contracts/Contracts';
 import { WriteToModal } from '@/pages/wallet/Wallet';
 import { useI18n, type TKey } from '@/i18n';
@@ -92,6 +94,7 @@ export function SellerOrderDetail() {
               <div className="flex justify-between text-base font-extrabold"><dt>{t('seller.net')}</dt><dd className="text-brand-800">{money(o.sellerPayout, lang)}</dd></div>
             </dl>
           </Card>
+          {o.delivery && <AssignCourier sellerOrderId={o.id} status={o.status} current={o.delivery.courierName ?? null} />}
           <SellerTrackingControl sellerOrderId={o.id} status={o.status} />
           {o.delivery && ['ready_for_delivery', 'shipped'].includes(o.status) && (
             <Card className="p-4">
@@ -113,6 +116,7 @@ export function SellerOrderDetail() {
             <div className="mt-3 flex flex-wrap gap-2">
               <Button size="sm" variant="outline" onClick={() => setWrite(true)}><MessageCircle className="h-4 w-4" />{t('y.support.writeBuyer')}</Button>
               <ContractFromOrderButton sellerOrderId={o.id} />
+              <InvoiceButton sellerOrderId={o.id} label />
             </div>
           </Card>
           <Card className="p-4"><OrderTimeline status={o.status} history={o.statusHistory} /></Card>

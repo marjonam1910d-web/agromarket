@@ -5,6 +5,7 @@ import { BadgeCheck, CreditCard, FileText, Heart, MapPin, MessageCircle, Package
 import { useI18n, type TKey } from '@/i18n';
 import { BuyerTracking } from '@/components/LiveTracking';
 import { ContractFromOrderButton } from '@/pages/contracts/Contracts';
+import { InvoiceButton } from '@/components/Invoice';
 import { api, img, qs } from '@/services/api';
 import { useAuth } from '@/store/auth';
 import { useToast } from '@/store/toast';
@@ -176,7 +177,7 @@ export function OrderDetail() {
                 </div>
               </div>
               {o.viewer === 'buyer' && ['ready_for_delivery', 'shipped', 'in_transit'].includes(so.status) && <div className="px-4 pb-4 print:hidden"><BuyerTracking sellerOrderId={so.id} /></div>}
-              {o.viewer === 'buyer' && <div className="px-4 pb-4 print:hidden"><ContractFromOrderButton sellerOrderId={so.id} /></div>}
+              <div className="flex flex-wrap gap-2 px-4 pb-4 print:hidden">{o.viewer === 'buyer' && <ContractFromOrderButton sellerOrderId={so.id} />}<InvoiceButton sellerOrderId={so.id} label /></div>
               {so.delivery && (so.delivery.courierName || so.delivery.trackingNote) && (
                 <div className="mx-4 mb-4 rounded-xl bg-brand-50 px-4 py-3 text-sm">
                   <p className="flex items-center gap-2 font-bold text-brand-800"><Truck className="h-4 w-4" />{t('account.courier')}: {so.delivery.courierName} {so.delivery.courierPhone && <a href={`tel:${so.delivery.courierPhone}`} className="underline">{phone(so.delivery.courierPhone)}</a>}</p>

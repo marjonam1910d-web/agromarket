@@ -79,6 +79,16 @@ const uz: GuideContent = {
       "Yuqoridagi til tugmasini (UZ) bosing va RU yoki EN ni tanlang — butun interfeys va xato xabarlari shu tilga o'tadi.",
       "Tarjima xizmati yoqilgan bo'lsa, suhbatdagi har bir xabar ostida «Tarjima qilish» tugmasi chiqadi.",
     ] },
+    { id: 'invoice', icon: 'package', title: 'Hisob-faktura va hujjatlar', steps: [
+      "Buyurtma sahifasida har bir fermer qismi ostidagi «Hisob-faktura» tugmasini bosing — fermer xo'jaligi muhri bosilgan hujjat ochiladi.",
+      "Hujjatdan shartnomaga o'ting yoki «Shartnoma tuzish» ni bosing. «Chop etish / PDF» bilan saqlang.",
+    ] },
+    { id: 'work', icon: 'truck', title: "Fermer xo'jaligida ishlash (kuryer, sotuvchi)", steps: [
+      "Fermer sizni email orqali xodim qilib taklif qilsa, emailingizga 6 xonali kod keladi (24 soat amal qiladi).",
+      "Kabinetda «Ish joyi» bo'limini oching va kodni kiriting — siz xo'jalik xodimiga aylanasiz.",
+      "Kuryer: biriktirilgan yetkazishlarda manzil, telefon va mahsulotlar ko'rinadi. «Yo'lga chiqdim» → «Jonli yetkazishni boshlash» → «Yetkazildi».",
+      "Sotuvchi xodim: yangi buyurtmalarni tasdiqlaydi, tayyorlaydi va «Yetkazishga tayyor» qiladi.",
+    ] },
   ],
   seller: [
     { id: 'verify', icon: 'store', title: "Fermer sifatida ro'yxatdan o'tish", steps: [
@@ -123,10 +133,33 @@ const uz: GuideContent = {
       "«Kartaga yechib olish» ni bosing, summani (kamida 10 000 so'm) va saqlangan kartangizni tanlang.",
       "Barcha kirim-chiqimlar «Harakatlar tarixi» da sana va holat bilan ko'rinadi.",
     ] },
+    { id: 'applications', icon: 'shield', title: 'Elektron arizalar', steps: [
+      "«Arizalar» bo'limida uch xil ariza bor: xo'jalikni ro'yxatdan o'tkazish, mahsulotlarni sotuvga chiqarish va yetkazish hamkorligi.",
+      "Xo'jalik arizasi davlat namunasida: rekvizitlarni to'ldirasiz, guvohnoma va boshqa hujjatlarni biriktirasiz. O'ng tomonda ariza qanday ko'rinishi darhol chiqib turadi.",
+      "Arizani parolingiz bilan imzolaysiz — shaxsiy muhringiz bosiladi va hujjat izi saqlanadi. Ko'rib chiqilguncha qaytarib olishingiz mumkin.",
+    ] },
+    { id: 'batch', icon: 'package', title: 'Mahsulotlar paketi va kategoriya taklifi', steps: [
+      "«Mahsulotlar» → «Mahsulotlar arizasi»: bir nechta mahsulotni bitta arizada yuboring. Qoralama yoki rad etilganlarini ham qo'shishingiz mumkin.",
+      "Tavsif shablonlari (Yangi hosil, Organik, Ulgurji, Sut mahsuloti) bir bosishda matn qo'yadi — keyin tahrirlaysiz. Har bir mahsulotga rasm yuklang.",
+      "Kerakli kategoriya bo'lmasa, «+» tugmasi bilan yangisini taklif qiling. Mahsulot tasdiqlansa, kategoriya ham faollashadi.",
+      "Admin har bir mahsulotni alohida tasdiqlaydi: tasdiqlanganlari sotuvga chiqadi, rad etilganlari sababi bilan qaytadi.",
+      "Tugagan mahsulotni «Ko'rinishi» tugmasi bilan yashiring va qayta ko'rsating — moderatsiya talab qilinmaydi.",
+    ] },
+    { id: 'staff', icon: 'users', title: 'Xodimlar va hamkorlik', steps: [
+      "Avval «Arizalar» → «Yetkazish hamkorligi» arizasini yuboring. Tasdiqlangach hamkorlik shartnomasi tuziladi: yetkazish to'lovining kelishilgan foizi platforma ulushi.",
+      "«Xodimlar» → «Xodim qo'shish»: ro'yxatdan o'tgan odamning emailini kiriting va rolini tanlang (kuryer yoki sotuvchi). Unga kod boradi.",
+      "Buyurtma sahifasida «Kuryer biriktirish» orqali kuryerni tanlang. U yetkazayotganda xaridor uni xaritada ko'radi.",
+      "Xo'jalik sahifangizda sotuv markazlaringiz xaritada ko'rinadi — «Sotuv nuqtalari» bo'limida qo'shing.",
+    ] },
+    { id: 'docs', icon: 'chart', title: 'Hisobot va hujjat yuklab olish', steps: [
+      "«Hisobotlar» dagi har bir kartochkani (savdo, buyurtmalar, mahsulotlar, kategoriyalar) bosing — to'liq jadval ochiladi.",
+      "Kategoriyani bossangiz, uning har bir savdosi sana, miqdor va narx bilan ko'rinadi.",
+      "«Hujjat tayyorlash»: hisobot turlari, davr va kategoriyalarni belgilang — Excel (CSV) yuklab oling yoki PDF qilib chop eting.",
+    ] },
   ],
   admin: [
     { id: 'moderation', icon: 'shield', title: 'Moderatsiya', steps: [
-      "«Sotuvchilar» da hujjatlarni tekshirib, tasdiqlang yoki sababini yozib rad eting.",
+      "«Arizalar» da fermerlarning e-arizalarini (davlat namunasidagi hujjat) ko'rib chiqing: ilova hujjatlarni oching, tasdiqlang yoki sababini yozib rad eting.",
       "«Mahsulotlar» da yangi e'lonlarni ko'rib chiqing. Sharh va shikoyatlarni ham shu yerda boshqaring.",
     ] },
     { id: 'reports', icon: 'chart', title: 'Hisobotlar', steps: [
@@ -147,6 +180,23 @@ const uz: GuideContent = {
       "Kutilayotgan yechib olish so'rovlarini tasdiqlang yoki sabab bilan rad eting — fermerga bildirishnoma boradi.",
       "Shartnomalar bo'limida platformadagi barcha shartnomalarni ko'rishingiz mumkin.",
     ] },
+    { id: 'users-card', icon: 'users', title: 'Foydalanuvchi kartasi', steps: [
+      "«Foydalanuvchilar» da ism ustiga bosing — karta ochiladi: ma'lumotlar, buyurtmalar, shartnomalar, hamyon, arizalar va choralar.",
+      "«Tahrirlash»: F.I.Sh., telefon, email, xo'jalik rekvizitlarini tuzating. Har bir o'zgarish «tuzatish dalolatnomasi» sifatida saqlanadi.",
+      "«Parolni almashtirish»: yangi parol o'rnatiladi va foydalanuvchining barcha qurilmalaridagi sessiyalar darhol yopiladi.",
+    ] },
+    { id: 'sanctions', icon: 'shield', title: 'Shikoyat va choralar', steps: [
+      "«Shikoyatlar» da «Chora ko'rish» ni bosing: ogohlantirish, jarima yoki faoliyatni to'xtatish. Asos va muddatni yozing.",
+      "Jarima fermer hamyonidan darhol yechiladi. Har bir chora uchun platforma muhri bosilgan rasmiy hujjat (qaror) yaratiladi va fermerga bildirishnoma boradi.",
+      "«Choralar» bo'limida barcha hujjatlar; noto'g'ri chorani sababi bilan bekor qilsangiz, jarima qaytariladi.",
+    ] },
+    { id: 'payments-admin', icon: 'card', title: "To'lovlar, cheklar va hisobotlar", steps: [
+      "«To'lovlar» da har bir to'lov yonidagi ko'z belgisini bosing — chek ochiladi (to'langan, to'lanmagan yoki qaytarilgan).",
+      "Yuqorida Payme, Click, Uzum, karta va sinov to'lovlarining holati ko'rinadi. Batafsil — «Sozlamalar» → «Integratsiyalar».",
+      "«Buyurtmalar» dagi ko'z belgisi — fermer muhri bilan hisob-faktura va shartnoma.",
+      "Bosh sahifadagi har bir kartochka bosiladi. «Hisobotlar» → «Hujjat tayyorlash» da kategoriyalarni tanlab Excel yoki PDF oling.",
+      "«Sozlamalar» endi bitta: profil va xavfsizlik bilan birga platforma, integratsiyalar va kuponlar bo'limlari.",
+    ] },
   ],
   security: [
     { title: 'PIN-kod va barmoq izi', text: "O'rnatilgan ilovada PIN-kod majburiy. Ilova fonga o'tsa yoki yopilsa, qayta ochilganda PIN yoki barmoq izi so'raladi. PIN 5 marta xato kiritilsa, barcha qurilmalarda tizimdan chiqiladi." },
@@ -158,6 +208,9 @@ const uz: GuideContent = {
     { title: 'Shartnoma va muhr', text: "Imzolashda parol qayta so'raladi. Shartnoma matnidan SHA-256 iz olinadi va imzo server kaliti bilan muhrlanadi — imzolangan matn o'zgartirilsa, QR orqali tekshiruvda darhol «buzilgan» deb ko'rinadi. Muhrni o'zgartirib bo'lmaydi." },
     { title: 'Hamyondan pul yechish', text: "Pul faqat o'zingiz saqlagan kartaga yechiladi. Bir vaqtda bir nechta so'rov yuborilsa ham balans ikki marta sarflanmaydi; har bir harakat jurnalga yoziladi." },
     { title: 'Joylashuv', text: "Joylashuvingiz faqat siz «Jonli yetkazish» ni yoqqaningizda va faqat shu buyurtma xaridoriga ko'rsatiladi. To'xtatganingizda yuborish to'xtaydi." },
+    { title: 'Arizalar va hujjatlar', text: "Har bir ariza parol bilan imzolanadi, muhr bosiladi va matndan SHA-256 iz olinadi. Ilova hujjatlarni faqat egasi va administrator ko'radi; har bir ko'rish jurnalga yoziladi." },
+    { title: 'Administrator amallari', text: "Ma'lumot tuzatish, parol almashtirish, jarima va to'xtatish — barchasi audit logga va foydalanuvchi kartasiga yoziladi. Parol almashganda barcha qurilmalardagi kirishlar darhol bekor bo'ladi; parol hech qayerda ko'rinmaydi." },
+    { title: 'Xodim taklifi', text: "Xodimga yuborilgan 6 xonali kod xeshlangan holda saqlanadi, 24 soat amal qiladi va 5 marta noto'g'ri kiritilsa bloklanadi. Kuryer faqat o'ziga biriktirilgan buyurtmani ko'radi." },
   ],
   faq: [
     { q: "Yetkazish qancha turadi?", a: "Har bir fermer o'z viloyatlari uchun narx belgilaydi. Summa ma'lum chegaradan oshsa, yetkazish bepul bo'lishi mumkin — savatchada aniq summa ko'rinadi." },
@@ -167,7 +220,7 @@ const uz: GuideContent = {
     { q: "Ilova Play Market'dami?", a: "AgroMarket — PWA ilova: saytdan bevosita o'rnatiladi, Play Market shart emas. Kerak bo'lsa, Play Market uchun APK ham tayyorlash mumkin." },
   ],
   changelog: [
-    { date: '2026-11-12', items: ["Fermerlarning sotuv markazlari xaritasi va kuryerni jonli kuzatish.", "Elektron shartnomalar: shaxsiy muhr, parol bilan imzo, har bir shartnoma uchun QR-kod.", "Hamyon: buyurtma tushumlari va kartaga yechib olish; admin uchun tasdiqlash.", "Admin bilan bog'lanish, fermer — xaridorga yozish, xabarlarni tarjima qilish.", "«Bo'limlar» menyusi, til tanlash ro'yxati va yuqorida «Ilova» tugmasi.", "Bank kartasiga o'xshash Uzcard va Humo kartalari.", "Bosh sahifa haqiqiy fotosuratlar bilan yangilandi.", 
+    { date: '2026-11-12', items: ["Elektron arizalar: davlat namunasidagi xo'jalik arizasi, mahsulotlar paketi (har biri alohida tasdiqlanadi), yetkazish hamkorligi.", "Fermer o'zi yangi kategoriya taklif qila oladi; mahsulotni bir bosishda yashirish/ko'rsatish.", "Fermer xodimlari: kuryer va sotuvchi email kodi bilan qo'shiladi, kuryer kabineti va jonli joylashuv.", "Hisob-faktura fermer muhri bilan; to'lov cheki ko'z belgisi orqali; Payme/Click/Uzum belgilari.", "Admin: foydalanuvchi kartasi (tahrirlash, parol, shartnomalar, hamyon), jarima va ogohlantirish hujjatlari.", "Hisobotlar: har bir kartochka bosiladi, kategoriya bo'yicha har bir savdo, Excel va PDF hujjat tayyorlash.", "Yangi menyu: til va «Ilova» yuqorida doim ko'rinadi; sozlamalar bitta sahifada; xarita kabinet ichida.", "Fermerlarning sotuv markazlari xaritasi va kuryerni jonli kuzatish.", "Elektron shartnomalar: shaxsiy muhr, parol bilan imzo, har bir shartnoma uchun QR-kod.", "Hamyon: buyurtma tushumlari va kartaga yechib olish; admin uchun tasdiqlash.", "Admin bilan bog'lanish, fermer — xaridorga yozish, xabarlarni tarjima qilish.", "«Bo'limlar» menyusi, til tanlash ro'yxati va yuqorida «Ilova» tugmasi.", "Bank kartasiga o'xshash Uzcard va Humo kartalari.", "Bosh sahifa haqiqiy fotosuratlar bilan yangilandi.", 
       "Ilovani yuklab olish (Android, iPhone, kompyuter).",
       "Ilova qulfi: majburiy PIN-kod va barmoq izi / Face ID.",
       "Uzcard/Humo kartalarini saqlash va bir bosishda to'lash.",
@@ -236,6 +289,16 @@ const ru: GuideContent = {
       "Нажмите кнопку языка (UZ) вверху и выберите RU или EN — весь интерфейс и сообщения об ошибках переключатся.",
       "Если сервис перевода включён, под каждым сообщением в чате есть кнопка «Перевести».",
     ] },
+    { id: 'invoice', icon: 'package', title: 'Счёт-фактура и документы', steps: [
+      "На странице заказа под частью каждого фермера нажмите «Счёт-фактура» — откроется документ с печатью хозяйства.",
+      "Из документа перейдите к договору или нажмите «Составить договор». Сохраните через «Печать / PDF».",
+    ] },
+    { id: 'work', icon: 'truck', title: 'Работа в хозяйстве (курьер, продавец)', steps: [
+      "Если фермер пригласит вас по email, придёт 6-значный код (действует 24 часа).",
+      "Откройте раздел «Работа» в кабинете и введите код — вы станете сотрудником хозяйства.",
+      "Курьер: в назначенных доставках видны адрес, телефон и товары. «Выехал» → «Начать отслеживание» → «Доставлено».",
+      "Продавец: подтверждает, собирает и отмечает заказы «Готов к доставке».",
+    ] },
   ],
   seller: [
     { id: 'verify', icon: 'store', title: 'Регистрация фермера', steps: [
@@ -280,10 +343,33 @@ const ru: GuideContent = {
       "Нажмите «Вывести на карту», укажите сумму (от 10 000 сум) и сохранённую карту.",
       "Все поступления и списания видны в «Истории операций» с датой и статусом.",
     ] },
+    { id: 'applications', icon: 'shield', title: 'Электронные заявки', steps: [
+      "В разделе «Заявки» три вида: регистрация хозяйства, вывод товаров в продажу и партнёрство по доставке.",
+      "Заявка хозяйства — по гос. образцу: заполняете реквизиты, прикрепляете свидетельство и другие документы. Справа сразу виден вид заявления.",
+      "Заявление подписывается паролем — ставится ваша печать и сохраняется отпечаток документа. До рассмотрения его можно отозвать.",
+    ] },
+    { id: 'batch', icon: 'package', title: 'Пакет товаров и предложение категории', steps: [
+      "«Товары» → «Заявка на товары»: отправьте несколько товаров одной заявкой. Можно добавить черновики и отклонённые.",
+      "Шаблоны описаний (Свежий урожай, Органика, Опт, Молочная продукция) вставляют текст в одно касание. Загрузите фото к каждому товару.",
+      "Если нужной категории нет, предложите новую кнопкой «+». После одобрения товара категория активируется.",
+      "Админ одобряет каждый товар отдельно: одобренные выходят в продажу, отклонённые возвращаются с причиной.",
+      "Закончившийся товар скройте переключателем «Видимость» и покажите снова — без модерации.",
+    ] },
+    { id: 'staff', icon: 'users', title: 'Сотрудники и партнёрство', steps: [
+      "Сначала отправьте заявку «Партнёрство по доставке». После одобрения заключается договор: согласованный % стоимости доставки — доля платформы.",
+      "«Сотрудники» → «Добавить сотрудника»: укажите email зарегистрированного человека и роль (курьер или продавец). Ему придёт код.",
+      "На странице заказа выберите курьера в «Назначить курьера». Во время доставки покупатель видит его на карте.",
+      "Точки продаж видны на карте на странице хозяйства — добавьте их в «Точках продаж».",
+    ] },
+    { id: 'docs', icon: 'chart', title: 'Отчёты и выгрузка документов', steps: [
+      "Каждая карточка в «Отчётах» (продажи, заказы, товары, категории) кликабельна — открывается полная таблица.",
+      "При нажатии на категорию видна каждая её продажа с датой, количеством и ценой.",
+      "«Подготовка документа»: выберите отчёты, период и категории — скачайте Excel (CSV) или распечатайте как PDF.",
+    ] },
   ],
   admin: [
     { id: 'moderation', icon: 'shield', title: 'Модерация', steps: [
-      'В «Продавцах» проверьте документы и подтвердите или отклоните с причиной.',
+      'В «Заявках» рассмотрите электронные заявления фермеров (по гос. образцу): откройте приложенные документы, одобрите или отклоните с причиной.',
       'В «Товарах» рассмотрите новые объявления. Здесь же — отзывы и жалобы.',
     ] },
     { id: 'reports', icon: 'chart', title: 'Отчёты', steps: [
@@ -304,6 +390,23 @@ const ru: GuideContent = {
       "Подтверждайте или отклоняйте с причиной запросы на вывод — фермер получит уведомление.",
       "В разделе «Договоры» доступны все договоры платформы.",
     ] },
+    { id: 'users-card', icon: 'users', title: 'Карточка пользователя', steps: [
+      "В «Пользователях» нажмите на имя — откроется карточка: данные, заказы, договоры, кошелёк, заявки и меры.",
+      "«Редактировать»: исправьте Ф.И.О., телефон, email, реквизиты хозяйства. Каждое изменение сохраняется как «акт исправления».",
+      "«Сменить пароль»: новый пароль устанавливается, сессии пользователя на всех устройствах сразу закрываются.",
+    ] },
+    { id: 'sanctions', icon: 'shield', title: 'Жалобы и меры', steps: [
+      "В «Жалобах» нажмите «Применить меру»: предупреждение, штраф или приостановка. Укажите основание и срок.",
+      "Штраф сразу списывается с кошелька фермера. Для каждой меры формируется официальный документ (решение) с печатью платформы, фермер получает уведомление.",
+      "В разделе «Меры» — все документы; ошибочную меру можно отменить с причиной, штраф вернётся.",
+    ] },
+    { id: 'payments-admin', icon: 'card', title: 'Платежи, чеки и отчёты', steps: [
+      "В «Платежах» нажмите на значок глаза — откроется чек (оплачен, не оплачен или возвращён).",
+      "Вверху виден статус Payme, Click, Uzum, карт и тестовых платежей. Подробно — «Настройки» → «Интеграции».",
+      "Значок глаза в «Заказах» — счёт-фактура с печатью фермера и договор.",
+      "Каждая карточка на главной кликабельна. В «Отчёты» → «Подготовка документа» выберите категории и получите Excel или PDF.",
+      "«Настройки» теперь одни: вместе с профилем и безопасностью — разделы платформы, интеграций и купонов.",
+    ] },
   ],
   security: [
     { title: 'PIN-код и отпечаток пальца', text: 'В установленном приложении PIN-код обязателен. Если приложение свернуть или закрыть, при открытии запрашивается PIN или отпечаток. После 5 неверных PIN выполняется выход на всех устройствах.' },
@@ -315,6 +418,9 @@ const ru: GuideContent = {
     { title: 'Договор и печать', text: "При подписи повторно запрашивается пароль. От текста договора берётся отпечаток SHA-256, подпись заверяется ключом сервера — при изменении подписанного текста проверка по QR сразу покажет «нарушен». Печать изменить нельзя." },
     { title: 'Вывод из кошелька', text: "Деньги выводятся только на вашу сохранённую карту. Даже при одновременных запросах баланс не будет списан дважды; каждая операция записывается в журнал." },
     { title: 'Геолокация', text: "Ваше местоположение передаётся только когда вы включили «Доставку с отслеживанием» и только покупателю этого заказа." },
+    { title: 'Заявки и документы', text: "Каждая заявка подписывается паролем, ставится печать и берётся отпечаток SHA-256. Приложенные документы видят только владелец и администратор; каждый просмотр записывается в журнал." },
+    { title: 'Действия администратора', text: "Исправление данных, смена пароля, штрафы и приостановки записываются в журнал аудита и карточку пользователя. При смене пароля все входы на всех устройствах сразу аннулируются; пароль нигде не отображается." },
+    { title: 'Приглашение сотрудника', text: "6-значный код хранится в хешированном виде, действует 24 часа и блокируется после 5 неверных попыток. Курьер видит только назначенные ему заказы." },
   ],
   faq: [
     { q: 'Сколько стоит доставка?', a: 'Каждый фермер задаёт цену для своих областей. При сумме выше порога доставка может быть бесплатной — точная сумма видна в корзине.' },
@@ -324,7 +430,7 @@ const ru: GuideContent = {
     { q: 'Есть ли приложение в Play Market?', a: 'AgroMarket — PWA-приложение: устанавливается прямо с сайта, Play Market не нужен. При необходимости можно подготовить и APK.' },
   ],
   changelog: [
-    { date: '2026-11-12', items: ["Карта точек продаж фермеров и отслеживание курьера в реальном времени.", "Электронные договоры: личная печать, подпись паролем, QR-код для каждого договора.", "Кошелёк: поступления по заказам и вывод на карту; подтверждение админом.", "Связь с админом, фермер может написать покупателю, перевод сообщений.", "Меню «Разделы», выпадающий выбор языка и кнопка «Приложение» вверху.", "Карты Uzcard и Humo в виде настоящих банковских карт.", "Главная страница обновлена реальными фотографиями.", 'Установка приложения (Android, iPhone, компьютер).', 'Блокировка приложения: обязательный PIN и отпечаток / Face ID.', 'Сохранение карт Uzcard/Humo и оплата в одно касание.', 'Подробные отчёты по категориям (админ и фермер).', 'Электронный чек, который «печатается» после оплаты.', 'Демо-режим без регистрации.', 'Реальные фотографии товаров.'] },
+    { date: '2026-11-12', items: ["Электронные заявки: заявление хозяйства по гос. образцу, пакет товаров (каждый одобряется отдельно), партнёрство по доставке.", "Фермер может предложить новую категорию; скрыть/показать товар одним касанием.", "Сотрудники хозяйства: курьер и продавец добавляются по коду из email, кабинет курьера и живая геопозиция.", "Счёт-фактура с печатью фермера; чек по значку глаза; значки Payme/Click/Uzum.", "Админ: карточка пользователя (редактирование, пароль, договоры, кошелёк), документы о штрафах и предупреждениях.", "Отчёты: кликабельные карточки, каждая продажа по категории, подготовка документа в Excel и PDF.", "Новое меню: язык и «Приложение» всегда вверху; настройки на одной странице; карта внутри кабинета.", "Карта точек продаж фермеров и отслеживание курьера в реальном времени.", "Электронные договоры: личная печать, подпись паролем, QR-код для каждого договора.", "Кошелёк: поступления по заказам и вывод на карту; подтверждение админом.", "Связь с админом, фермер может написать покупателю, перевод сообщений.", "Меню «Разделы», выпадающий выбор языка и кнопка «Приложение» вверху.", "Карты Uzcard и Humo в виде настоящих банковских карт.", "Главная страница обновлена реальными фотографиями.", 'Установка приложения (Android, iPhone, компьютер).', 'Блокировка приложения: обязательный PIN и отпечаток / Face ID.', 'Сохранение карт Uzcard/Humo и оплата в одно касание.', 'Подробные отчёты по категориям (админ и фермер).', 'Электронный чек, который «печатается» после оплаты.', 'Демо-режим без регистрации.', 'Реальные фотографии товаров.'] },
     { date: '2026-11-07', items: ['Коды подтверждения отправляются на email через Gmail.'] },
   ],
 };
@@ -385,6 +491,16 @@ const en: GuideContent = {
       "Tap the language button (UZ) at the top and pick RU or EN — the whole interface and error messages switch.",
       "If the translation service is enabled, every chat message has a «Translate» button.",
     ] },
+    { id: 'invoice', icon: 'package', title: 'Invoice and documents', steps: [
+      "On the order page tap «Invoice» under each farmer's part — a document with the farm's seal opens.",
+      "Go to the contract from the document or tap «Create contract». Save with «Print / PDF».",
+    ] },
+    { id: 'work', icon: 'truck', title: 'Working for a farm (courier, sales)', steps: [
+      "If a farmer invites you by email, you receive a 6-digit code (valid 24 hours).",
+      "Open «My work» in your account and enter the code — you become farm staff.",
+      "Courier: assigned deliveries show address, phone and items. «On my way» → «Start live delivery» → «Delivered».",
+      "Sales staff: confirm, prepare and mark orders «Ready for delivery».",
+    ] },
   ],
   seller: [
     { id: 'verify', icon: 'store', title: 'Registering as a farmer', steps: [
@@ -429,10 +545,33 @@ const en: GuideContent = {
       "Tap «Withdraw to card», enter the amount (min 10,000 UZS) and choose a saved card.",
       "All movements are listed in «History» with date and status.",
     ] },
+    { id: 'applications', icon: 'shield', title: 'E-applications', steps: [
+      "«Applications» has three kinds: farm registration, listing products for sale and delivery partnership.",
+      "The farm application follows the government template: fill in the details and attach your certificate and other documents. A live preview is shown alongside.",
+      "You sign with your password — your seal is stamped and a document fingerprint is stored. You can withdraw it until it is reviewed.",
+    ] },
+    { id: 'batch', icon: 'package', title: 'Product batch and category proposal', steps: [
+      "«Products» → «Products application»: send several products in one application. Drafts and rejected items can be added too.",
+      "Description templates (Fresh harvest, Organic, Wholesale, Dairy) insert text in one tap — then edit. Upload photos for each product.",
+      "If the category you need is missing, propose one with «+». It becomes active when the product is approved.",
+      "The admin approves each product separately: approved ones go on sale, rejected ones come back with a reason.",
+      "Hide a sold-out product with the «Visibility» switch and show it again — no moderation needed.",
+    ] },
+    { id: 'staff', icon: 'users', title: 'Staff and partnership', steps: [
+      "First send a «Delivery partnership» application. Once approved, an agreement is created: the agreed % of the delivery fee is the platform share.",
+      "«Staff» → «Add staff»: enter a registered person's email and role (courier or sales). They receive a code.",
+      "On the order page pick a courier in «Assign courier». While delivering, the buyer sees them on the map.",
+      "Your sales points appear on a map on your farm page — add them in «Sales points».",
+    ] },
+    { id: 'docs', icon: 'chart', title: 'Reports and document download', steps: [
+      "Every tile in «Reports» (sales, orders, products, categories) is clickable — the full table opens.",
+      "Tapping a category shows each of its sales with date, quantity and price.",
+      "«Prepare a document»: choose reports, period and categories — download Excel (CSV) or print as PDF.",
+    ] },
   ],
   admin: [
     { id: 'moderation', icon: 'shield', title: 'Moderation', steps: [
-      'In «Sellers» review documents and approve or reject with a reason.',
+      'In «Applications» review farmers\' e-applications (government-style document): open the attachments, approve or reject with a reason.',
       'Review new listings in «Products». Reviews and complaints are handled here too.',
     ] },
     { id: 'reports', icon: 'chart', title: 'Reports', steps: [
@@ -453,6 +592,23 @@ const en: GuideContent = {
       "Approve pending withdrawal requests or reject them with a reason — the farmer is notified.",
       "All platform contracts are available under «Contracts».",
     ] },
+    { id: 'users-card', icon: 'users', title: 'User card', steps: [
+      "In «Users» tap a name — the card opens: details, orders, contracts, wallet, applications and sanctions.",
+      "«Edit»: fix name, phone, email and farm details. Every change is saved as a «correction act».",
+      "«Change password»: the new password is set and the user's sessions on all devices are closed immediately.",
+    ] },
+    { id: 'sanctions', icon: 'shield', title: 'Complaints and sanctions', steps: [
+      "In «Complaints» tap «Take action»: warning, fine or suspension. Enter the basis and deadline.",
+      "A fine is deducted from the farmer's wallet at once. Each action produces an official document (decision) with the platform seal, and the farmer is notified.",
+      "«Sanctions» lists all documents; cancel a wrong action with a reason and the fine is refunded.",
+    ] },
+    { id: 'payments-admin', icon: 'card', title: 'Payments, receipts and reports', steps: [
+      "In «Payments» tap the eye icon — the receipt opens (paid, unpaid or refunded).",
+      "The top shows the status of Payme, Click, Uzum, cards and test payments. Details — «Settings» → «Integrations».",
+      "The eye icon in «Orders» opens the invoice with the farmer's seal and the contract.",
+      "Every tile on the dashboard is clickable. In «Reports» → «Prepare a document» choose categories and get Excel or PDF.",
+      "«Settings» is now one page: profile and security plus platform, integrations and coupons.",
+    ] },
   ],
   security: [
     { title: 'PIN and fingerprint', text: 'A PIN is required in the installed app. When the app goes to background or is closed, a PIN or fingerprint is required to reopen it. After 5 wrong PINs you are signed out on all devices.' },
@@ -464,6 +620,9 @@ const en: GuideContent = {
     { title: 'Contracts and seal', text: "Signing asks for your password again. A SHA-256 fingerprint of the text is signed with a server key — if a signed contract is altered, the QR check immediately shows it as tampered. The seal cannot be changed." },
     { title: 'Wallet withdrawals', text: "Money goes only to a card you saved. Even with simultaneous requests the balance cannot be spent twice; every movement is logged." },
     { title: 'Location', text: "Your location is shared only while you run «Live delivery», and only with that order's buyer." },
+    { title: 'Applications and documents', text: "Every application is signed with a password, stamped with a seal and fingerprinted with SHA-256. Attachments are visible only to the owner and the administrator; every view is logged." },
+    { title: 'Administrator actions', text: "Data corrections, password changes, fines and suspensions are recorded in the audit log and the user card. Changing a password ends sign-ins on all devices immediately; the password is never shown." },
+    { title: 'Staff invitation', text: "The 6-digit code is stored hashed, valid for 24 hours and blocked after 5 wrong attempts. A courier sees only the orders assigned to them." },
   ],
   faq: [
     { q: 'How much is delivery?', a: 'Each farmer sets prices for their regions. Above a threshold delivery may be free — the exact amount is shown in the cart.' },
@@ -473,7 +632,7 @@ const en: GuideContent = {
     { q: 'Is the app on Play Market?', a: 'AgroMarket is a PWA: it installs straight from the website, no store needed. An APK for Play Market can be prepared if required.' },
   ],
   changelog: [
-    { date: '2026-11-12', items: ["Map of farmers' sales points and live courier tracking.", "E-contracts: personal seal, password signing, a QR code for every contract.", "Wallet: order income and withdrawals to card; admin approval.", "Contact admin, farmers can message buyers, message translation.", "«Sections» menu, language dropdown and an «App» button at the top.", "Uzcard and Humo shown as real-looking bank cards.", "Homepage refreshed with real photography.", 'Install the app (Android, iPhone, desktop).', 'App lock: mandatory PIN and fingerprint / Face ID.', 'Save Uzcard/Humo cards and pay in one tap.', 'Detailed category reports (admin and farmer).', 'Electronic receipt that «prints» after payment.', 'Demo mode without signing up.', 'Real product photos.'] },
+    { date: '2026-11-12', items: ["E-applications: government-style farm application, product batches (each approved separately), delivery partnership.", "Farmers can propose a new category; hide/show a product in one tap.", "Farm staff: couriers and sales staff join with an email code; courier cabinet and live location.", "Invoice with the farm's seal; receipts via the eye icon; Payme/Click/Uzum marks.", "Admin: user card (edit, password, contracts, wallet), fine and warning documents.", "Reports: clickable tiles, every sale per category, Excel and PDF document builder.", "New menu: language and «App» always at the top; settings on one page; map inside the account.", "Map of farmers' sales points and live courier tracking.", "E-contracts: personal seal, password signing, a QR code for every contract.", "Wallet: order income and withdrawals to card; admin approval.", "Contact admin, farmers can message buyers, message translation.", "«Sections» menu, language dropdown and an «App» button at the top.", "Uzcard and Humo shown as real-looking bank cards.", "Homepage refreshed with real photography.", 'Install the app (Android, iPhone, desktop).', 'App lock: mandatory PIN and fingerprint / Face ID.', 'Save Uzcard/Humo cards and pay in one tap.', 'Detailed category reports (admin and farmer).', 'Electronic receipt that «prints» after payment.', 'Demo mode without signing up.', 'Real product photos.'] },
     { date: '2026-11-07', items: ['Verification codes are emailed via Gmail.'] },
   ],
 };

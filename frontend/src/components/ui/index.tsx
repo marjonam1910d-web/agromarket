@@ -5,7 +5,7 @@ import { cx } from '@/utils/format';
 import { useI18n } from '@/i18n';
 
 // ───────── Button ─────────
-type Variant = 'primary' | 'secondary' | 'ghost' | 'outline' | 'danger' | 'accent' | 'dark';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'outline' | 'danger' | 'accent' | 'dark' | 'light';
 const variants: Record<Variant, string> = {
   primary: 'bg-brand text-white hover:bg-brand-600 shadow-sm shadow-brand/20',
   secondary: 'bg-brand-50 text-brand-700 hover:bg-brand-100',
@@ -14,6 +14,7 @@ const variants: Record<Variant, string> = {
   danger: 'bg-danger text-white hover:bg-red-700',
   accent: 'bg-sun text-brand-900 hover:bg-sun-400 shadow-sm shadow-sun/30',
   dark: 'bg-brand-800 text-white hover:bg-brand-900',
+  light: 'bg-white/15 text-white ring-1 ring-white/25 hover:bg-white/25',
 };
 const sizes = { sm: 'h-9 px-3 text-sm gap-1.5', md: 'h-11 px-5 text-[15px] gap-2', lg: 'h-12 px-6 text-base gap-2', icon: 'h-10 w-10 justify-center' };
 
@@ -298,7 +299,7 @@ export function Table<T>({ rows, columns, empty, rowKey, onRowClick }: {
           </thead>
           <tbody className="divide-y divide-cream-200">
             {rows.map((r) => (
-              <tr key={rowKey(r)} onClick={() => onRowClick?.(r)} className={cx('transition', onRowClick && 'cursor-pointer hover:bg-brand-50/40')}>
+              <tr key={rowKey(r)} onClick={(e) => !(e.target as HTMLElement).closest('button,a,input,select,textarea,label') && onRowClick?.(r)} className={cx('transition', onRowClick && 'cursor-pointer hover:bg-brand-50/40')}>
                 {columns.map((c) => <td key={c.key} className={cx('px-4 py-3 align-middle', c.className)}>{c.render(r)}</td>)}
               </tr>
             ))}
@@ -307,7 +308,7 @@ export function Table<T>({ rows, columns, empty, rowKey, onRowClick }: {
       </div>
       <div className="space-y-3 md:hidden">
         {rows.map((r) => (
-          <div key={rowKey(r)} onClick={() => onRowClick?.(r)} className={cx('rounded-2xl border border-cream-200 bg-white p-4 shadow-soft', onRowClick && 'active:bg-brand-50/40')}>
+          <div key={rowKey(r)} onClick={(e) => !(e.target as HTMLElement).closest('button,a,input,select,textarea,label') && onRowClick?.(r)} className={cx('rounded-2xl border border-cream-200 bg-white p-4 shadow-soft', onRowClick && 'active:bg-brand-50/40')}>
             {columns.filter((c) => c.mobile !== false).map((c) => (
               <div key={c.key} className="flex items-start justify-between gap-3 py-1 text-sm">
                 <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-muted">{c.title}</span>

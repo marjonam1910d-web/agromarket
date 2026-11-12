@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { InvoiceButton } from '@/components/Invoice';
 import { Link } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useI18n, type TKey } from '@/i18n';
@@ -33,7 +34,7 @@ export function AdminOrders() {
           <Table rows={q.data?.data ?? []} rowKey={(o) => o.id} empty={<Empty title={t('common.empty')} />} columns={[
             { key: 'n', title: '#', render: (o) => <Link to={`/account/orders/${o.id}`} className="font-bold text-brand">{o.orderNumber}</Link> },
             { key: 'b', title: t('seller.buyer'), render: (o) => o.buyer.fullName },
-            { key: 's', title: t('admin.sellers'), render: (o) => <div className="space-y-1">{o.sellerOrders.map((so) => <div key={so.id} className="flex items-center gap-1.5 text-xs">{so.seller.farmName} <StatusBadge status={so.status} />{!['delivered', 'cancelled', 'refunded'].includes(so.status) && <button className="text-danger underline" onClick={() => setCancel({ id: so.id, number: so.number })}>×</button>}</div>)}</div> },
+            { key: 's', title: t('admin.sellers'), render: (o) => <div className="space-y-1">{o.sellerOrders.map((so) => <div key={so.id} className="flex items-center gap-1.5 text-xs"><InvoiceButton sellerOrderId={so.id} />{so.seller.farmName} <StatusBadge status={so.status} />{!['delivered', 'cancelled', 'refunded'].includes(so.status) && <button className="text-danger underline" onClick={() => setCancel({ id: so.id, number: so.number })}>×</button>}</div>)}</div> },
             { key: 'd', title: t('common.date'), render: (o) => dateTime(o.createdAt, lang) },
             { key: 't', title: t('common.total'), render: (o) => <b>{money(o.total, lang)}</b> },
             { key: 'p', title: t('checkout.payment'), render: (o) => <StatusBadge status={o.paymentStatus} kind="pay" /> },

@@ -42,6 +42,31 @@ export const TEMPLATES = {
     ru: { title: 'Вывод отклонён', body: '{amount} сум: {reason}' },
     en: { title: 'Withdrawal rejected', body: '{amount} UZS: {reason}' },
   },
+  'application.submitted': {
+    uz: { title: 'Yangi ariza', body: '{farm}: {kind} arizasi ({number}) ko\'rib chiqishni kutmoqda' },
+    ru: { title: 'Новая заявка', body: '{farm}: заявка {number} ({kind}) ожидает рассмотрения' },
+    en: { title: 'New application', body: '{farm}: application {number} ({kind}) awaits review' },
+  },
+  'application.reviewed': {
+    uz: { title: 'Arizangiz ko\'rib chiqildi', body: '{number}: {result}. {note}' },
+    ru: { title: 'Заявка рассмотрена', body: '{number}: {result}. {note}' },
+    en: { title: 'Application reviewed', body: '{number}: {result}. {note}' },
+  },
+  'sanction.issued': {
+    uz: { title: 'Ma\'muriy chora', body: '{number}: {kind}. Sabab: {reason}' },
+    ru: { title: 'Административная мера', body: '{number}: {kind}. Причина: {reason}' },
+    en: { title: 'Administrative action', body: '{number}: {kind}. Reason: {reason}' },
+  },
+  'staff.invited': {
+    uz: { title: 'Ishga taklif', body: '{farm} sizni {role} sifatida taklif qildi. Emailingizga kelgan kodni «Ish joyi» bo\'limida kiriting' },
+    ru: { title: 'Приглашение', body: '{farm} приглашает вас как {role}. Введите код из письма в разделе «Работа»' },
+    en: { title: 'Job invitation', body: '{farm} invited you as {role}. Enter the emailed code under «Workplace»' },
+  },
+  'staff.assigned': {
+    uz: { title: 'Yangi yetkazish', body: '{number} buyurtmasi sizga biriktirildi: {address}' },
+    ru: { title: 'Новая доставка', body: 'Вам назначен заказ {number}: {address}' },
+    en: { title: 'New delivery', body: 'Order {number} assigned to you: {address}' },
+  },
   'support.message': {
     uz: { title: 'Qo\'llab-quvvatlash', body: '{from}: {text}' },
     ru: { title: 'Поддержка', body: '{from}: {text}' },

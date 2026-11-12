@@ -25,14 +25,14 @@ export function AdminDashboard() {
       <PageHeader title={t('admin.panel')} />
       {ov.isError ? <ErrorState onRetry={() => ov.refetch()} /> : (
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <StatCard icon={<Users className="h-5 w-5" />} label={t('admin.totalUsers')} value={o.totalUsers ?? '—'} />
-          <StatCard icon={<Store className="h-5 w-5" />} label={t('admin.activeSellers')} value={o.activeSellers ?? '—'} hint={o.pendingSellers ? <Link to="/admin/sellers" className="font-bold text-amber-600">{o.pendingSellers} {t('admin.pendingSellers')}</Link> : undefined} tone="lime" />
-          <StatCard icon={<Package className="h-5 w-5" />} label={t('admin.activeProducts')} value={o.activeProducts ?? '—'} hint={o.pendingProducts ? <Link to="/admin/products" className="font-bold text-amber-600">{o.pendingProducts} {t('status.prod_pending_review')}</Link> : undefined} tone="blue" />
-          <StatCard icon={<ShoppingBag className="h-5 w-5" />} label={t('admin.totalOrders')} value={o.totalOrders ?? '—'} tone="yellow" />
-          <StatCard icon={<TrendingUp className="h-5 w-5" />} label={t('admin.totalSales')} value={o.totalSales !== undefined ? money(o.totalSales, lang) : '—'} />
-          <StatCard icon={<CreditCard className="h-5 w-5" />} label={t('admin.paymentVolume')} value={o.paymentVolume !== undefined ? money(o.paymentVolume, lang) : '—'} tone="blue" />
-          <StatCard icon={<Wallet className="h-5 w-5" />} label={t('admin.commission')} value={o.commissionEarned !== undefined ? money(o.commissionEarned, lang) : '—'} tone="lime" />
-          <StatCard icon={<MessageSquareWarning className="h-5 w-5" />} label={t('admin.openComplaints')} value={o.openComplaints ?? '—'} hint={o.pendingRefunds ? <Link to="/admin/payments" className="font-bold text-danger">{o.pendingRefunds} {t('admin.refunds')}</Link> : undefined} tone="red" />
+          <StatCard icon={<Users className="h-5 w-5" />} label={t('admin.totalUsers')} value={o.totalUsers ?? '—'} to="/admin/users" />
+          <StatCard icon={<Store className="h-5 w-5" />} label={t('admin.activeSellers')} value={o.activeSellers ?? '—'} to="/admin/users?role=SELLER" hint={o.pendingSellers ? <Link to="/admin/applications" className="font-bold text-amber-600">{o.pendingSellers} {t('admin.pendingSellers')}</Link> : undefined} tone="lime" />
+          <StatCard icon={<Package className="h-5 w-5" />} label={t('admin.activeProducts')} value={o.activeProducts ?? '—'} to="/admin/reports/view/products" hint={o.pendingProducts ? <Link to="/admin/products" className="font-bold text-amber-600">{o.pendingProducts} {t('status.prod_pending_review')}</Link> : undefined} tone="blue" />
+          <StatCard icon={<ShoppingBag className="h-5 w-5" />} label={t('admin.totalOrders')} value={o.totalOrders ?? '—'} tone="yellow" to="/admin/reports/view/orders?days=365" />
+          <StatCard icon={<TrendingUp className="h-5 w-5" />} label={t('admin.totalSales')} value={o.totalSales !== undefined ? money(o.totalSales, lang) : '—'} to="/admin/reports/view/lines?days=365" />
+          <StatCard icon={<CreditCard className="h-5 w-5" />} label={t('admin.paymentVolume')} value={o.paymentVolume !== undefined ? money(o.paymentVolume, lang) : '—'} tone="blue" to="/admin/payments" />
+          <StatCard icon={<Wallet className="h-5 w-5" />} label={t('admin.commission')} value={o.commissionEarned !== undefined ? money(o.commissionEarned, lang) : '—'} tone="lime" to="/admin/wallet" />
+          <StatCard icon={<MessageSquareWarning className="h-5 w-5" />} label={t('admin.openComplaints')} value={o.openComplaints ?? '—'} to="/admin/complaints" hint={o.pendingRefunds ? <Link to="/admin/payments" className="font-bold text-danger">{o.pendingRefunds} {t('admin.refunds')}</Link> : undefined} tone="red" />
         </div>
       )}
       <div className="mt-5 grid gap-5 xl:grid-cols-[1fr_360px]">
@@ -82,7 +82,7 @@ export function AdminDashboard() {
       </div>
       {Boolean(pending.data?.data.length) && (
         <Card className="mt-5 p-5">
-          <div className="mb-3 flex items-center justify-between"><h2 className="font-extrabold">{t('admin.pendingSellers')}</h2><Link to="/admin/sellers" className="text-sm font-bold text-brand">{t('common.seeAll')}</Link></div>
+          <div className="mb-3 flex items-center justify-between"><h2 className="font-extrabold">{t('admin.pendingSellers')}</h2><Link to="/admin/applications" className="text-sm font-bold text-brand">{t('common.seeAll')}</Link></div>
           {pending.data!.data.map((s) => <div key={s.id} className="flex items-center justify-between border-b border-cream-100 py-2 text-sm last:border-0"><span className="font-semibold">{s.farmName}</span><span className="text-muted">{regionName(s.region)} · {s.tin ?? '—'}</span></div>)}
         </Card>
       )}

@@ -127,7 +127,7 @@ r.get(
   ah(async (req, res) => {
     const so = await loadDelivery(req.params.sellerOrderId);
     const u = req.user!;
-    if (so.order.buyerId !== u.id && so.seller.userId !== u.id && u.role !== 'ADMIN') throw Errors.notFound('Yetkazish');
+    if (so.order.buyerId !== u.id && so.seller.userId !== u.id && u.role !== 'ADMIN' && so.delivery!.courierUserId !== u.id) throw Errors.notFound('Yetkazish');
     const d = so.delivery!;
     const points = await prisma.salesPoint.findMany({ where: { sellerId: so.sellerId, isActive: true }, select: { id: true, name: true, type: true, lat: true, lng: true, address: true }, take: 5 });
     ok(res, {
@@ -151,17 +151,22 @@ r.get(
 
 const posSchema = z.object({ lat, lng, accuracy: z.number().min(0).max(5000).optional(), heading: z.number().min(0).max(360).nullable().optional() });
 
+/** Fermer yoki shu buyurtmaga biriktirilgan faol kuryer (fermer xodimi) */
 async function ownSellerOrder(req: Parameters<typeof sellerId>[0], id: string) {
   const so = await loadDelivery(id);
-  if (so.sellerId !== sellerId(req)) throw Errors.notFound('Yetkazish');
-  return so;
+  const u = (req as unknown as { user: { id: string; sellerId?: string | null } }).user;
+  if (u.sellerId && so.sellerId === u.sellerId) return so;
+  if (so.delivery!.courierUserId === u.id) {
+    const staff = await prisma.farmStaff.findFirst({ where: { sellerId: so.sellerId, userId: u.id, status: 'active', role: 'COURIER' } });
+    if (staff) return so;
+  }
+  throw Errors.notFound('Yetkazish');
 }
 
 /** Fermer/kuryer: jonli kuzatuvni boshlash (buyurtma "yo'lda" holatida bo'lishi kerak) */
 r.post(
   '/tracking/:sellerOrderId/start',
   authenticate,
-  requireSeller,
   validate({ body: posSchema.extend({ courierName: z.string().max(80).optional(), courierPhone: z.string().max(30).optional() }) }),
   ah(async (req, res) => {
     const so = await ownSellerOrder(req, req.params.sellerOrderId);
@@ -184,7 +189,6 @@ r.post(
 r.post(
   '/tracking/:sellerOrderId/location',
   authenticate,
-  requireSeller,
   validate({ body: posSchema }),
   ah(async (req, res) => {
     const so = await ownSellerOrder(req, req.params.sellerOrderId);
@@ -199,7 +203,6 @@ r.post(
 r.post(
   '/tracking/:sellerOrderId/stop',
   authenticate,
-  requireSeller,
   ah(async (req, res) => {
     const so = await ownSellerOrder(req, req.params.sellerOrderId);
     await prisma.delivery.update({ where: { id: so.delivery!.id }, data: { trackingActive: false } });

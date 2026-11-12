@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ban, CheckCircle2, MessageCircle, ShieldCheck, ShoppingBag, Sprout, UserPlus, UserX, Warehouse } from 'lucide-react';
 import { WriteToModal } from '@/pages/wallet/Wallet';
-import { useI18n } from '@/i18n';
+import { useI18n, type TKey } from '@/i18n';
 import { api, qs } from '@/services/api';
 import { useToast } from '@/store/toast';
 import { useDebounce, useErrorText } from '@/hooks';
@@ -20,7 +21,9 @@ export function AdminUsers() {
   const err = useErrorText();
   const qc = useQueryClient();
   const [search, setSearch] = useState('');
-  const [role, setRole] = useState('');
+  const [sp] = useSearchParams();
+  const nav = useNavigate();
+  const [role, setRole] = useState(sp.get('role') ?? '');
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
   const dq = useDebounce(search);
@@ -72,13 +75,13 @@ export function AdminUsers() {
       </div>
       {q.isLoading ? <Skeleton className="h-60" /> : (
         <>
-          <Table rows={q.data?.data ?? []} rowKey={(u) => u.id} empty={<Empty title={t('common.empty')} />} columns={[
-            { key: 'n', title: t('common.name'), render: (u) => <div className="text-left"><p className="font-bold">{u.fullName}</p><p className="text-xs text-muted">{u.sellerProfile?.farmName}</p></div> },
+          <Table rows={q.data?.data ?? []} rowKey={(u) => u.id} onRowClick={(u) => nav(`/admin/users/${u.id}`)} empty={<Empty title={t('common.empty')} />} columns={[
+            { key: 'n', title: t('common.name'), render: (u) => <Link to={`/admin/users/${u.id}`} className="block text-left"><p className="font-bold text-brand hover:underline">{u.fullName}</p><p className="text-xs text-muted">{u.sellerProfile?.farmName}</p></Link> },
             { key: 'c', title: t('common.phone'), render: (u) => <span className="text-sm">{phone(u.phone)}<br /><span className="text-xs text-muted">{u.email}</span></span> },
-            { key: 'r', title: t('admin.role'), render: (u) => <Badge tone={u.role === 'ADMIN' ? 'dark' : u.role === 'SELLER' ? 'lime' : 'gray'}>{u.role}</Badge> },
+            { key: 'r', title: t('admin.role'), render: (u) => <Badge tone={u.role === 'ADMIN' ? 'dark' : u.role === 'SELLER' ? 'lime' : 'gray'}>{t(`z.role.${u.role}` as TKey)}</Badge> },
             { key: 'o', title: t('admin.orders'), render: (u) => u._count.orders },
             { key: 'j', title: t('admin.joined'), render: (u) => date(u.createdAt, lang) },
-            { key: 's', title: t('common.status'), render: (u) => <Badge tone={u.status === 'ACTIVE' ? 'green' : 'red'}>{u.status}</Badge> },
+            { key: 's', title: t('common.status'), render: (u) => <Badge tone={u.status === 'ACTIVE' ? 'green' : 'red'}>{t(`z.ustatus.${u.status}` as TKey)}</Badge> },
             { key: 'w', title: '', render: (u) => u.role !== 'ADMIN' && <Button size="sm" variant="outline" onClick={() => setWrite(u)}><MessageCircle className="h-4 w-4" />{t('y.support.writeUser')}</Button> },
             { key: 'a', title: '', render: (u) => u.role !== 'ADMIN' && (u.status === 'ACTIVE'
               ? <Button size="sm" variant="ghost" onClick={() => confirm(`${t('admin.block')}: ${u.fullName}?`) && m.mutate({ id: u.id, status: 'BLOCKED' })}><Ban className="h-4 w-4 text-danger" />{t('admin.block')}</Button>

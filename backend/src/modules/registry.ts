@@ -21,9 +21,13 @@ import security from './security';
 import maps from './maps';
 import contracts from './contracts';
 import wallet from './wallet';
+import backoffice from './backoffice';
+import applications from './applications';
+import staff from './staff';
+import reports from './reports';
 
 /** Barcha modullar ro'yxati. Yangi modul qo'shish — papka yaratib, shu ro'yxatga bitta qator qo'shish. */
-export const MODULES: AppModule[] = [auth, users, categories, products, sellers, cart, orders, payments, delivery, reviews, favorites, notifications, chat, complaints, uploads, admin, analytics, meta, security, maps, contracts, wallet];
+export const MODULES: AppModule[] = [auth, users, categories, products, sellers, cart, orders, payments, delivery, reviews, favorites, notifications, chat, complaints, uploads, admin, analytics, meta, security, maps, contracts, wallet, backoffice, applications, staff, reports];
 
 /** Hech qachon o'chirib bo'lmaydigan asosiy modullar */
 export const CORE_MODULES = ['auth', 'users', 'meta'];

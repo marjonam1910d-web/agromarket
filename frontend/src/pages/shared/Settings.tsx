@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BookOpen, ChevronRight, CreditCard, Fingerprint, Globe, KeyRound, LogOut, MonitorSmartphone, ShieldCheck, Smartphone, Stamp, Trash2, User as UserIcon } from 'lucide-react';
+import { BookOpen, ChevronRight, CreditCard, Fingerprint, Globe, KeyRound, LogOut, MonitorSmartphone, ShieldCheck, Smartphone, PlugZap, SlidersHorizontal, Stamp, TicketPercent, Trash2, User as UserIcon } from 'lucide-react';
 import { LANGS, useI18n, type Lang, type TKey } from '@/i18n';
 import { useAuth } from '@/store/auth';
 import { useToast } from '@/store/toast';
@@ -16,13 +16,17 @@ import { PageHeader } from '@/components/common';
 import { CardsManager } from '@/components/Cards';
 import { InstallAppButton } from '@/components/InstallApp';
 import { Seal, type SealData } from '@/components/Seal';
+import { AdminIntegrations, AdminSettings } from '@/pages/admin/AdminSettings';
 
-type SectionId = 'profile' | 'security' | 'cards' | 'seal' | 'language' | 'app' | 'help';
+type SectionId = 'profile' | 'security' | 'cards' | 'seal' | 'platform' | 'integrations' | 'coupons' | 'language' | 'app' | 'help';
 const SECTIONS: { id: SectionId; icon: typeof UserIcon; label: TKey; roles?: string[] }[] = [
   { id: 'profile', icon: UserIcon, label: 'x.settings.profile' },
   { id: 'security', icon: ShieldCheck, label: 'x.settings.security' },
   { id: 'cards', icon: CreditCard, label: 'x.settings.cards', roles: ['BUYER', 'SELLER'] },
   { id: 'seal', icon: Stamp, label: 'y.seal.title', roles: ['BUYER', 'SELLER'] },
+  { id: 'platform', icon: SlidersHorizontal, label: 'z.settings.platform', roles: ['ADMIN'] },
+  { id: 'integrations', icon: PlugZap, label: 'z.settings.integrations', roles: ['ADMIN'] },
+  { id: 'coupons', icon: TicketPercent, label: 'admin.coupons', roles: ['ADMIN'] },
   { id: 'language', icon: Globe, label: 'x.settings.language' },
   { id: 'app', icon: Smartphone, label: 'x.settings.app' },
   { id: 'help', icon: BookOpen, label: 'x.settings.help' },
@@ -76,6 +80,9 @@ export function SettingsPage() {
             <Section title={t('x.cards.title')} text={t('x.cards.text')}><CardsManager /></Section>
           )}
           {active === 'seal' && <SealSection />}
+          {active === 'platform' && <Section title={t('z.settings.platform')} text={t('z.settings.platformText')}><AdminSettings part="platform" /></Section>}
+          {active === 'integrations' && <Section title={t('z.settings.integrations')} text={t('z.settings.integrationsText')}><AdminIntegrations /></Section>}
+          {active === 'coupons' && <AdminSettings part="coupons" />}
           {active === 'language' && <LanguageSection />}
           {active === 'app' && <AppSection />}
           {active === 'help' && (

@@ -167,6 +167,14 @@ Oxirgi natijalar (to'liq: [docs/TESTING.md](docs/TESTING.md)):
 - **Admin → Foydalanuvchilar:** kategoriyalar (xaridor, fermer, ulgurji, bloklangan, yangi) va hududlar bo'yicha.
 - **Interfeys:** "Bo'limlar" menyusi (katalog, kategoriyalar, xarita, fermerlar), til ro'yxati (UZ → RU/EN), yuqorida "Ilova" tugmasi; bank kartasiga o'xshash Uzcard/Humo; bosh sahifada haqiqiy fotosuratlar.
 
+### Yangi imkoniyatlar (2026-11-12, 3-qism)
+- **E-arizalar** (`/seller/applications`, admin: `/admin/applications`): davlat namunasidagi xo'jalik arizasi (ilova hujjatlar bilan), mahsulotlar paketi (admin har birini alohida tasdiqlaydi/rad etadi), yetkazish hamkorligi. Parol bilan imzo + muhr + SHA-256. Fermer yangi kategoriya taklif qiladi.
+- **Fermer xodimlari** (`/seller/staff`, xodim: `/work`): kuryer va sotuvchi email kodi (6 xonali, 24 soat, 5 urinish) bilan qo'shiladi; kuryer kabineti, jonli joylashuv, «Yetkazildi». Hamkorlik ulushi yetkazish to'lovidan avtomatik yechiladi (`partner.deliverySharePercent`).
+- **Admin back-office**: foydalanuvchi kartasi (`/admin/users/:id`) — tahrirlash (tuzatish dalolatnomasi), parolni almashtirish (barcha tokenlar darhol bekor), jarima/ogohlantirish/to'xtatish hujjatlari (`/admin/sanctions`), hamyonga qo'lda o'tkazma.
+- **Hujjatlar**: hisob-faktura fermer muhri bilan (`/documents/invoice/:sellerOrderId`), to'lov cheki (ko'z belgisi), chora hujjatlari platforma muhri bilan.
+- **Hisobot konstruktori** (`/reports/:kind`, `/reports/:kind/export`): sotuv qatorlari, buyurtmalar, mahsulotlar, kategoriyalar — davr va kategoriya filtri, CSV (Excel) va PDF (chop etish).
+- **Interfeys**: til va «Ilova» tugmasi yuqorida doim ko'rinadi, yon menyu guruhlangan va aylantiriladi, sozlamalar bitta sahifa, xarita kabinet ichida (`/panel/map`).
+
 ### Modullik
 Backend har bir yo'nalish alohida modul (`src/modules/<nom>/index.ts`) va `src/modules/registry.ts` orqali ulanadi.
 Bitta modulni o'zgartirish boshqalariga ta'sir qilmaydi; qaysi o'zgarish qaysi faylga tegishi — [docs/MODULES.md](docs/MODULES.md).
@@ -181,6 +189,7 @@ Bitta modulni o'zgartirish boshqalariga ta'sir qilmaydi; qaysi o'zgarish qaysi f
 | Xaridor | `+998 90 123 45 67` (yoki `buyer@agromarket.uz`) | `Buyer12345` |
 | Ulgurji xaridor | `+998 90 111 22 33` (yoki `ulgurji@agromarket.uz`) | `Buyer12345` |
 | Sotuvchi (tasdiqlangan) | `+998 91 123 45 67` (yoki `fermer@agromarket.uz`) | `Seller12345` |
+| Kuryer (Bog'iston xodimi) | `kuryer@agromarket.uz` | `Kuryer12345` |
 | Sotuvchi (tekshiruvda) | `+998 93 123 45 67` | `Seller12345` |
 
 Demo kupon: `AGRO10` (10%, 100 000 so'mdan, maks. 30 000).

@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { ArrowDownRight, ArrowLeft, ArrowRight, ArrowUpRight, Boxes, MapPin, Package, ShoppingBag, Star, Store, TrendingUp, Users, Wallet } from 'lucide-react';
+import { ArrowDownRight, ArrowLeft, ArrowRight, ArrowUpRight, Boxes, FileDown, MapPin, Package, ShoppingBag, Star, Store, TrendingUp, Users, Wallet } from 'lucide-react';
 import { useI18n, type TKey } from '@/i18n';
 import { api, qs } from '@/services/api';
 import { useAuth } from '@/store/auth';
 import { useRegions } from '@/hooks';
 import { catName, cx, money, num } from '@/utils/format';
-import { Card, Empty, ErrorState, Skeleton, Tabs } from '@/components/ui';
+import { Button, Card, Empty, ErrorState, Skeleton, Tabs } from '@/components/ui';
+import { ReportTable } from './ReportBuilder';
 import { CategoryIcon, PageHeader, StatCard, StatusBadge } from '@/components/common';
 
 interface CatRow {
@@ -82,17 +83,22 @@ export function CategoryReports() {
       <PageHeader
         title={user?.role === 'ADMIN' ? t('x.reports.title') : t('x.reports.sellerTitle')}
         subtitle={t('x.reports.subtitle')}
-        actions={<Tabs value={days} onChange={setDays} items={PERIODS.map((p) => ({ value: p.value, label: p.label }))} />}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Tabs value={days} onChange={setDays} items={PERIODS.map((p) => ({ value: p.value, label: p.label }))} />
+            <Link to={`${base}/export`}><Button variant="outline"><FileDown className="h-4 w-4" />{t('z.rep.builder')}</Button></Link>
+          </div>
+        }
       />
       {q.isError ? (
         <ErrorState onRetry={() => q.refetch()} />
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <StatCard icon={<Wallet className="h-5 w-5" />} label={`${t('x.reports.revenue')} · ${t('x.reports.days', { n: days })}`} value={q.data ? money(q.data.totalRevenue, lang) : '—'} />
-            <StatCard icon={<ShoppingBag className="h-5 w-5" />} label={t('x.reports.orders')} value={q.data ? q.data.totalOrders : '—'} tone="yellow" />
-            <StatCard icon={<Boxes className="h-5 w-5" />} label={t('x.reports.products')} value={q.data ? rows.reduce((a, r) => a + r.activeProducts, 0) : '—'} tone="blue" />
-            <StatCard icon={<TrendingUp className="h-5 w-5" />} label={t('admin.categories')} value={q.data ? rows.filter((r) => r.revenue > 0).length + ' / ' + rows.length : '—'} tone="lime" />
+            <StatCard icon={<Wallet className="h-5 w-5" />} label={`${t('x.reports.revenue')} · ${t('x.reports.days', { n: days })}`} value={q.data ? money(q.data.totalRevenue, lang) : '—'} to={`${base}/view/lines?days=${days}`} />
+            <StatCard icon={<ShoppingBag className="h-5 w-5" />} label={t('x.reports.orders')} value={q.data ? q.data.totalOrders : '—'} tone="yellow" to={`${base}/view/orders?days=${days}`} />
+            <StatCard icon={<Boxes className="h-5 w-5" />} label={t('x.reports.products')} value={q.data ? rows.reduce((a, r) => a + r.activeProducts, 0) : '—'} tone="blue" to={`${base}/view/products?days=${days}`} />
+            <StatCard icon={<TrendingUp className="h-5 w-5" />} label={t('admin.categories')} value={q.data ? rows.filter((r) => r.revenue > 0).length + ' / ' + rows.length : '—'} tone="lime" to={`${base}/view/categories?days=${days}`} />
           </div>
 
           {q.data && rows.some((r) => r.revenue > 0) && (
@@ -200,6 +206,10 @@ export function CategoryReportDetail() {
             <StatCard icon={<ShoppingBag className="h-5 w-5" />} label={t('x.reports.orders')} value={d.summary.orders} tone="yellow" />
             <StatCard icon={<TrendingUp className="h-5 w-5" />} label={t('x.reports.avgOrder')} value={money(d.summary.averageOrder, lang)} tone="blue" />
             <StatCard icon={<Package className="h-5 w-5" />} label={t('x.reports.priceRange')} value={d.summary.maxPrice ? `${num(d.summary.minPrice / 1000, 1)}k – ${num(d.summary.maxPrice / 1000, 1)}k` : '—'} tone="lime" />
+          </div>
+
+          <div className="mt-5">
+            <ReportTable kind="lines" filter={{ days, categories: [slug ?? ''] }} compact title={t('z.rep.salesOf', { name: catName(d.category, lang) })} />
           </div>
 
           {!d.series.length ? (

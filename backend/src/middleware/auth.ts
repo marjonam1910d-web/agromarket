@@ -28,17 +28,19 @@ interface AccessPayload {
   sub: string;
   role: Role;
   sid?: string | null;
+  /** berilgan vaqt (ms) — iat soniyagacha yaxlitlangani uchun */
+  t?: number;
 }
 
 export function signAccessToken(user: AuthUser) {
-  const payload: AccessPayload = { sub: user.id, role: user.role, sid: user.sellerId ?? null };
+  const payload: AccessPayload = { sub: user.id, role: user.role, sid: user.sellerId ?? null, t: Date.now() };
   return jwt.sign(payload, env.JWT_ACCESS_SECRET, { expiresIn: '15m', issuer: 'agromarket' });
 }
 
-export function verifyAccessToken(token: string): AuthUser | null {
+export function verifyAccessToken(token: string): (AuthUser & { issuedMs: number }) | null {
   try {
-    const p = jwt.verify(token, env.JWT_ACCESS_SECRET, { issuer: 'agromarket' }) as AccessPayload;
-    return { id: p.sub, role: p.role, sellerId: p.sid };
+    const p = jwt.verify(token, env.JWT_ACCESS_SECRET, { issuer: 'agromarket' }) as AccessPayload & { iat?: number };
+    return { id: p.sub, role: p.role, sellerId: p.sid, issuedMs: p.t ?? (p.iat ?? 0) * 1000 };
   } catch {
     return null;
   }
@@ -61,9 +63,11 @@ async function resolveUser(req: Request): Promise<AuthUser | null> {
   if (!u) return null;
   const db = await prisma.user.findUnique({
     where: { id: u.id },
-    select: { id: true, role: true, status: true, deletedAt: true, sellerProfile: { select: { id: true } } },
+    select: { id: true, role: true, status: true, deletedAt: true, tokensValidAfter: true, sellerProfile: { select: { id: true } } },
   });
   if (!db || db.status !== 'ACTIVE' || db.deletedAt) return null;
+  // parol almashgan / sessiyalar yopilgan bo'lsa — undan oldingi tokenlar darhol yaroqsiz
+  if (db.tokensValidAfter && u.issuedMs < db.tokensValidAfter.getTime()) return null;
   req.viaBearer = bearer;
   return { id: db.id, role: db.role, sellerId: db.sellerProfile?.id ?? null };
 }

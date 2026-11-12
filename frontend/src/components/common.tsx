@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  Apple, Bean, Beef, BadgeCheck, Camera, Carrot, Check, ChevronDown, Drumstick, Egg, Globe, Heart, Hexagon, ImagePlus, Leaf, Loader2, MapPin, Milk, ShoppingBasket, Sprout, Sun, Wheat, X,
+  Apple, Bean, Beef, BadgeCheck, Camera, Carrot, Check, ChevronDown, ChevronRight, Drumstick, Egg, Globe, Heart, Hexagon, ImagePlus, Leaf, Loader2, MapPin, Milk, ShoppingBasket, Sprout, Sun, Wheat, X,
 } from 'lucide-react';
 import { useI18n, LANGS, type TKey } from '@/i18n';
 import { api, img } from '@/services/api';
@@ -352,15 +352,23 @@ export function OrderTimeline({ status, history }: { status: string; history: { 
   );
 }
 
-export function StatCard({ icon, label, value, hint, tone = 'green' }: { icon: ReactNode; label: string; value: ReactNode; hint?: ReactNode; tone?: 'green' | 'lime' | 'yellow' | 'red' | 'blue' }) {
+/** Statistika kartochkasi. `to` berilsa — bosiladigan (batafsil ma'lumot sahifasiga o'tadi) */
+export function StatCard({ icon, label, value, hint, tone = 'green', to }: { icon: ReactNode; label: string; value: ReactNode; hint?: ReactNode; tone?: 'green' | 'lime' | 'yellow' | 'red' | 'blue'; to?: string }) {
   const bg = { green: 'bg-brand-50 text-brand', lime: 'bg-lime-50 text-lime-600', yellow: 'bg-sun-100 text-amber-600', red: 'bg-red-50 text-danger', blue: 'bg-sky-50 text-sky-600' }[tone];
+  const nav = useNavigate();
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-cream-200 bg-white p-4 shadow-soft">
-      <div className="flex items-center gap-3">
-        <span className={cx('flex h-11 w-11 shrink-0 items-center justify-center rounded-xl', bg)}>{icon}</span>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      {...(to ? { role: 'link', tabIndex: 0, onClick: (e: React.MouseEvent) => !(e.target as HTMLElement).closest('a') && nav(to), onKeyDown: (e: React.KeyboardEvent) => e.key === 'Enter' && nav(to) } : {})}
+      className={cx('relative rounded-2xl border border-cream-200 bg-white p-4 shadow-soft', to && 'group cursor-pointer transition hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-card')}
+    >
+      {to && <ChevronRight className="absolute right-3 top-3 h-4 w-4 text-muted opacity-50 transition group-hover:translate-x-0.5 group-hover:text-brand group-hover:opacity-100" />}
+      <div className={cx('flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3', to && 'pr-3')}>
+        <span className={cx('flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11', bg)}>{icon}</span>
         <div className="min-w-0">
-          <p className="truncate text-xs font-semibold text-muted">{label}</p>
-          <p className="truncate text-lg font-extrabold text-ink sm:text-xl" title={typeof value === 'string' ? value : undefined}>{value}</p>
+          <p className="line-clamp-2 text-xs font-semibold leading-snug text-muted">{label}</p>
+          <p className="break-words text-base font-extrabold leading-tight text-ink sm:text-xl" title={typeof value === 'string' ? value : undefined}>{value}</p>
         </div>
       </div>
       {hint && <p className="mt-2 text-xs text-muted">{hint}</p>}

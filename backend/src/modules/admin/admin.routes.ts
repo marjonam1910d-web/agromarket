@@ -197,6 +197,8 @@ r.post(
     if (d === 'approve' && p.status !== 'pending_review') throw new AppError(409, 'NOT_PENDING', 'Mahsulot moderatsiyada emas');
     const status = d === 'approve' ? (p.inventory && p.inventory.quantity.greaterThanOrEqualTo(p.minOrderQty) ? 'active' : 'out_of_stock') : d === 'reject' ? 'rejected' : 'inactive';
     await prisma.product.update({ where: { id: p.id }, data: { status, rejectionReason: d === 'approve' ? null : req.body.reason } });
+    // fermer taklif qilgan kategoriya — mahsulot tasdiqlansa kategoriya ham faollashadi
+    if (d === 'approve') await prisma.category.updateMany({ where: { id: p.categoryId, isActive: false, proposedById: { not: null } }, data: { isActive: true } });
     await audit(req, `product.${d}`, 'Product', p.id, { reason: req.body.reason });
     await cache.del('categories');
     void notify({
@@ -301,7 +303,7 @@ r.get(
         orderBy: { createdAt: 'desc' },
         skip,
         take,
-        include: { reporter: { select: { fullName: true, phone: true, email: true } }, against: { select: { fullName: true } }, order: { select: { orderNumber: true, id: true } } },
+        include: { reporter: { select: { id: true, fullName: true, phone: true, email: true, role: true } }, against: { select: { id: true, fullName: true, role: true, sellerProfile: { select: { farmName: true } } } }, order: { select: { orderNumber: true, id: true } } },
       }),
       prisma.complaint.count({ where }),
     ]);
@@ -395,6 +397,7 @@ const settingSchemas: Record<SettingKey, z.ZodTypeAny> = {
   'delivery.maxDaysAhead': z.number().int().min(1).max(60),
   'reviews.autoHideReports': z.number().int().min(1).max(100),
   'platform.supportPhone': z.string().max(30),
+  'partner.deliverySharePercent': z.number().min(0).max(50),
 };
 
 r.put(

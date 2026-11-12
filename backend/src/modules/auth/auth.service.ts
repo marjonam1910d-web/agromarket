@@ -225,8 +225,9 @@ export async function destroySession(req: Request, res: Response) {
   res.clearCookie(REFRESH_COOKIE, { ...cookieBase(), path: '/api/v1/auth' });
 }
 
-export async function revokeAllSessions(userId: string) {
+export async function revokeAllSessions(userId: string, opts: { keepCurrentToken?: boolean } = {}) {
   await prisma.session.updateMany({ where: { userId, revokedAt: null }, data: { revokedAt: new Date() } });
+  if (!opts.keepCurrentToken) await prisma.user.update({ where: { id: userId }, data: { tokensValidAfter: new Date() } });
 }
 
 export async function publicUser(userId: string) {

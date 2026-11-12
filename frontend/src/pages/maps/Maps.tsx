@@ -225,3 +225,40 @@ function PointForm({ initial, onClose }: { initial: Partial<SalesPoint>; onClose
     </Modal>
   );
 }
+
+/** Fermer xo'jaligi sahifasi: shu xo'jalikning sotuv markazlari va olib ketish nuqtalari xaritada */
+export function FarmPointsSection({ sellerId }: { sellerId: string }) {
+  const { t } = useI18n();
+  const q = useQuery({ queryKey: ['public', 'points', 'seller', sellerId], queryFn: () => api.get<SalesPoint[]>(`/maps/points?sellerId=${sellerId}`) });
+  const [sel, setSel] = useState<string | null>(null);
+  const pts = q.data ?? [];
+  if (!pts.length) return null;
+  const cur = pts.find((p) => p.id === sel) ?? null;
+  return (
+    <section className="mt-10">
+      <h2 className="mb-1 text-xl font-extrabold text-ink">{t('z.farm.points')}</h2>
+      <p className="mb-4 text-sm text-ink-soft">{t('z.farm.pointsText')}</p>
+      <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
+        <GeoMap className="h-[340px] rounded-2xl" fit markers={pts.map((p) => ({ id: p.id, lat: p.lat, lng: p.lng, color: POINT_META[p.type].color, label: p.name, active: cur?.id === p.id, onClick: () => setSel(p.id) }))} />
+        <ul className="max-h-[340px] space-y-2 overflow-y-auto">
+          {pts.map((p) => {
+            const M = POINT_META[p.type];
+            return (
+              <li key={p.id}>
+                <button type="button" onClick={() => setSel(p.id)} className={cx('flex w-full items-start gap-3 rounded-2xl bg-white p-3 text-left ring-1', cur?.id === p.id ? 'ring-brand' : 'ring-cream-200')}>
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white" style={{ background: M.color }}><M.icon className="h-4 w-4" /></span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-bold text-ink">{p.name}</span>
+                    <span className="block text-xs text-muted">{t(`y.map.${p.type}` as TKey)} · {p.address}</span>
+                    {p.hours && <span className="block text-xs text-muted">{p.hours}</span>}
+                    <a href={directions(p)} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="mt-1 inline-block text-xs font-bold text-brand">{t('y.map.route')} →</a>
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </section>
+  );
+}

@@ -208,8 +208,9 @@ const productSchema = productBase.superRefine((v, ctx) => {
   if (v.images.some((i) => !storage.isOwnPublicUrl(i.url))) ctx.addIssue({ code: 'custom', path: ['images'], message: 'Rasmlar faqat platforma orqali yuklanadi' });
 });
 
-async function assertCategory(id: string) {
-  const c = await prisma.category.findFirst({ where: { id, isActive: true } });
+/** Faol kategoriya yoki shu fermer o'zi taklif qilgan (hali tasdiqlanmagan) kategoriya */
+async function assertCategory(id: string, sid?: string | null) {
+  const c = await prisma.category.findFirst({ where: { id, OR: [{ isActive: true }, ...(sid ? [{ proposedById: sid }] : [])] } });
   if (!c) throw Errors.badRequest('Kategoriya topilmadi');
 }
 
@@ -229,7 +230,7 @@ r.post(
   validate({ body: productSchema }),
   ah(async (req, res) => {
     const b = req.body as z.infer<typeof productSchema>;
-    await assertCategory(b.categoryId);
+    await assertCategory(b.categoryId, req.user!.sellerId);
     const status = await initialStatus(req, b.submit);
     const p = await prisma.$transaction(async (tx) => {
       const created = await tx.product.create({
@@ -280,7 +281,7 @@ r.put(
   ah(async (req, res) => {
     const b = req.body as z.infer<typeof productSchema>;
     const p = await ownProduct(req, req.params.id);
-    await assertCategory(b.categoryId);
+    await assertCategory(b.categoryId, req.user!.sellerId);
 
     // Kontent o'zgarsa (nom, tavsif, kategoriya, rasm) — qayta moderatsiya. Narx/qoldiq o'zgarishi moderatsiyasiz.
     const contentChanged =

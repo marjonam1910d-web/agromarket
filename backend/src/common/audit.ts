@@ -31,6 +31,7 @@ export const SETTING_DEFAULTS = {
   'delivery.maxDaysAhead': 14,
   'reviews.autoHideReports': 5,
   'platform.supportPhone': '+998 71 200 00 00',
+  'partner.deliverySharePercent': 10,
 } as const;
 
 export type SettingKey = keyof typeof SETTING_DEFAULTS;

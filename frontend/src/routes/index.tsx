@@ -65,15 +65,29 @@ const FarmProfile = lazy(() => import('@/pages/seller/FarmProfile').then((m) => 
 
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard').then((m) => ({ default: m.AdminDashboard })));
 const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers').then((m) => ({ default: m.AdminUsers })));
-const AdminSellers = lazy(() => import('@/pages/admin/AdminSellers').then((m) => ({ default: m.AdminSellers })));
 const AdminProducts = lazy(() => import('@/pages/admin/AdminProducts').then((m) => ({ default: m.AdminProducts })));
 const AdminCategories = lazy(() => import('@/pages/admin/AdminCategories').then((m) => ({ default: m.AdminCategories })));
 const AdminOrders = lazy(() => import('@/pages/admin/AdminOrders').then((m) => ({ default: m.AdminOrders })));
 const AdminPayments = lazy(() => import('@/pages/admin/AdminPayments').then((m) => ({ default: m.AdminPayments })));
 const AdminComplaints = lazy(() => import('@/pages/admin/AdminComplaints').then((m) => ({ default: m.AdminComplaints })));
 const AdminReviews = lazy(() => import('@/pages/admin/AdminReviews').then((m) => ({ default: m.AdminReviews })));
-const AdminSettings = lazy(() => import('@/pages/admin/AdminSettings').then((m) => ({ default: m.AdminSettings })));
 const AdminAudit = lazy(() => import('@/pages/admin/AdminAudit').then((m) => ({ default: m.AdminAudit })));
+
+const apps = () => import('@/pages/applications/Applications');
+const SellerApplications = lazy(() => apps().then((m) => ({ default: m.SellerApplications })));
+const ApplicationNew = lazy(() => apps().then((m) => ({ default: m.ApplicationNew })));
+const SellerApplicationView = lazy(() => apps().then((m) => ({ default: m.SellerApplicationView })));
+const AdminApplications = lazy(() => apps().then((m) => ({ default: m.AdminApplications })));
+const AdminApplicationDetail = lazy(() => apps().then((m) => ({ default: m.AdminApplicationDetail })));
+const bo = () => import('@/pages/admin/Backoffice');
+const AdminUserDetail = lazy(() => bo().then((m) => ({ default: m.AdminUserDetail })));
+const AdminSanctions = lazy(() => bo().then((m) => ({ default: m.AdminSanctions })));
+const stf = () => import('@/pages/seller/Staff');
+const StaffPage = lazy(() => stf().then((m) => ({ default: m.StaffPage })));
+const WorkPage = lazy(() => stf().then((m) => ({ default: m.WorkPage })));
+const rb = () => import('@/pages/shared/ReportBuilder');
+const ReportView = lazy(() => rb().then((m) => ({ default: m.ReportViewPage })));
+const ReportExport = lazy(() => rb().then((m) => ({ default: m.ReportExportPage })));
 
 function Loader() {
   return <div className="flex min-h-[50vh] items-center justify-center"><Spinner className="h-8 w-8" /></div>;
@@ -112,6 +126,10 @@ export default function AppRoutes() {
         </Route>
 
         <Route element={<RequireAuth><DashboardLayout /></RequireAuth>}>
+          {/* kabinet ichidagi xarita va yo'riqnoma — yon menyu saqlanadi */}
+          <Route path="panel/map" element={<MapPage />} />
+          <Route path="panel/help" element={<Help />} />
+          <Route path="work" element={<WorkPage />} />
           <Route path="messages" element={<Messages />} />
           <Route path="messages/:id" element={<Messages />} />
           <Route path="contracts" element={<ContractsList />} />
@@ -140,6 +158,12 @@ export default function AppRoutes() {
             <Route path="orders/:id" element={<SellerOrderDetail />} />
             <Route path="delivery" element={<DeliveryZones />} />
             <Route path="points" element={<SalesPoints />} />
+            <Route path="staff" element={<StaffPage />} />
+            <Route path="applications" element={<SellerApplications />} />
+            <Route path="applications/new/:kind" element={<ApplicationNew />} />
+            <Route path="applications/:id" element={<SellerApplicationView />} />
+            <Route path="reports/view/:kind" element={<ReportView />} />
+            <Route path="reports/export" element={<ReportExport />} />
             <Route path="promotions" element={<Promotions />} />
             <Route path="reviews" element={<SellerReviews />} />
             <Route path="earnings" element={<Earnings />} />
@@ -152,7 +176,13 @@ export default function AppRoutes() {
           <Route path="admin" element={<RequireAuth roles={['ADMIN']}><SellerOutlet /></RequireAuth>}>
             <Route index element={<AdminDashboard />} />
             <Route path="users" element={<AdminUsers />} />
-            <Route path="sellers" element={<AdminSellers />} />
+            <Route path="users/:id" element={<AdminUserDetail />} />
+            <Route path="sellers" element={<Navigate to="/admin/applications" replace />} />
+            <Route path="applications" element={<AdminApplications />} />
+            <Route path="applications/:id" element={<AdminApplicationDetail />} />
+            <Route path="sanctions" element={<AdminSanctions />} />
+            <Route path="reports/view/:kind" element={<ReportView />} />
+            <Route path="reports/export" element={<ReportExport />} />
             <Route path="products" element={<AdminProducts />} />
             <Route path="categories" element={<AdminCategories />} />
             <Route path="orders" element={<AdminOrders />} />
@@ -160,11 +190,11 @@ export default function AppRoutes() {
             <Route path="wallet" element={<AdminWallet />} />
             <Route path="complaints" element={<AdminComplaints />} />
             <Route path="reviews" element={<AdminReviews />} />
-            <Route path="settings" element={<AdminSettings />} />
+            <Route path="settings" element={<Settings />} />
             <Route path="audit" element={<AdminAudit />} />
             <Route path="reports" element={<CategoryReports />} />
             <Route path="reports/:slug" element={<CategoryReportDetail />} />
-            <Route path="account" element={<Settings />} />
+            <Route path="account" element={<Navigate to="/admin/settings" replace />} />
             <Route path="notifications" element={<Notifications />} />
           </Route>
         </Route>

@@ -51,9 +51,11 @@ export function checkoutUrl(payment: Pick<Payment, 'id' | 'provider' | 'amount'>
 
 export function providerStatus() {
   return {
-    payme: env.paymeEnabled ? (env.PAYME_TEST_MODE ? 'test' : 'live') : 'sozlanmagan',
-    click: env.clickEnabled ? 'live' : 'sozlanmagan',
-    card: `${env.CARD_PROVIDER} orqali`,
-    sandbox: env.sandboxAllowed ? 'yoqilgan (faqat development)' : "o'chirilgan",
+    // Holat kodlari — matnni frontend foydalanuvchi tilida ko'rsatadi
+    payme: env.paymeEnabled ? (env.PAYME_TEST_MODE ? 'test' : 'live') : 'off',
+    click: env.clickEnabled ? 'live' : 'off',
+    uzum: 'off',
+    card: env.CARD_PROVIDER as string,
+    sandbox: env.sandboxAllowed ? 'on' : 'off',
   };
 }
